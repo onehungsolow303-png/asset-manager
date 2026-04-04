@@ -54,7 +54,9 @@ class Creature:
 
     @classmethod
     def from_spawn(cls, spawn_data: dict) -> "Creature":
-        stats = spawn_data.get("stats", {})
+        raw_stats = spawn_data.get("stats", {})
+        # Normalise keys to uppercase for consistent lookup
+        stats = {k.upper(): v for k, v in raw_stats.items()}
         hp = stats.get("HP", 10)
         return cls(
             name=spawn_data["name"], x=spawn_data["x"], y=spawn_data["y"],
