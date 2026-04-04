@@ -201,7 +201,7 @@ class UnityTilemapExporter(BaseAgent):
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
         output_dir = params.get("output_dir",
-                                "/sessions/brave-busy-fermat/mnt/outputs/unity_export")
+                                "./output/unity_export")
         tilemap_dir = os.path.join(output_dir, "Tilemap")
         os.makedirs(tilemap_dir, exist_ok=True)
 
@@ -332,7 +332,7 @@ class UnityTilemapExporter(BaseAgent):
             },
         }
 
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f)  # compact for large grids
 
     def _generate_palette_image(self, palette: dict, path: str):
@@ -382,7 +382,7 @@ class UnityTilemapExporter(BaseAgent):
             "walkablePercent": float(collision.mean() * 100),
         }
 
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f)
 
     def _write_tilemap_loader(self, path: str):
@@ -483,5 +483,5 @@ public class TilemapLayers
     public int[] ground;
 }
 '''
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(code)

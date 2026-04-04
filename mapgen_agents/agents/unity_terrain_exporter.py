@@ -23,7 +23,7 @@ class UnityTerrainExporter(BaseAgent):
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
         output_dir = params.get("output_dir",
-                                "/sessions/brave-busy-fermat/mnt/outputs/unity_export")
+                                "./output/unity_export")
         terrain_dir = os.path.join(output_dir, "Terrain")
         os.makedirs(terrain_dir, exist_ok=True)
 
@@ -81,7 +81,7 @@ class UnityTerrainExporter(BaseAgent):
             }
         }
 
-        with open(config_path, 'w') as f:
+        with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(terrain_config, f, indent=2)
 
         return {

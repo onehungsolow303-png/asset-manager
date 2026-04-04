@@ -30,7 +30,7 @@ class UnitySceneExporter(BaseAgent):
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
         output_dir = params.get("output_dir",
-                                "/sessions/brave-busy-fermat/mnt/outputs/unity_export")
+                                "./output/unity_export")
         scenes_dir = os.path.join(output_dir, "Scenes")
         os.makedirs(scenes_dir, exist_ok=True)
 
@@ -74,10 +74,10 @@ class UnitySceneExporter(BaseAgent):
         # ── Prefab reference manifest ──
         prefab_manifest = self._build_prefab_manifest(shared_state)
         manifest_path = os.path.join(output_dir, "prefab_manifest.json")
-        with open(manifest_path, 'w') as f:
+        with open(manifest_path, 'w', encoding='utf-8') as f:
             json.dump(prefab_manifest, f, indent=2)
 
-        with open(scene_path, 'w') as f:
+        with open(scene_path, 'w', encoding='utf-8') as f:
             f.write("\n".join(scene_lines))
 
         return {

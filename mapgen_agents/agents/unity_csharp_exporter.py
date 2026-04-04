@@ -23,7 +23,7 @@ class UnityCSharpExporter(BaseAgent):
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
         output_dir = params.get("output_dir",
-                                "/sessions/brave-busy-fermat/mnt/outputs/unity_export")
+                                "./output/unity_export")
         scripts_dir = os.path.join(output_dir, "Scripts")
         data_dir = os.path.join(output_dir, "Data")
         os.makedirs(scripts_dir, exist_ok=True)
@@ -125,7 +125,7 @@ class UnityCSharpExporter(BaseAgent):
             },
         }
 
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(map_data, f, indent=2)
 
     def _write_map_loader(self, path: str):
@@ -288,7 +288,7 @@ public class MapStats
     public float walkableCoverage;
 }
 '''
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(code)
 
     def _write_map_config(self, path: str):
@@ -334,7 +334,7 @@ public enum MapType
     Village, City, Dungeon, Cave, Arena, Wilderness, Camp, Outpost, OpenWorld
 }
 '''
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(code)
 
     def _write_terrain_builder(self, path: str):
@@ -485,7 +485,7 @@ public class TerrainBuilder : MonoBehaviour
     }
 }
 '''
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(code)
 
     def _write_entity_spawner(self, path: str):
@@ -609,7 +609,7 @@ public class PrefabMapping
     public GameObject prefab;
 }
 '''
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(code)
 
     def _write_water_controller(self, path: str):
@@ -708,5 +708,5 @@ public class WaterController : MonoBehaviour
     }
 }
 '''
-        with open(path, 'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             f.write(code)

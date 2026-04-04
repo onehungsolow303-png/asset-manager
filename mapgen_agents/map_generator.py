@@ -43,7 +43,7 @@ class MapGenerator:
                  biome: str = "forest", size: str = "standard",
                  seed: int = 42, output_path: str = None,
                  unity_export: bool = True,
-                 output_dir: str = "/sessions/brave-busy-fermat/mnt/outputs/unity_export",
+                 output_dir: str = "./output/unity_export",
                  **kwargs) -> dict:
         """
         Generate a complete map from a natural language goal.

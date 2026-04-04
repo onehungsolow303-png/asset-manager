@@ -243,6 +243,48 @@ DAG_TEMPLATES = {
         TaskNode("render", "RendererAgent", {"format": "png", "show_labels": True}, ["vegetation", "labeling", "road_network"]),
     ],
 
+    # ── Interior / Social ──
+    "tavern": [
+        TaskNode("terrain_base", "TerrainAgent", {"biome": "dungeon"}),
+        TaskNode("rooms", "StructureAgent", {"type": "tavern", "building_count": 6}, ["terrain_base"]),
+        TaskNode("props", "AssetAgent", {"theme": "tavern", "density": "high"}, ["rooms"]),
+        TaskNode("labeling", "LabelingAgent", {"style": "fantasy"}, ["rooms"]),
+        TaskNode("render", "RendererAgent", {"format": "png", "show_labels": True}, ["props", "labeling"]),
+    ],
+    "prison": [
+        TaskNode("terrain_base", "TerrainAgent", {"biome": "dungeon"}),
+        TaskNode("rooms", "StructureAgent", {"type": "prison", "building_count": 8}, ["terrain_base"]),
+        TaskNode("road_network", "PathfindingAgent", {"road_density": "low"}, ["terrain_base", "rooms"]),
+        TaskNode("props", "AssetAgent", {"theme": "prison", "density": "medium"}, ["rooms"]),
+        TaskNode("labeling", "LabelingAgent", {"style": "fantasy"}, ["rooms"]),
+        TaskNode("render", "RendererAgent", {"format": "png", "show_labels": True}, ["props", "labeling", "road_network"]),
+    ],
+    "library": [
+        TaskNode("terrain_base", "TerrainAgent", {"biome": "dungeon"}),
+        TaskNode("rooms", "StructureAgent", {"type": "library", "building_count": 6}, ["terrain_base"]),
+        TaskNode("props", "AssetAgent", {"theme": "library", "density": "high"}, ["rooms"]),
+        TaskNode("labeling", "LabelingAgent", {"style": "fantasy"}, ["rooms"]),
+        TaskNode("render", "RendererAgent", {"format": "png", "show_labels": True}, ["props", "labeling"]),
+    ],
+    "throne_room": [
+        TaskNode("terrain_base", "TerrainAgent", {"biome": "dungeon"}),
+        TaskNode("rooms", "StructureAgent", {"type": "throne_room", "building_count": 5}, ["terrain_base"]),
+        TaskNode("props", "AssetAgent", {"theme": "throne_room", "density": "medium"}, ["rooms"]),
+        TaskNode("labeling", "LabelingAgent", {"style": "fantasy", "lore_depth": "high"}, ["rooms"]),
+        TaskNode("render", "RendererAgent", {"format": "png", "show_labels": True}, ["props", "labeling"]),
+    ],
+
+    # ── Waterfront ── (extended)
+    "harbor": [
+        TaskNode("terrain_base", "TerrainAgent", {"biome": "{biome}"}),
+        TaskNode("water_system", "WaterAgent", {"type": "ocean", "ocean_edge": "south", "ocean_depth_pct": 0.45}, ["terrain_base"]),
+        TaskNode("road_network", "PathfindingAgent", {"road_density": "medium"}, ["terrain_base", "water_system"]),
+        TaskNode("structures", "StructureAgent", {"type": "dock", "building_count": 8}, ["road_network", "water_system"]),
+        TaskNode("vegetation", "AssetAgent", {"density": "low"}, ["terrain_base", "structures"]),
+        TaskNode("labeling", "LabelingAgent", {"style": "fantasy"}, ["structures", "water_system"]),
+        TaskNode("render", "RendererAgent", {"format": "png", "show_labels": True}, ["vegetation", "labeling"]),
+    ],
+
     # ── Large Scale ──
     "region": [
         TaskNode("terrain_base", "TerrainAgent", {"biome": "{biome}"}),
@@ -397,7 +439,7 @@ class StrategicPlanner:
         dag = TaskDAG()
         template = DAG_TEMPLATES[template_key]
         output_dir = kwargs.get("output_dir",
-                                "/sessions/brave-busy-fermat/mnt/outputs/unity_export")
+                                "./output/unity_export")
 
         # Track what the render node depends on (for Unity exporters)
         render_deps = []
@@ -416,7 +458,7 @@ class StrategicPlanner:
             if node_template.agent_type == "RendererAgent":
                 params["output_path"] = kwargs.get(
                     "output_path",
-                    f"/sessions/brave-busy-fermat/mnt/outputs/{map_type}_{biome}_{seed}.png"
+                    f"./output/{map_type}_{biome}_{seed}.png"
                 )
                 render_deps = list(node_template.depends_on)
 
@@ -472,7 +514,8 @@ class StrategicPlanner:
 
     def list_biomes(self) -> list[str]:
         return ["forest", "mountain", "desert", "swamp", "plains",
-                "tundra", "volcanic", "cave", "dungeon"]
+                "tundra", "volcanic", "cave", "dungeon",
+                "jungle", "underwater", "sky"]
 
     def list_sizes(self) -> dict:
         return SIZE_PRESETS

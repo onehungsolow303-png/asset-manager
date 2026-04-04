@@ -102,6 +102,21 @@ BIOME_PRESETS = {
         "moisture_scale": 200, "moisture_base": 0.3,
         "walkability_threshold": 0.5,
     },
+    "jungle": {
+        "elevation_scale": 70, "elevation_octaves": 6,
+        "moisture_scale": 40, "moisture_base": 0.8,
+        "walkability_threshold": 0.65,
+    },
+    "underwater": {
+        "elevation_scale": 100, "elevation_octaves": 5,
+        "moisture_scale": 30, "moisture_base": 0.95,
+        "walkability_threshold": 0.99,
+    },
+    "sky": {
+        "elevation_scale": 50, "elevation_octaves": 7,
+        "moisture_scale": 120, "moisture_base": 0.2,
+        "walkability_threshold": 0.75,
+    },
 }
 
 # Color palettes for each biome
@@ -159,6 +174,24 @@ BIOME_COLORS = {
         "mid": (60, 58, 52),
         "high": (80, 76, 68),
         "peak": (100, 95, 88),
+    },
+    "jungle": {
+        "low": (20, 60, 15),      # dark earth
+        "mid": (15, 80, 20),      # deep green
+        "high": (25, 100, 30),    # lush canopy
+        "peak": (180, 50, 90),    # bright flowers
+    },
+    "underwater": {
+        "low": (180, 170, 120),   # sandy ocean floor
+        "mid": (30, 100, 120),    # teal
+        "high": (20, 60, 120),    # mid blue
+        "peak": (10, 30, 100),    # deep blue
+    },
+    "sky": {
+        "low": (170, 200, 240),   # light sky blue
+        "mid": (240, 245, 250),   # white clouds
+        "high": (80, 130, 60),    # island green
+        "peak": (110, 85, 55),    # island brown earth
     },
 }
 
