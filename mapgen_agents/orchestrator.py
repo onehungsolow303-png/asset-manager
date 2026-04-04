@@ -48,9 +48,10 @@ class Orchestrator:
     Coordinates the execution of a TaskDAG against a SharedState.
     """
 
-    def __init__(self, shared_state: SharedState, verbose: bool = True):
+    def __init__(self, shared_state: SharedState, verbose: bool = True, on_progress=None):
         self.shared_state = shared_state
         self.verbose = verbose
+        self.on_progress = on_progress  # callable(event_dict) or None
         self.execution_log: list[dict] = []
         self.total_time: float = 0.0
 
@@ -74,6 +75,14 @@ class Orchestrator:
         start_time = time.time()
 
         for level_idx, level in enumerate(levels):
+            if self.on_progress:
+                self.on_progress({
+                    "event": "level_start",
+                    "level": level_idx,
+                    "total_levels": len(levels),
+                    "tasks": level,
+                })
+
             if self.verbose:
                 print(f"\n--- Level {level_idx}: {level} ---")
 
@@ -89,6 +98,16 @@ class Orchestrator:
                         if result.get("details"):
                             for k, v in result["details"].items():
                                 print(f"       {k}: {v}")
+                    if self.on_progress:
+                        self.on_progress({
+                            "event": "task_complete",
+                            "task_id": task_id,
+                            "agent": node.agent_type,
+                            "level": level_idx,
+                            "total_levels": len(levels),
+                            "details": result.get("details", {}),
+                            "elapsed": result.get("execution_time", 0),
+                        })
                 else:
                     # Retry logic
                     retried = False
@@ -114,11 +133,22 @@ class Orchestrator:
             print(f"  State: {self.shared_state.summary()}")
             print(f"{'='*60}\n")
 
+        tasks_completed = sum(1 for n in dag.nodes.values() if n.status == "completed")
+        tasks_failed = sum(1 for n in dag.nodes.values() if n.status == "failed")
+
+        if self.on_progress:
+            self.on_progress({
+                "event": "complete",
+                "total_time": self.total_time,
+                "tasks_completed": tasks_completed,
+                "tasks_failed": tasks_failed,
+            })
+
         return {
             "status": "completed" if not dag.has_failures() else "partial",
             "total_time": round(self.total_time, 2),
-            "tasks_completed": sum(1 for n in dag.nodes.values() if n.status == "completed"),
-            "tasks_failed": sum(1 for n in dag.nodes.values() if n.status == "failed"),
+            "tasks_completed": tasks_completed,
+            "tasks_failed": tasks_failed,
             "state_summary": self.shared_state.summary(),
         }
 

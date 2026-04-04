@@ -11,6 +11,12 @@ from typing import Any
 from PIL import Image, ImageDraw, ImageFont
 import os
 
+try:
+    from agents.sprite_manager import SpriteManager, composite_sprites
+    _SPRITES_AVAILABLE = True
+except ImportError:
+    _SPRITES_AVAILABLE = False
+
 
 def _load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     """Try multiple font paths (Windows then Linux) and fall back to default."""
@@ -238,6 +244,15 @@ class RendererAgent(BaseAgent):
         # Thin gold inner border
         border_draw.rectangle([2, 2, w - 3, total_h - 3], outline=(160, 130, 80, 120), width=1)
         canvas.alpha_composite(border_layer)
+
+        # ---- Sprite compositing ------------------------------------
+        if _SPRITES_AVAILABLE:
+            try:
+                mgr = SpriteManager()
+                if mgr.available:
+                    canvas = composite_sprites(canvas, shared_state, mgr)
+            except Exception:
+                pass  # graceful fallback to rendered shapes
 
         # ---- Save as RGB ------------------------------------------
         final = canvas.convert("RGB")

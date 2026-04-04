@@ -14,6 +14,8 @@ Usage:
     )
 """
 
+import time as _time
+
 from planner import StrategicPlanner
 from orchestrator import Orchestrator
 from shared_state import SharedState, MapConfig
@@ -43,7 +45,8 @@ class MapGenerator:
                  biome: str = "forest", size: str = "standard",
                  seed: int = 42, output_path: str = None,
                  unity_export: bool = True,
-                 output_dir: str = "./output/unity_export",
+                 output_dir: str = None,
+                 on_progress=None,
                  **kwargs) -> dict:
         """
         Generate a complete map from a natural language goal.
@@ -68,6 +71,11 @@ class MapGenerator:
             print(f"  Type: {map_type} | Biome: {biome} | Size: {size}")
             print(f"  Unity Export: {unity_export}")
             print(f"{'#'*60}")
+
+        # Per-map output directory with unique timestamp
+        if output_dir is None:
+            timestamp = _time.strftime("%Y%m%d_%H%M%S")
+            output_dir = f"./output/{map_type}_{biome}_{seed}_{timestamp}"
 
         if output_path:
             kwargs["output_path"] = output_path
@@ -100,7 +108,7 @@ class MapGenerator:
         shared_state = SharedState(map_config)
 
         # TIER 2: Orchestration
-        orchestrator = Orchestrator(shared_state, verbose=self.verbose)
+        orchestrator = Orchestrator(shared_state, verbose=self.verbose, on_progress=on_progress)
 
         # TIER 3: Execution
         result = orchestrator.execute_dag(dag)
@@ -124,6 +132,7 @@ class MapGenerator:
             "unity_files": unity_files,
             "config": config,
             "map_name": shared_state.metadata.get("map_name", "Untitled Map"),
+            "shared_state": shared_state,  # for live preview
         }
 
     def list_options(self) -> dict:

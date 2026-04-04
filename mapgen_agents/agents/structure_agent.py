@@ -291,6 +291,9 @@ class StructureAgent(BaseAgent):
                     state.terrain_color[door_y, door_x] = (60, 40, 25)
                     state.walkability[door_y, door_x] = True
 
+                # Draw interior details for this building
+                self._draw_interior(state, x, y, bw, bh, name_prefix.lower(), rng)
+
                 state.entities.append(Entity(
                     entity_type="building",
                     position=(x, y),
@@ -321,6 +324,10 @@ class StructureAgent(BaseAgent):
         corridors = self._connect_rooms_corridors(state, rooms, rng,
                                                    floor_color=(75, 70, 62),
                                                    corridor_w=3)
+
+        # Interior details for each dungeon room
+        for rx, ry, rw, rh in rooms:
+            self._draw_interior(state, rx, ry, rw, rh, "dungeon_room", rng)
 
         return {"rooms_created": len(rooms), "corridors_created": corridors}
 
@@ -472,6 +479,10 @@ class StructureAgent(BaseAgent):
                                           entity_variant="mine_chamber",
                                           min_room_frac=12, max_room_frac=6)
 
+        # Interior details for mine chambers
+        for rx, ry, rw, rh in rooms:
+            self._draw_interior(state, rx, ry, rw, rh, "mine_chamber", rng)
+
         # Scatter ore veins
         ore_count = 0
         for _ in range(room_count * 3):
@@ -532,6 +543,8 @@ class StructureAgent(BaseAgent):
         for i, (tx, ty) in enumerate(corners):
             self._draw_filled_rect(state, tx, ty, tower_size, tower_size,
                                     tower_color, wall_color)
+            self._draw_interior(state, max(0, tx), max(0, ty),
+                                tower_size, tower_size, "castle", rng)
             state.entities.append(Entity(
                 entity_type="building",
                 position=(max(0, tx), max(0, ty)),
@@ -564,6 +577,7 @@ class StructureAgent(BaseAgent):
         keep_y = h // 3 - keep_h // 2
         self._draw_filled_rect(state, keep_x, keep_y, keep_w, keep_h,
                                 (90, 82, 70), wall_color)
+        self._draw_interior(state, keep_x, keep_y, keep_w, keep_h, "keep", rng)
         state.entities.append(Entity(
             entity_type="building",
             position=(keep_x, keep_y),
@@ -816,6 +830,8 @@ class StructureAgent(BaseAgent):
         self._draw_rect_walls(state, margin, margin, w - margin, h - margin,
                                max(3, w // 60), wall_color, floor_color)
 
+        self._draw_interior(state, margin, margin, w - margin * 2, h - margin * 2,
+                            "vault", rng)
         state.entities.append(Entity(
             entity_type="room",
             position=(margin, margin),
@@ -877,6 +893,10 @@ class StructureAgent(BaseAgent):
                                                    floor_color=floor_color,
                                                    corridor_w=2)
 
+        # Interior details for crypt chambers
+        for rx, ry, rw, rh in rooms:
+            self._draw_interior(state, rx, ry, rw, rh, "crypt_chamber", rng)
+
         # Place sarcophagi (small unwalkable blocks in rooms)
         sarcophagi = 0
         for rx, ry, rw, rh in rooms:
@@ -915,6 +935,7 @@ class StructureAgent(BaseAgent):
         hall_y = h // 2 - hall_h // 2
         self._draw_filled_rect(state, hall_x, hall_y, hall_w, hall_h,
                                 floor_color, wall_color)
+        self._draw_interior(state, hall_x, hall_y, hall_w, hall_h, "burial_hall", rng)
         state.entities.append(Entity(
             entity_type="room",
             position=(hall_x, hall_y),
@@ -945,6 +966,7 @@ class StructureAgent(BaseAgent):
 
             if 0 <= rx < w - rw and 0 <= ry < h - rh:
                 self._draw_filled_rect(state, rx, ry, rw, rh, floor_color, wall_color)
+                self._draw_interior(state, rx, ry, rw, rh, "tomb_chamber", rng)
                 side_rooms.append((rx, ry, rw, rh))
                 state.entities.append(Entity(
                     entity_type="room",
@@ -1015,6 +1037,8 @@ class StructureAgent(BaseAgent):
         chapel_h = max(15, h // 8)
         self._draw_filled_rect(state, margin + 5, margin + 5,
                                 chapel_w, chapel_h, (110, 105, 95), (70, 65, 55))
+        self._draw_interior(state, margin + 5, margin + 5,
+                            chapel_w, chapel_h, "chapel", rng)
         state.entities.append(Entity(
             entity_type="building",
             position=(margin + 5, margin + 5),
@@ -1100,6 +1124,8 @@ class StructureAgent(BaseAgent):
         self._draw_rect_walls(state, margin_x, margin_y,
                                w - margin_x, h - margin_y,
                                max(3, w // 60), wall_color, floor_color)
+        self._draw_interior(state, margin_x, margin_y,
+                            w - margin_x * 2, h - margin_y * 2, "factory_main", rng)
 
         state.entities.append(Entity(
             entity_type="building",
@@ -1201,6 +1227,8 @@ class StructureAgent(BaseAgent):
         sanctum_y = margin + wall_thick + 5
         self._draw_filled_rect(state, sanctum_x, sanctum_y,
                                 sanctum_w, sanctum_h, (170, 165, 150), wall_color)
+        self._draw_interior(state, sanctum_x, sanctum_y,
+                            sanctum_w, sanctum_h, "temple", rng)
         state.entities.append(Entity(
             entity_type="room",
             position=(sanctum_x, sanctum_y),
@@ -1249,6 +1277,7 @@ class StructureAgent(BaseAgent):
         self._draw_rect_walls(state, nave_x, nave_y,
                                nave_x + nave_w, nave_y + nave_h,
                                wall_thick, wall_color, floor_color)
+        self._draw_interior(state, nave_x, nave_y, nave_w, nave_h, "nave", rng)
 
         state.entities.append(Entity(
             entity_type="building",
@@ -1315,6 +1344,320 @@ class StructureAgent(BaseAgent):
                         state.terrain_color[py, nx] = (100, 75, 45)
 
         return {"structure_type": "church"}
+
+    # ── Interior detail rendering ─────────────────────────────────────────
+
+    def _draw_interior(self, state, x, y, w, h, structure_type, rng):
+        """Draw interior details onto terrain_color within a building footprint.
+
+        Called after a building rectangle is placed. Draws small decorative
+        elements (furniture, floor patterns, etc.) appropriate to the
+        structure_type. All drawing is clipped to the map bounds and stays
+        inside the (x, y, w, h) footprint (excluding the 1px border wall).
+        """
+        map_h, map_w = state.config.height, state.config.width
+
+        # Interior bounds (skip 1-px border walls)
+        ix, iy = x + 1, y + 1
+        iw, ih = w - 2, h - 2
+        if iw < 3 or ih < 3:
+            return  # too small for details
+
+        tc = state.terrain_color  # alias for brevity
+
+        # Clamp helper
+        def clamp(val, lo, hi):
+            return max(lo, min(hi - 1, val))
+
+        # Safe single-pixel set
+        def px(py, px_x, color):
+            if 0 <= px_x < map_w and 0 <= py < map_h:
+                tc[py, px_x] = color
+
+        # Safe horizontal line
+        def hline(py, x0, x1, color):
+            py = int(py)
+            if py < 0 or py >= map_h:
+                return
+            x0, x1 = int(max(0, x0)), int(min(map_w, x1))
+            if x0 < x1:
+                tc[py, x0:x1] = color
+
+        # Safe vertical line
+        def vline(px_x, y0, y1, color):
+            px_x = int(px_x)
+            if px_x < 0 or px_x >= map_w:
+                return
+            y0, y1 = int(max(0, y0)), int(min(map_h, y1))
+            if y0 < y1:
+                tc[y0:y1, px_x] = color
+
+        # Safe filled rect
+        def frect(ry, rx, rh, rw, color):
+            ry0, rx0 = int(max(0, ry)), int(max(0, rx))
+            ry1, rx1 = int(min(map_h, ry + rh)), int(min(map_w, rx + rw))
+            if ry0 < ry1 and rx0 < rx1:
+                tc[ry0:ry1, rx0:rx1] = color
+
+        stype = structure_type.lower()
+
+        # ── Village / Town / City buildings ─────────────────────────
+        if stype in ("village", "town", "city", "house", "cottage", "shop",
+                     "inn", "workshop", "manor", "guild hall", "warehouse",
+                     "market stall", "smithy", "stable", "well house",
+                     "town hall", "barracks", "shop front", "counter",
+                     "storage room", "display area", "general store",
+                     "potion shop", "armorer", "jeweler", "tailor",
+                     "blacksmith", "shopping_center", "shop", "outpost",
+                     "watchtower", "storage", "palisade gate",
+                     "rest_area", "campfire", "bedroll", "pack",
+                     "log bench"):
+            # Lighter interior floor (already placed), add 2px darker border
+            base = tc[clamp(iy + 1, 0, map_h), clamp(ix + 1, 0, map_w)]
+            dark_wall = tuple(max(0, int(c) - 30) for c in base)
+            # Top/bottom inner wall lines
+            hline(iy, ix, ix + iw, dark_wall)
+            hline(iy + 1, ix, ix + iw, dark_wall)
+            hline(iy + ih - 1, ix, ix + iw, dark_wall)
+            hline(iy + ih - 2, ix, ix + iw, dark_wall)
+            # Left/right inner wall lines
+            vline(ix, iy, iy + ih, dark_wall)
+            vline(ix + 1, iy, iy + ih, dark_wall)
+            vline(ix + iw - 1, iy, iy + ih, dark_wall)
+            vline(ix + iw - 2, iy, iy + ih, dark_wall)
+            # Lighter floor center
+            floor_light = tuple(min(255, int(c) + 12) for c in base)
+            frect(iy + 2, ix + 2, ih - 4, iw - 4, floor_light)
+            # Doorway (small dark square on south side)
+            door_cx = ix + iw // 2
+            frect(iy + ih - 2, door_cx - 1, 2, 3, (60, 40, 25))
+            # Furniture dots (1-2 tiny colored squares)
+            if iw > 6 and ih > 6:
+                # Table (brown)
+                tx = ix + 3 + rng.integers(0, max(1, iw - 7))
+                ty = iy + 3 + rng.integers(0, max(1, ih - 7))
+                frect(ty, tx, 2, 2, (90, 60, 30))
+                # Bed (blue-ish)
+                if iw > 8 and ih > 8:
+                    bx = ix + iw - 5 - rng.integers(0, max(1, iw // 4))
+                    by = iy + 3 + rng.integers(0, max(1, ih // 4))
+                    frect(by, bx, 2, 3, (70, 70, 110))
+
+        # ── Tavern ──────────────────────────────────────────────────
+        elif stype in ("tavern",):
+            base = tc[clamp(iy + 2, 0, map_h), clamp(ix + 2, 0, map_w)]
+            dark_wall = tuple(max(0, int(c) - 25) for c in base)
+            hline(iy, ix, ix + iw, dark_wall)
+            hline(iy + ih - 1, ix, ix + iw, dark_wall)
+            vline(ix, iy, iy + ih, dark_wall)
+            vline(ix + iw - 1, iy, iy + ih, dark_wall)
+            # Bar counter (dark brown horizontal line across mid-height)
+            bar_y = iy + ih // 3
+            hline(bar_y, ix + 2, ix + iw - 2, (55, 35, 18))
+            hline(bar_y + 1, ix + 2, ix + iw - 2, (55, 35, 18))
+            # Tables (small brown squares)
+            for _ in range(min(3, max(1, iw * ih // 80))):
+                tx = ix + 3 + rng.integers(0, max(1, iw - 6))
+                ty = bar_y + 3 + rng.integers(0, max(1, iy + ih - bar_y - 6))
+                frect(ty, tx, 2, 2, (80, 55, 28))
+            # Fireplace (orange/red square in top-left corner)
+            frect(iy + 1, ix + 1, 3, 3, (180, 80, 30))
+            px(iy + 2, ix + 2, (220, 120, 40))  # bright center
+
+        # ── Dungeon rooms ───────────────────────────────────────────
+        elif stype in ("dungeon", "dungeon_room", "chamber", "room",
+                       "great hall", "cell"):
+            # Stone floor checkerboard pattern
+            dark_stone = (65, 60, 52)
+            light_stone = (78, 72, 63)
+            for dy in range(2, ih - 2):
+                for dx in range(2, iw - 2):
+                    cy, cx = iy + dy, ix + dx
+                    if 0 <= cx < map_w and 0 <= cy < map_h:
+                        if (dx + dy) % 4 < 2:
+                            tc[cy, cx] = dark_stone
+                        else:
+                            tc[cy, cx] = light_stone
+            # Darker walls (2px border inside)
+            wall_dark = (40, 36, 30)
+            hline(iy, ix, ix + iw, wall_dark)
+            hline(iy + 1, ix, ix + iw, wall_dark)
+            hline(iy + ih - 1, ix, ix + iw, wall_dark)
+            hline(iy + ih - 2, ix, ix + iw, wall_dark)
+            vline(ix, iy, iy + ih, wall_dark)
+            vline(ix + 1, iy, iy + ih, wall_dark)
+            vline(ix + iw - 1, iy, iy + ih, wall_dark)
+            vline(ix + iw - 2, iy, iy + ih, wall_dark)
+
+        # ── Castle / Fort ───────────────────────────────────────────
+        elif stype in ("castle", "fort", "keep", "great hall_castle",
+                       "throne room", "armory", "kitchen",
+                       "main hall", "gate house", "gate"):
+            # Thick walls (3-4px)
+            wall_c = (65, 60, 50)
+            for t in range(min(4, max(2, iw // 6))):
+                hline(iy + t, ix, ix + iw, wall_c)
+                hline(iy + ih - 1 - t, ix, ix + iw, wall_c)
+                vline(ix + t, iy, iy + ih, wall_c)
+                vline(ix + iw - 1 - t, iy, iy + ih, wall_c)
+            # Lighter courtyard interior
+            court = (130, 120, 100)
+            thick = min(4, max(2, iw // 6))
+            frect(iy + thick, ix + thick, ih - thick * 2, iw - thick * 2, court)
+            # Corner towers (small darker circles at corners)
+            tr = max(2, min(iw, ih) // 8)
+            tower_c = (55, 50, 42)
+            for cy_off, cx_off in [(iy + 1, ix + 1),
+                                    (iy + 1, ix + iw - 2),
+                                    (iy + ih - 2, ix + 1),
+                                    (iy + ih - 2, ix + iw - 2)]:
+                for ddy in range(-tr, tr + 1):
+                    for ddx in range(-tr, tr + 1):
+                        if ddx * ddx + ddy * ddy <= tr * tr:
+                            py_ = cy_off + ddy
+                            px_ = cx_off + ddx
+                            if (0 <= px_ < map_w and 0 <= py_ < map_h and
+                                    ix <= px_ < ix + iw and iy <= py_ < iy + ih):
+                                tc[py_, px_] = tower_c
+
+        # ── Prison ──────────────────────────────────────────────────
+        elif stype in ("prison", "cell_block", "dungeon entrance"):
+            # Cell bars (thin dark vertical lines)
+            bar_color = (35, 32, 28)
+            bar_spacing = max(3, iw // 6)
+            for bx in range(ix + 2, ix + iw - 2, bar_spacing):
+                vline(bx, iy + 2, iy + ih - 2, bar_color)
+            # Guard post (lighter area near south entrance)
+            guard_w = max(3, iw // 4)
+            guard_h = max(3, ih // 4)
+            frect(iy + ih - guard_h - 2, ix + iw // 2 - guard_w // 2,
+                  guard_h, guard_w, (100, 95, 85))
+
+        # ── Library ─────────────────────────────────────────────────
+        elif stype in ("library", "study"):
+            # Shelving rows (dark brown parallel horizontal lines with gaps)
+            shelf_color = (60, 40, 22)
+            shelf_spacing = max(3, ih // 5)
+            for sy in range(iy + 3, iy + ih - 3, shelf_spacing):
+                # Leave a gap in the middle for walking
+                gap_cx = ix + iw // 2
+                hline(sy, ix + 2, gap_cx - 1, shelf_color)
+                hline(sy, gap_cx + 2, ix + iw - 2, shelf_color)
+
+        # ── Temple / Church ─────────────────────────────────────────
+        elif stype in ("temple", "church", "chapel", "prayer hall",
+                       "meditation chamber", "relic room",
+                       "clergy quarters", "nave", "vestry",
+                       "bell tower base", "temple_main"):
+            # Central aisle (lighter path down the middle)
+            aisle_w = max(2, iw // 5)
+            aisle_cx = ix + iw // 2
+            aisle_color = tuple(min(255, int(c) + 20)
+                                for c in tc[clamp(iy + 2, 0, map_h),
+                                            clamp(ix + 2, 0, map_w)])
+            for ax in range(aisle_cx - aisle_w // 2, aisle_cx + aisle_w // 2 + 1):
+                vline(ax, iy + 2, iy + ih - 2, aisle_color)
+            # Altar (gold/yellow square at the far end)
+            altar_sz = max(2, min(iw, ih) // 5)
+            frect(iy + 2, aisle_cx - altar_sz // 2, altar_sz, altar_sz,
+                  (190, 170, 60))
+
+        # ── Mine tunnels ────────────────────────────────────────────
+        elif stype in ("mine", "mine_chamber", "shaft room",
+                       "vein chamber", "tool storage", "cart station",
+                       "ore deposit"):
+            # Support beams (brown lines across at regular intervals)
+            beam_color = (90, 60, 30)
+            beam_spacing = max(4, ih // 4)
+            for by in range(iy + 2, iy + ih - 2, beam_spacing):
+                hline(by, ix + 1, ix + iw - 1, beam_color)
+
+        # ── Crypt / Tomb ────────────────────────────────────────────
+        elif stype in ("crypt", "crypt_chamber", "tomb", "tomb_chamber",
+                       "burial_hall", "burial chamber",
+                       "sarcophagus room", "ossuary", "antechamber",
+                       "catacombs", "main burial hall",
+                       "sarcophagus chamber", "offering room",
+                       "sealed passage", "guardian chamber",
+                       "treasure alcove"):
+            # Brick-pattern floor
+            brick_a = (58, 52, 44)
+            brick_b = (52, 46, 38)
+            for dy in range(2, ih - 2):
+                for dx in range(2, iw - 2):
+                    cy_, cx_ = iy + dy, ix + dx
+                    if 0 <= cx_ < map_w and 0 <= cy_ < map_h:
+                        offset = 2 if (dy // 2) % 2 else 0
+                        if (dx + offset) % 4 == 0 or dy % 2 == 0 and (dx + offset) % 4 < 1:
+                            tc[cy_, cx_] = brick_a
+                        else:
+                            tc[cy_, cx_] = brick_b
+
+        # ── Dock / Pier ─────────────────────────────────────────────
+        elif stype in ("dock", "pier", "harbor master", "fish market",
+                       "bait shop", "dock platform"):
+            # Plank lines across the building
+            plank_dark = (95, 72, 40)
+            for dy in range(0, ih, 3):
+                hline(iy + dy, ix + 1, ix + iw - 1, plank_dark)
+
+        # ── Factory / Industrial ────────────────────────────────────
+        elif stype in ("factory", "factory_main", "assembly hall",
+                       "storage silo", "furnace room", "office",
+                       "loading bay", "machinery"):
+            # Machine outlines (small darker rectangles)
+            machine_c = (75, 72, 68)
+            for _ in range(min(3, max(1, iw * ih // 100))):
+                mw_ = rng.integers(2, max(3, iw // 3))
+                mh_ = rng.integers(2, max(3, ih // 3))
+                mx_ = ix + 2 + rng.integers(0, max(1, iw - mw_ - 4))
+                my_ = iy + 2 + rng.integers(0, max(1, ih - mh_ - 4))
+                frect(my_, mx_, mh_, mw_, machine_c)
+
+        # ── Crash site debris ───────────────────────────────────────
+        elif stype in ("crash_site", "wreckage hull", "debris field",
+                       "cargo scatter", "impact crater", "salvage pile"):
+            # Scorch marks (random dark splotches)
+            scorch = (50, 42, 35)
+            for _ in range(min(4, max(1, iw * ih // 60))):
+                sx = ix + 1 + rng.integers(0, max(1, iw - 3))
+                sy = iy + 1 + rng.integers(0, max(1, ih - 3))
+                frect(sy, sx, 2, 2, scorch)
+
+        # ── Treasure room ───────────────────────────────────────────
+        elif stype in ("treasure_room", "vault", "treasure pile",
+                       "chest alcove", "trophy hall", "gem display"):
+            # Gold/gem piles (small bright dots)
+            gold = (200, 180, 50)
+            gem_colors = [(180, 40, 40), (40, 180, 40), (40, 40, 200)]
+            for _ in range(min(5, max(1, iw * ih // 40))):
+                gx = ix + 2 + rng.integers(0, max(1, iw - 4))
+                gy = iy + 2 + rng.integers(0, max(1, ih - 4))
+                c = gold if rng.random() < 0.6 else gem_colors[rng.integers(3)]
+                px(gy, gx, c)
+                px(gy + 1, gx, c)
+
+        # ── Arena ───────────────────────────────────────────────────
+        elif stype in ("arena", "arena_obstacle", "pillar", "barrier",
+                       "platform", "wall segment"):
+            # Sand texture variation
+            for dy in range(1, ih - 1):
+                for dx in range(1, iw - 1):
+                    cy_, cx_ = iy + dy, ix + dx
+                    if 0 <= cx_ < map_w and 0 <= cy_ < map_h:
+                        v = rng.integers(-8, 9)
+                        base = tc[cy_, cx_]
+                        tc[cy_, cx_] = tuple(max(0, min(255, int(c) + v))
+                                             for c in base)
+
+        # ── Graveyard chapel ────────────────────────────────────────
+        elif stype in ("graveyard", "mausoleum", "crypt entrance"):
+            # Simple cross-shaped window on floor
+            cx_ = ix + iw // 2
+            cy_ = iy + ih // 2
+            cross_c = (140, 135, 120)
+            vline(cx_, cy_ - 2, cy_ + 3, cross_c)
+            hline(cy_, cx_ - 1, cx_ + 2, cross_c)
 
     # ── Helper methods ──────────────────────────────────────────────────
 
