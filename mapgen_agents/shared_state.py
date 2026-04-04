@@ -1,6 +1,7 @@
 """
 Shared State — The central data layer that all agents read from and write to.
 Maintains the map's current state as numpy arrays (grid layers) and lists (entities, paths, labels).
+Supports multiple z-levels for layered maps (dungeons, multi-floor buildings).
 """
 
 import numpy as np
@@ -40,6 +41,60 @@ class Label:
 
 
 @dataclass
+class ZLevel:
+    """A single vertical layer of the map."""
+    z: int
+    width: int = 0
+    height: int = 0
+    terrain_color: np.ndarray = None
+    walkability: np.ndarray = None
+    structure_mask: np.ndarray = None
+    water_mask: np.ndarray = None
+    elevation: np.ndarray = None
+    moisture: np.ndarray = None
+    entities: list = field(default_factory=list)
+    labels: list = field(default_factory=list)
+
+    def __post_init__(self):
+        h, w = self.height, self.width
+        if h > 0 and w > 0:
+            if self.terrain_color is None:
+                self.terrain_color = np.zeros((h, w, 3), dtype=np.uint8)
+            if self.walkability is None:
+                self.walkability = np.ones((h, w), dtype=bool)
+            if self.structure_mask is None:
+                self.structure_mask = np.zeros((h, w), dtype=bool)
+            if self.water_mask is None:
+                self.water_mask = np.zeros((h, w), dtype=bool)
+            if self.elevation is None:
+                self.elevation = np.zeros((h, w), dtype=np.float32)
+            if self.moisture is None:
+                self.moisture = np.zeros((h, w), dtype=np.float32)
+
+
+@dataclass
+class Transition:
+    """A link between two z-levels (stairs, ladder, trapdoor)."""
+    x: int
+    y: int
+    from_z: int
+    to_z: int
+    transition_type: str  # "stairs_up", "stairs_down", "ladder", "trapdoor", "entrance"
+
+
+@dataclass
+class SpawnPoint:
+    """A creature spawn location for the playtest viewer."""
+    x: int
+    y: int
+    z: int
+    token_type: str       # "player", "enemy", "npc"
+    name: str
+    stats: dict = field(default_factory=dict)
+    ai_behavior: str = "static"  # "patrol", "guard", "chase", "static"
+
+
+@dataclass
 class MapConfig:
     """Configuration for the map being generated"""
     width: int = 512
@@ -56,25 +111,28 @@ class SharedState:
     Central shared state that all agents reference.
     Grid layers are numpy arrays, entities/paths/labels are lists.
     Includes locking hints for the orchestrator to manage concurrent access.
+
+    Supports multiple z-levels via self.levels dict. The ground level (z=0) is
+    always present. Backwards-compatible properties map attribute access
+    (e.g. self.terrain_color) to the ground level so existing agents work unchanged.
     """
 
     def __init__(self, config: MapConfig):
         self.config = config
         self.rng = np.random.default_rng(config.seed)
 
-        # Grid layers (all float32, 0.0–1.0 unless noted)
         w, h = config.width, config.height
-        self.elevation = np.zeros((h, w), dtype=np.float32)
-        self.moisture = np.zeros((h, w), dtype=np.float32)
-        self.walkability = np.ones((h, w), dtype=bool)       # True = walkable
-        self.water_mask = np.zeros((h, w), dtype=bool)        # True = water
-        self.structure_mask = np.zeros((h, w), dtype=bool)    # True = structure
-        self.terrain_color = np.zeros((h, w, 3), dtype=np.uint8)  # RGB color layer
 
-        # Entity lists
-        self.entities: list[Entity] = []
+        # Create ground z-level and store in levels dict
+        ground = ZLevel(z=0, width=w, height=h)
+        self.levels: dict[int, ZLevel] = {0: ground}
+
+        # Entity lists (paths are not per-level, they span the ground)
         self.paths: list[PathSegment] = []
-        self.labels: list[Label] = []
+
+        # Transitions between z-levels and spawn points
+        self.transitions: list[Transition] = []
+        self.spawns: list[SpawnPoint] = []
 
         # Generation metadata
         self.metadata: dict[str, Any] = {
@@ -83,6 +141,106 @@ class SharedState:
             "created_at": time.time(),
             "agents_completed": [],
         }
+
+    # ------------------------------------------------------------------
+    # Ground-level backwards-compat properties
+    # All existing agents write to shared_state.terrain_color etc. — these
+    # transparently proxy to self.levels[0].
+    # ------------------------------------------------------------------
+
+    @property
+    def terrain_color(self) -> np.ndarray:
+        return self.levels[0].terrain_color
+
+    @terrain_color.setter
+    def terrain_color(self, value: np.ndarray):
+        self.levels[0].terrain_color = value
+
+    @property
+    def walkability(self) -> np.ndarray:
+        return self.levels[0].walkability
+
+    @walkability.setter
+    def walkability(self, value: np.ndarray):
+        self.levels[0].walkability = value
+
+    @property
+    def structure_mask(self) -> np.ndarray:
+        return self.levels[0].structure_mask
+
+    @structure_mask.setter
+    def structure_mask(self, value: np.ndarray):
+        self.levels[0].structure_mask = value
+
+    @property
+    def water_mask(self) -> np.ndarray:
+        return self.levels[0].water_mask
+
+    @water_mask.setter
+    def water_mask(self, value: np.ndarray):
+        self.levels[0].water_mask = value
+
+    @property
+    def elevation(self) -> np.ndarray:
+        return self.levels[0].elevation
+
+    @elevation.setter
+    def elevation(self, value: np.ndarray):
+        self.levels[0].elevation = value
+
+    @property
+    def moisture(self) -> np.ndarray:
+        return self.levels[0].moisture
+
+    @moisture.setter
+    def moisture(self, value: np.ndarray):
+        self.levels[0].moisture = value
+
+    @property
+    def entities(self) -> list:
+        return self.levels[0].entities
+
+    @entities.setter
+    def entities(self, value: list):
+        self.levels[0].entities = value
+
+    @property
+    def labels(self) -> list:
+        return self.levels[0].labels
+
+    @labels.setter
+    def labels(self, value: list):
+        self.levels[0].labels = value
+
+    # ------------------------------------------------------------------
+    # Z-level management
+    # ------------------------------------------------------------------
+
+    def add_zlevel(self, z: int) -> ZLevel:
+        """Create and register a new z-level. Returns it. Reuses existing if present."""
+        if z in self.levels:
+            return self.levels[z]
+        level = ZLevel(
+            z=z,
+            width=self.config.width,
+            height=self.config.height,
+        )
+        self.levels[z] = level
+        return level
+
+    def add_transition(self, t: Transition):
+        """Register a transition between z-levels."""
+        self.transitions.append(t)
+
+    @property
+    def z_range(self) -> tuple[int, int]:
+        """Return (min_z, max_z) across all registered levels."""
+        keys = self.levels.keys()
+        return (min(keys), max(keys))
+
+    # ------------------------------------------------------------------
+    # Existing public API (unchanged behaviour)
+    # ------------------------------------------------------------------
 
     def log_agent_completion(self, agent_name: str):
         self.metadata["agents_completed"].append({
@@ -103,4 +261,8 @@ class SharedState:
             "paths": len(self.paths),
             "labels": len(self.labels),
             "agents_completed": [a["agent"] for a in self.metadata["agents_completed"]],
+            "z_levels": len(self.levels),
+            "z_range": self.z_range,
+            "transitions": len(self.transitions),
+            "spawns": len(self.spawns),
         }
