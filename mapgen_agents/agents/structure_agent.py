@@ -1,0 +1,1428 @@
+"""
+StructureAgent — Places buildings, walls, dungeon rooms, mazes, mines, and other structures.
+Uses BSP for dungeons, recursive backtracker for mazes, tunnel carving for mines,
+and rule-based placement for villages/cities/forts/castles.
+"""
+
+import numpy as np
+from base_agent import BaseAgent
+from shared_state import SharedState, Entity
+from typing import Any
+
+
+# Building templates: (width, height, color_rgb, name_prefix)
+BUILDING_TEMPLATES = {
+    "village": [
+        (20, 15, (120, 90, 60), "House"),
+        (25, 20, (100, 80, 50), "Tavern"),
+        (15, 15, (130, 100, 70), "Shop"),
+        (30, 25, (90, 70, 45), "Inn"),
+        (12, 10, (110, 85, 55), "Cottage"),
+        (18, 14, (105, 82, 52), "Workshop"),
+    ],
+    "town": [
+        (22, 16, (115, 88, 58), "House"),
+        (28, 22, (98, 78, 48), "Tavern"),
+        (18, 15, (125, 98, 68), "Market Stall"),
+        (30, 25, (88, 68, 42), "Inn"),
+        (20, 18, (108, 85, 55), "Smithy"),
+        (25, 20, (100, 82, 52), "Stable"),
+        (15, 12, (118, 92, 62), "Well House"),
+        (32, 24, (92, 72, 48), "Town Hall"),
+    ],
+    "city": [
+        (30, 25, (100, 90, 75), "Manor"),
+        (20, 15, (110, 95, 70), "House"),
+        (25, 20, (95, 85, 65), "Guild Hall"),
+        (15, 15, (105, 90, 68), "Shop"),
+        (35, 30, (85, 75, 55), "Keep"),
+        (20, 18, (100, 88, 66), "Barracks"),
+        (22, 16, (108, 92, 70), "Temple"),
+        (18, 14, (112, 96, 72), "Warehouse"),
+    ],
+    "castle": [
+        (60, 50, (80, 75, 65), "Great Hall"),
+        (25, 25, (75, 70, 60), "Tower"),
+        (30, 20, (85, 78, 68), "Barracks"),
+        (20, 15, (90, 82, 72), "Armory"),
+        (35, 25, (78, 72, 62), "Throne Room"),
+        (18, 18, (82, 76, 66), "Chapel"),
+        (15, 12, (88, 80, 70), "Dungeon Entrance"),
+        (25, 20, (72, 68, 58), "Kitchen"),
+    ],
+    "fort": [
+        (30, 25, (90, 82, 68), "Main Hall"),
+        (20, 20, (85, 78, 64), "Watchtower"),
+        (18, 15, (95, 86, 72), "Barracks"),
+        (15, 12, (88, 80, 66), "Armory"),
+        (12, 10, (92, 84, 70), "Storage"),
+        (22, 18, (82, 74, 60), "Gate House"),
+    ],
+    "tower": [
+        (30, 30, (85, 80, 70), "Main Tower"),
+        (12, 12, (90, 84, 74), "Turret"),
+        (15, 10, (80, 75, 65), "Bridge Room"),
+        (18, 15, (88, 82, 72), "Study"),
+        (20, 20, (82, 76, 66), "Observatory"),
+    ],
+    "camp": [
+        (10, 10, (140, 120, 80), "Tent"),
+        (12, 8, (135, 115, 75), "Supply Tent"),
+        (8, 8, (145, 125, 85), "Bedroll"),
+        (15, 12, (130, 110, 70), "Command Tent"),
+    ],
+    "outpost": [
+        (20, 20, (100, 90, 70), "Watchtower"),
+        (15, 12, (110, 95, 72), "Barracks"),
+        (12, 10, (105, 90, 68), "Storage"),
+        (25, 20, (95, 82, 62), "Palisade Gate"),
+    ],
+    "crash_site": [
+        (30, 20, (70, 65, 60), "Wreckage Hull"),
+        (15, 12, (80, 72, 65), "Debris Field"),
+        (10, 8, (75, 68, 62), "Cargo Scatter"),
+        (20, 15, (65, 60, 55), "Impact Crater"),
+        (8, 8, (90, 82, 75), "Salvage Pile"),
+    ],
+    "treasure_room": [
+        (45, 35, (100, 85, 50), "Vault"),
+        (20, 20, (110, 95, 55), "Treasure Pile"),
+        (15, 15, (90, 78, 45), "Chest Alcove"),
+        (25, 20, (95, 82, 48), "Trophy Hall"),
+        (12, 10, (105, 90, 52), "Gem Display"),
+    ],
+    "rest_area": [
+        (12, 10, (140, 125, 90), "Campfire"),
+        (10, 8, (135, 118, 82), "Bedroll"),
+        (8, 8, (130, 115, 80), "Pack"),
+        (14, 10, (125, 110, 78), "Log Bench"),
+    ],
+    "dungeon": [
+        (40, 30, (70, 65, 58), "Chamber"),
+        (25, 25, (75, 68, 60), "Room"),
+        (50, 40, (65, 60, 52), "Great Hall"),
+        (20, 20, (72, 66, 58), "Cell"),
+    ],
+    "mine": [
+        (30, 25, (65, 58, 48), "Shaft Room"),
+        (20, 15, (70, 62, 52), "Vein Chamber"),
+        (15, 12, (60, 55, 45), "Tool Storage"),
+        (25, 20, (68, 60, 50), "Cart Station"),
+        (35, 30, (62, 56, 46), "Ore Deposit"),
+    ],
+    "maze": [],  # Mazes use procedural generation, not templates
+    "arena": [
+        (20, 20, (100, 90, 70), "Pillar"),
+        (15, 15, (110, 95, 72), "Barrier"),
+        (10, 10, (95, 85, 65), "Platform"),
+        (25, 8, (105, 92, 68), "Wall Segment"),
+    ],
+    "crypt": [
+        (35, 30, (55, 50, 45), "Burial Chamber"),
+        (20, 20, (60, 55, 48), "Sarcophagus Room"),
+        (25, 15, (50, 45, 40), "Ossuary"),
+        (15, 12, (58, 52, 46), "Antechamber"),
+        (30, 25, (52, 48, 42), "Catacombs"),
+    ],
+    "tomb": [
+        (50, 40, (60, 55, 48), "Main Burial Hall"),
+        (30, 25, (55, 50, 42), "Sarcophagus Chamber"),
+        (20, 18, (65, 58, 50), "Offering Room"),
+        (25, 20, (50, 45, 38), "Sealed Passage"),
+        (35, 30, (58, 52, 45), "Guardian Chamber"),
+        (15, 12, (62, 56, 48), "Treasure Alcove"),
+    ],
+    "graveyard": [
+        (8, 4, (140, 135, 125), "Headstone"),
+        (12, 8, (130, 125, 115), "Grave Plot"),
+        (20, 15, (80, 75, 65), "Mausoleum"),
+        (15, 12, (100, 92, 80), "Crypt Entrance"),
+        (25, 20, (75, 70, 60), "Chapel"),
+    ],
+    "dock": [
+        (40, 10, (110, 85, 50), "Pier"),
+        (30, 25, (100, 80, 55), "Warehouse"),
+        (20, 15, (115, 90, 60), "Harbor Master"),
+        (25, 20, (105, 82, 52), "Fish Market"),
+        (15, 12, (120, 95, 65), "Bait Shop"),
+        (35, 15, (95, 75, 48), "Dock Platform"),
+    ],
+    "factory": [
+        (50, 40, (90, 85, 80), "Main Factory"),
+        (30, 25, (85, 80, 75), "Assembly Hall"),
+        (20, 18, (95, 88, 82), "Storage Silo"),
+        (25, 20, (80, 75, 70), "Furnace Room"),
+        (15, 12, (100, 92, 85), "Office"),
+        (35, 30, (88, 82, 76), "Loading Bay"),
+    ],
+    "shop": [
+        (20, 15, (125, 100, 70), "Shop Front"),
+        (15, 12, (120, 95, 65), "Counter"),
+        (12, 10, (115, 90, 60), "Storage Room"),
+        (18, 14, (130, 105, 75), "Display Area"),
+    ],
+    "shopping_center": [
+        (25, 20, (125, 100, 70), "General Store"),
+        (20, 18, (120, 95, 65), "Potion Shop"),
+        (22, 16, (130, 105, 75), "Armorer"),
+        (18, 15, (115, 92, 62), "Jeweler"),
+        (20, 18, (110, 88, 58), "Tailor"),
+        (28, 22, (105, 85, 55), "Tavern"),
+        (25, 20, (100, 82, 52), "Blacksmith"),
+    ],
+    "temple": [
+        (60, 45, (150, 145, 135), "Main Sanctum"),
+        (30, 25, (140, 135, 125), "Prayer Hall"),
+        (20, 20, (145, 140, 130), "Altar Room"),
+        (25, 18, (135, 130, 120), "Meditation Chamber"),
+        (15, 12, (155, 148, 138), "Relic Room"),
+        (35, 25, (130, 125, 115), "Clergy Quarters"),
+    ],
+    "church": [
+        (40, 30, (145, 140, 130), "Nave"),
+        (20, 15, (150, 145, 135), "Altar"),
+        (15, 12, (140, 135, 125), "Vestry"),
+        (25, 20, (135, 130, 120), "Bell Tower Base"),
+        (18, 15, (148, 142, 132), "Chapel"),
+    ],
+}
+
+
+class StructureAgent(BaseAgent):
+    name = "StructureAgent"
+
+    def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
+        structure_type = params.get("type", shared_state.config.map_type)
+        building_count = params.get("building_count", 8)
+
+        # Route to specialized generators
+        if structure_type == "dungeon":
+            return self._generate_dungeon_rooms(shared_state, params)
+        elif structure_type == "maze":
+            return self._generate_maze(shared_state, params)
+        elif structure_type == "mine":
+            return self._generate_mine(shared_state, params)
+        elif structure_type == "castle":
+            return self._generate_castle(shared_state, params)
+        elif structure_type == "fort":
+            return self._generate_fort(shared_state, params)
+        elif structure_type == "tower":
+            return self._generate_tower(shared_state, params)
+        elif structure_type == "arena":
+            return self._generate_arena(shared_state, params)
+        elif structure_type == "crash_site":
+            return self._generate_crash_site(shared_state, params)
+        elif structure_type == "treasure_room":
+            return self._generate_treasure_room(shared_state, params)
+        elif structure_type == "crypt":
+            return self._generate_crypt(shared_state, params)
+        elif structure_type == "tomb":
+            return self._generate_tomb(shared_state, params)
+        elif structure_type == "graveyard":
+            return self._generate_graveyard(shared_state, params)
+        elif structure_type == "dock":
+            return self._generate_dock(shared_state, params)
+        elif structure_type == "factory":
+            return self._generate_factory(shared_state, params)
+        elif structure_type == "temple":
+            return self._generate_temple(shared_state, params)
+        elif structure_type == "church":
+            return self._generate_church(shared_state, params)
+        else:
+            return self._place_buildings(shared_state, structure_type, building_count)
+
+    # ── Generic building placement ──────────────────────────────────────
+
+    def _place_buildings(self, state: SharedState, stype: str, count: int) -> dict:
+        """Place buildings near roads on walkable terrain."""
+        rng = np.random.default_rng(state.config.seed + 500)
+        h, w = state.config.height, state.config.width
+
+        templates = BUILDING_TEMPLATES.get(stype, BUILDING_TEMPLATES["village"])
+
+        # Prefer placement near roads
+        road_proximity = np.zeros((h, w), dtype=np.float32)
+        for path in state.paths:
+            if path.path_type == "road":
+                for px, py in path.waypoints:
+                    for dy in range(-30, 31):
+                        for dx in range(-30, 31):
+                            nx, ny = px + dx, py + dy
+                            if 0 <= nx < w and 0 <= ny < h:
+                                dist = max(1, abs(dx) + abs(dy))
+                                road_proximity[ny, nx] = max(
+                                    road_proximity[ny, nx], 1.0 / dist)
+
+        placed = 0
+        attempts = 0
+        max_attempts = count * 50
+
+        while placed < count and attempts < max_attempts:
+            attempts += 1
+            template = templates[rng.integers(len(templates))]
+            bw, bh, color, name_prefix = template
+
+            # Scale buildings to map size
+            bw = max(4, bw * w // 512)
+            bh = max(4, bh * h // 512)
+
+            x = rng.integers(bw, w - bw)
+            y = rng.integers(bh, h - bh)
+
+            region = state.get_walkable_positions()[y:y+bh, x:x+bw]
+            water_region = state.water_mask[y:y+bh, x:x+bw]
+            struct_region = state.structure_mask[y:y+bh, x:x+bw]
+
+            if (region.all() and not water_region.any() and not struct_region.any()):
+                state.structure_mask[y:y+bh, x:x+bw] = True
+                state.walkability[y:y+bh, x:x+bw] = False
+
+                wall_color = tuple(max(0, c - 20) for c in color)
+                for by in range(y, y + bh):
+                    for bx in range(x, x + bw):
+                        if by == y or by == y + bh - 1 or bx == x or bx == x + bw - 1:
+                            state.terrain_color[by, bx] = wall_color
+                        else:
+                            state.terrain_color[by, bx] = color
+
+                door_x = x + bw // 2
+                door_y = y + bh - 1
+                if 0 <= door_x < w and 0 <= door_y < h:
+                    state.terrain_color[door_y, door_x] = (60, 40, 25)
+                    state.walkability[door_y, door_x] = True
+
+                state.entities.append(Entity(
+                    entity_type="building",
+                    position=(x, y),
+                    size=(bw, bh),
+                    variant=name_prefix.lower(),
+                    metadata={"name": f"{name_prefix} {placed + 1}", "style": stype}
+                ))
+                placed += 1
+
+        return {
+            "buildings_placed": placed,
+            "structure_type": stype,
+            "attempts": attempts,
+        }
+
+    # ── Dungeon rooms (BSP) ─────────────────────────────────────────────
+
+    def _generate_dungeon_rooms(self, state: SharedState, params: dict) -> dict:
+        """Use BSP to generate connected dungeon rooms."""
+        rng = np.random.default_rng(state.config.seed + 600)
+        h, w = state.config.height, state.config.width
+        room_count = params.get("building_count", 6)
+
+        rooms = self._place_random_rooms(state, rng, room_count,
+                                          floor_color=(75, 70, 62),
+                                          wall_color=(45, 40, 35),
+                                          entity_variant="dungeon_room")
+        corridors = self._connect_rooms_corridors(state, rooms, rng,
+                                                   floor_color=(75, 70, 62),
+                                                   corridor_w=3)
+
+        return {"rooms_created": len(rooms), "corridors_created": corridors}
+
+    # ── Maze (recursive backtracker) ────────────────────────────────────
+
+    def _generate_maze(self, state: SharedState, params: dict) -> dict:
+        """Generate a maze using recursive backtracker algorithm."""
+        rng = np.random.default_rng(state.config.seed + 610)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (50, 45, 38)
+        path_color = (85, 80, 70)
+        cell_size = params.get("cell_size", max(4, w // 64))
+
+        # Maze grid dimensions
+        maze_w = (w - 2) // cell_size
+        maze_h = (h - 2) // cell_size
+        if maze_w < 3: maze_w = 3
+        if maze_h < 3: maze_h = 3
+
+        # Initialize all walls
+        state.walkability[:, :] = False
+        state.terrain_color[:, :] = wall_color
+
+        # Visited grid
+        visited = np.zeros((maze_h, maze_w), dtype=bool)
+        stack = [(0, 0)]
+        visited[0, 0] = True
+
+        def carve_cell(cx, cy):
+            """Carve a cell and the passage to it."""
+            px = 1 + cx * cell_size
+            py = 1 + cy * cell_size
+            for dy in range(cell_size - 1):
+                for dx in range(cell_size - 1):
+                    nx, ny = px + dx, py + dy
+                    if 0 <= nx < w and 0 <= ny < h:
+                        state.walkability[ny, nx] = True
+                        state.terrain_color[ny, nx] = path_color
+
+        def carve_passage(cx1, cy1, cx2, cy2):
+            """Carve passage between two adjacent cells."""
+            px1 = 1 + cx1 * cell_size
+            py1 = 1 + cy1 * cell_size
+            px2 = 1 + cx2 * cell_size
+            py2 = 1 + cy2 * cell_size
+            # Carve between centers
+            min_x = min(px1, px2)
+            max_x = max(px1, px2) + cell_size - 1
+            min_y = min(py1, py2)
+            max_y = max(py1, py2) + cell_size - 1
+            for ny in range(min_y, min(max_y, h)):
+                for nx in range(min_x, min(max_x, w)):
+                    state.walkability[ny, nx] = True
+                    state.terrain_color[ny, nx] = path_color
+
+        carve_cell(0, 0)
+
+        # Recursive backtracker
+        while stack:
+            cx, cy = stack[-1]
+            neighbors = []
+            for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
+                nx, ny = cx + dx, cy + dy
+                if 0 <= nx < maze_w and 0 <= ny < maze_h and not visited[ny, nx]:
+                    neighbors.append((nx, ny))
+
+            if neighbors:
+                ncx, ncy = neighbors[rng.integers(len(neighbors))]
+                visited[ncy, ncx] = True
+                carve_passage(cx, cy, ncx, ncy)
+                carve_cell(ncx, ncy)
+                stack.append((ncx, ncy))
+
+                state.entities.append(Entity(
+                    entity_type="room",
+                    position=(1 + ncx * cell_size, 1 + ncy * cell_size),
+                    size=(cell_size - 1, cell_size - 1),
+                    variant="maze_cell",
+                    metadata={"name": f"Passage {len(state.entities) + 1}"}
+                ))
+            else:
+                stack.pop()
+
+        state.structure_mask = ~state.walkability
+
+        return {
+            "maze_size": f"{maze_w}x{maze_h}",
+            "cells_carved": int(visited.sum()),
+            "cell_size": cell_size,
+        }
+
+    # ── Mine (tunnel network) ───────────────────────────────────────────
+
+    def _generate_mine(self, state: SharedState, params: dict) -> dict:
+        """Generate a mine with main shafts and branching tunnels."""
+        rng = np.random.default_rng(state.config.seed + 620)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (45, 40, 32)
+        tunnel_color = (70, 62, 50)
+        ore_colors = [(140, 120, 40), (120, 130, 140), (100, 50, 50)]  # gold, silver, ruby
+        room_count = params.get("building_count", 5)
+
+        # Fill with walls
+        state.walkability[:, :] = False
+        state.terrain_color[:, :] = wall_color
+
+        tunnel_w = max(3, w // 80)
+        tunnels_created = 0
+
+        # Main shaft: vertical down the center-ish
+        cx = w // 2 + rng.integers(-w // 8, w // 8)
+        for y in range(10, h - 10):
+            for dx in range(-tunnel_w, tunnel_w + 1):
+                nx = cx + dx + int(rng.integers(-1, 2))  # slight wobble
+                if 0 <= nx < w:
+                    state.walkability[y, nx] = True
+                    state.terrain_color[y, nx] = tunnel_color
+        tunnels_created += 1
+
+        # Branching tunnels from main shaft
+        branch_count = params.get("branch_count", 6)
+        branch_points = rng.integers(30, h - 30, size=branch_count)
+
+        for bp_y in branch_points:
+            direction = rng.choice([-1, 1])
+            length = rng.integers(w // 6, w // 2)
+            start_x = cx
+
+            for step in range(length):
+                bx = start_x + direction * step
+                # Slight vertical drift
+                by = int(bp_y + rng.integers(-1, 2))
+                by = max(0, min(h - 1, by))
+
+                for dy in range(-tunnel_w // 2, tunnel_w // 2 + 1):
+                    for dx in range(-tunnel_w // 2, tunnel_w // 2 + 1):
+                        nx, ny = bx + dx, by + dy
+                        if 0 <= nx < w and 0 <= ny < h:
+                            state.walkability[ny, nx] = True
+                            state.terrain_color[ny, nx] = tunnel_color
+            tunnels_created += 1
+
+        # Place ore deposit rooms
+        rooms = self._place_random_rooms(state, rng, room_count,
+                                          floor_color=(72, 65, 52),
+                                          wall_color=wall_color,
+                                          entity_variant="mine_chamber",
+                                          min_room_frac=12, max_room_frac=6)
+
+        # Scatter ore veins
+        ore_count = 0
+        for _ in range(room_count * 3):
+            ox = rng.integers(5, w - 5)
+            oy = rng.integers(5, h - 5)
+            if state.walkability[oy, ox]:
+                ore_color = ore_colors[rng.integers(len(ore_colors))]
+                r = rng.integers(2, 5)
+                for dy in range(-r, r + 1):
+                    for dx in range(-r, r + 1):
+                        nx, ny = ox + dx, oy + dy
+                        if (0 <= nx < w and 0 <= ny < h and
+                            dx*dx + dy*dy <= r*r and state.walkability[ny, nx]):
+                            state.terrain_color[ny, nx] = ore_color
+                state.entities.append(Entity(
+                    entity_type="ore_vein",
+                    position=(ox, oy),
+                    size=(r * 2, r * 2),
+                    variant="ore",
+                    metadata={"name": f"Ore Vein {ore_count + 1}"}
+                ))
+                ore_count += 1
+
+        state.structure_mask = ~state.walkability
+
+        return {
+            "tunnels_created": tunnels_created,
+            "rooms_created": len(rooms),
+            "ore_veins": ore_count,
+        }
+
+    # ── Castle (keep + walls + towers) ──────────────────────────────────
+
+    def _generate_castle(self, state: SharedState, params: dict) -> dict:
+        """Generate a castle with outer walls, corner towers, inner keep, and courtyard."""
+        rng = np.random.default_rng(state.config.seed + 630)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (80, 75, 65)
+        floor_color = (110, 100, 85)
+        tower_color = (70, 65, 55)
+
+        wall_thick = max(3, w // 60)
+        margin = max(20, w // 8)
+
+        # Outer walls (rectangle with margin)
+        self._draw_rect_walls(state, margin, margin, w - margin, h - margin,
+                               wall_thick, wall_color, floor_color)
+
+        # Corner towers
+        tower_size = max(12, w // 20)
+        corners = [
+            (margin - tower_size // 2, margin - tower_size // 2),
+            (w - margin - tower_size // 2, margin - tower_size // 2),
+            (margin - tower_size // 2, h - margin - tower_size // 2),
+            (w - margin - tower_size // 2, h - margin - tower_size // 2),
+        ]
+        for i, (tx, ty) in enumerate(corners):
+            self._draw_filled_rect(state, tx, ty, tower_size, tower_size,
+                                    tower_color, wall_color)
+            state.entities.append(Entity(
+                entity_type="building",
+                position=(max(0, tx), max(0, ty)),
+                size=(tower_size, tower_size),
+                variant="tower",
+                metadata={"name": f"Tower {i + 1}", "style": "castle"}
+            ))
+
+        # Gate (south wall center)
+        gate_w = max(8, w // 30)
+        gate_x = w // 2 - gate_w // 2
+        gate_y = h - margin - wall_thick
+        for gy in range(gate_y, min(h, gate_y + wall_thick + 2)):
+            for gx in range(gate_x, min(w, gate_x + gate_w)):
+                if 0 <= gx < w and 0 <= gy < h:
+                    state.walkability[gy, gx] = True
+                    state.terrain_color[gy, gx] = (60, 40, 25)
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(gate_x, gate_y),
+            size=(gate_w, wall_thick + 2),
+            variant="gate",
+            metadata={"name": "Castle Gate", "style": "castle"}
+        ))
+
+        # Inner keep
+        keep_w = max(30, w // 5)
+        keep_h = max(25, h // 5)
+        keep_x = w // 2 - keep_w // 2
+        keep_y = h // 3 - keep_h // 2
+        self._draw_filled_rect(state, keep_x, keep_y, keep_w, keep_h,
+                                (90, 82, 70), wall_color)
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(keep_x, keep_y),
+            size=(keep_w, keep_h),
+            variant="keep",
+            metadata={"name": "The Keep", "style": "castle"}
+        ))
+
+        # Inner buildings from templates
+        inner_placed = self._place_buildings(state, "castle",
+                                              params.get("building_count", 4))
+
+        return {
+            "structure_type": "castle",
+            "towers": 4,
+            "inner_buildings": inner_placed.get("buildings_placed", 0),
+        }
+
+    # ── Fort (palisade + buildings) ─────────────────────────────────────
+
+    def _generate_fort(self, state: SharedState, params: dict) -> dict:
+        """Generate a fort with palisade walls and interior structures."""
+        rng = np.random.default_rng(state.config.seed + 640)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (85, 70, 45)  # wooden palisade
+        floor_color = (120, 105, 80)
+
+        wall_thick = max(2, w // 80)
+        margin = max(30, w // 5)
+
+        # Palisade walls
+        self._draw_rect_walls(state, margin, margin, w - margin, h - margin,
+                               wall_thick, wall_color, floor_color)
+
+        # Gate
+        gate_w = max(6, w // 40)
+        gate_x = w // 2 - gate_w // 2
+        gate_y = h - margin - wall_thick
+        for gy in range(gate_y, min(h, gate_y + wall_thick + 2)):
+            for gx in range(gate_x, min(w, gate_x + gate_w)):
+                if 0 <= gx < w and 0 <= gy < h:
+                    state.walkability[gy, gx] = True
+                    state.terrain_color[gy, gx] = (100, 80, 50)
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(gate_x, gate_y),
+            size=(gate_w, wall_thick + 2),
+            variant="gate",
+            metadata={"name": "Fort Gate", "style": "fort"}
+        ))
+
+        # Interior buildings
+        inner = self._place_buildings(state, "fort", params.get("building_count", 5))
+
+        return {
+            "structure_type": "fort",
+            "inner_buildings": inner.get("buildings_placed", 0),
+        }
+
+    # ── Tower (single tall structure with floors) ───────────────────────
+
+    def _generate_tower(self, state: SharedState, params: dict) -> dict:
+        """Generate a wizard/watch tower with circular footprint and rooms."""
+        rng = np.random.default_rng(state.config.seed + 650)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (70, 65, 58)
+        floor_color = (95, 88, 78)
+
+        cx, cy = w // 2, h // 2
+        outer_r = max(20, min(w, h) // 4)
+        inner_r = outer_r - max(3, outer_r // 8)
+
+        # Draw circular tower
+        for y in range(max(0, cy - outer_r), min(h, cy + outer_r)):
+            for x in range(max(0, cx - outer_r), min(w, cx + outer_r)):
+                dist = np.sqrt((x - cx)**2 + (y - cy)**2)
+                if dist <= outer_r:
+                    state.structure_mask[y, x] = True
+                    if dist <= inner_r:
+                        state.walkability[y, x] = True
+                        state.terrain_color[y, x] = floor_color
+                    else:
+                        state.walkability[y, x] = False
+                        state.terrain_color[y, x] = wall_color
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(cx - outer_r, cy - outer_r),
+            size=(outer_r * 2, outer_r * 2),
+            variant="main_tower",
+            metadata={"name": "The Tower", "style": "tower"}
+        ))
+
+        # Internal dividing walls (cross pattern for rooms)
+        for y in range(max(0, cy - inner_r), min(h, cy + inner_r)):
+            if 0 <= cx < w:
+                state.walkability[y, cx] = False
+                state.terrain_color[y, cx] = wall_color
+        for x in range(max(0, cx - inner_r), min(w, cx + inner_r)):
+            if 0 <= cy < h:
+                state.walkability[cy, x] = False
+                state.terrain_color[cy, x] = wall_color
+
+        # Doorways in dividers
+        for offset in [-inner_r // 3, inner_r // 3]:
+            for dy, dx in [(offset, 0), (0, offset)]:
+                ny, nx = cy + dy, cx + dx
+                if 0 <= nx < w and 0 <= ny < h:
+                    state.walkability[ny, nx] = True
+                    state.terrain_color[ny, nx] = floor_color
+
+        # Entrance door
+        door_y = cy + outer_r - 1
+        if 0 <= door_y < h:
+            for dx in range(-2, 3):
+                nx = cx + dx
+                if 0 <= nx < w:
+                    state.walkability[door_y, nx] = True
+                    state.terrain_color[door_y, nx] = (60, 40, 25)
+
+        # Surrounding rooms from templates
+        inner = self._place_buildings(state, "tower", params.get("building_count", 3))
+
+        return {
+            "structure_type": "tower",
+            "tower_radius": outer_r,
+            "surrounding_buildings": inner.get("buildings_placed", 0),
+        }
+
+    # ── Arena (circular with obstacles) ─────────────────────────────────
+
+    def _generate_arena(self, state: SharedState, params: dict) -> dict:
+        """Generate a circular arena with walls and interior obstacles."""
+        rng = np.random.default_rng(state.config.seed + 660)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (90, 80, 65)
+        floor_color = (150, 135, 105)
+
+        cx, cy = w // 2, h // 2
+        outer_r = max(30, min(w, h) // 3)
+        inner_r = outer_r - max(3, outer_r // 10)
+
+        # Draw arena ring
+        for y in range(max(0, cy - outer_r), min(h, cy + outer_r)):
+            for x in range(max(0, cx - outer_r), min(w, cx + outer_r)):
+                dist = np.sqrt((x - cx)**2 + (y - cy)**2)
+                if dist <= outer_r:
+                    state.structure_mask[y, x] = True
+                    if dist <= inner_r:
+                        state.walkability[y, x] = True
+                        state.terrain_color[y, x] = floor_color
+                    else:
+                        state.walkability[y, x] = False
+                        state.terrain_color[y, x] = wall_color
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(cx - outer_r, cy - outer_r),
+            size=(outer_r * 2, outer_r * 2),
+            variant="arena",
+            metadata={"name": "The Arena", "style": "arena"}
+        ))
+
+        # Scatter obstacles inside
+        obstacle_count = params.get("building_count", 6)
+        placed = 0
+        for _ in range(obstacle_count * 10):
+            ox = cx + rng.integers(-inner_r + 10, inner_r - 10)
+            oy = cy + rng.integers(-inner_r + 10, inner_r - 10)
+            if np.sqrt((ox - cx)**2 + (oy - cy)**2) < inner_r - 5:
+                obs_r = rng.integers(3, max(4, inner_r // 6))
+                for dy in range(-obs_r, obs_r + 1):
+                    for dx in range(-obs_r, obs_r + 1):
+                        nx, ny = ox + dx, oy + dy
+                        if (0 <= nx < w and 0 <= ny < h and
+                            dx*dx + dy*dy <= obs_r*obs_r):
+                            state.walkability[ny, nx] = False
+                            state.terrain_color[ny, nx] = wall_color
+                state.entities.append(Entity(
+                    entity_type="building",
+                    position=(ox - obs_r, oy - obs_r),
+                    size=(obs_r * 2, obs_r * 2),
+                    variant="arena_obstacle",
+                    metadata={"name": f"Obstacle {placed + 1}", "style": "arena"}
+                ))
+                placed += 1
+                if placed >= obstacle_count:
+                    break
+
+        return {"structure_type": "arena", "obstacles_placed": placed}
+
+    # ── Crash Site (impact crater + debris) ─────────────────────────────
+
+    def _generate_crash_site(self, state: SharedState, params: dict) -> dict:
+        """Generate an impact crater with scattered debris and wreckage."""
+        rng = np.random.default_rng(state.config.seed + 670)
+        h, w = state.config.height, state.config.width
+
+        crater_color = (55, 48, 40)
+        scorched_color = (65, 55, 42)
+
+        cx, cy = w // 2, h // 2
+        crater_r = max(15, min(w, h) // 5)
+
+        # Impact crater (circular depression)
+        for y in range(max(0, cy - crater_r * 2), min(h, cy + crater_r * 2)):
+            for x in range(max(0, cx - crater_r * 2), min(w, cx + crater_r * 2)):
+                dist = np.sqrt((x - cx)**2 + (y - cy)**2)
+                if dist < crater_r:
+                    state.terrain_color[y, x] = crater_color
+                    state.elevation[y, x] *= 0.3
+                elif dist < crater_r * 1.5:
+                    state.terrain_color[y, x] = scorched_color
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(cx - crater_r, cy - crater_r),
+            size=(crater_r * 2, crater_r * 2),
+            variant="impact_crater",
+            metadata={"name": "Impact Crater", "style": "crash_site"}
+        ))
+
+        # Scatter debris from templates
+        result = self._place_buildings(state, "crash_site",
+                                        params.get("building_count", 5))
+
+        return {
+            "structure_type": "crash_site",
+            "crater_radius": crater_r,
+            "debris_placed": result.get("buildings_placed", 0),
+        }
+
+    # ── Treasure Room (vault with alcoves) ──────────────────────────────
+
+    def _generate_treasure_room(self, state: SharedState, params: dict) -> dict:
+        """Generate an ornate treasure vault with alcoves and display areas."""
+        rng = np.random.default_rng(state.config.seed + 680)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (60, 55, 45)
+        floor_color = (100, 85, 50)  # golden floor
+        pillar_color = (80, 70, 55)
+
+        # Main vault room (centered, large)
+        margin = max(20, w // 6)
+        self._draw_rect_walls(state, margin, margin, w - margin, h - margin,
+                               max(3, w // 60), wall_color, floor_color)
+
+        state.entities.append(Entity(
+            entity_type="room",
+            position=(margin, margin),
+            size=(w - margin * 2, h - margin * 2),
+            variant="vault",
+            metadata={"name": "The Vault", "style": "treasure_room"}
+        ))
+
+        # Pillars in a grid pattern
+        pillar_spacing = max(20, (w - margin * 2) // 5)
+        pillar_r = max(2, w // 80)
+        for py in range(margin + pillar_spacing, h - margin, pillar_spacing):
+            for px in range(margin + pillar_spacing, w - margin, pillar_spacing):
+                for dy in range(-pillar_r, pillar_r + 1):
+                    for dx in range(-pillar_r, pillar_r + 1):
+                        nx, ny = px + dx, py + dy
+                        if (0 <= nx < w and 0 <= ny < h and
+                            dx*dx + dy*dy <= pillar_r*pillar_r):
+                            state.walkability[ny, nx] = False
+                            state.terrain_color[ny, nx] = pillar_color
+
+        # Treasure piles from templates
+        result = self._place_buildings(state, "treasure_room",
+                                        params.get("building_count", 5))
+
+        # Entrance
+        gate_w = max(6, w // 30)
+        for gx in range(w // 2 - gate_w // 2, w // 2 + gate_w // 2):
+            gy = h - margin
+            if 0 <= gx < w and 0 <= gy < h:
+                state.walkability[gy, gx] = True
+                state.terrain_color[gy, gx] = (60, 40, 25)
+
+        return {
+            "structure_type": "treasure_room",
+            "treasure_piles": result.get("buildings_placed", 0),
+        }
+
+    # ── Crypt (underground burial chambers) ─────────────────────────────
+
+    def _generate_crypt(self, state: SharedState, params: dict) -> dict:
+        """Generate a crypt with burial chambers and narrow corridors."""
+        rng = np.random.default_rng(state.config.seed + 690)
+        h, w = state.config.height, state.config.width
+        room_count = params.get("building_count", 6)
+
+        wall_color = (40, 38, 32)
+        floor_color = (65, 60, 52)
+
+        # Fill with walls
+        state.walkability[:, :] = False
+        state.terrain_color[:, :] = wall_color
+
+        rooms = self._place_random_rooms(state, rng, room_count,
+                                          floor_color=floor_color,
+                                          wall_color=wall_color,
+                                          entity_variant="crypt_chamber")
+        corridors = self._connect_rooms_corridors(state, rooms, rng,
+                                                   floor_color=floor_color,
+                                                   corridor_w=2)
+
+        # Place sarcophagi (small unwalkable blocks in rooms)
+        sarcophagi = 0
+        for rx, ry, rw, rh in rooms:
+            cx, cy = rx + rw // 2, ry + rh // 2
+            sr = max(2, min(rw, rh) // 6)
+            for dy in range(-sr, sr + 1):
+                for dx in range(-sr, sr + 1):
+                    nx, ny = cx + dx, cy + dy
+                    if 0 <= nx < w and 0 <= ny < h:
+                        state.walkability[ny, nx] = False
+                        state.terrain_color[ny, nx] = (50, 45, 38)
+            sarcophagi += 1
+
+        state.structure_mask = ~state.walkability
+        return {"rooms_created": len(rooms), "corridors": corridors, "sarcophagi": sarcophagi}
+
+    # ── Tomb (sealed burial complex) ────────────────────────────────────
+
+    def _generate_tomb(self, state: SharedState, params: dict) -> dict:
+        """Generate a tomb with a main burial hall, sealed passages, and traps."""
+        rng = np.random.default_rng(state.config.seed + 695)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (45, 40, 35)
+        floor_color = (70, 62, 52)
+        accent_color = (90, 75, 40)  # gold accents
+
+        # Fill with walls
+        state.walkability[:, :] = False
+        state.terrain_color[:, :] = wall_color
+
+        # Main hall (centered, large)
+        hall_w = max(40, w // 3)
+        hall_h = max(30, h // 3)
+        hall_x = w // 2 - hall_w // 2
+        hall_y = h // 2 - hall_h // 2
+        self._draw_filled_rect(state, hall_x, hall_y, hall_w, hall_h,
+                                floor_color, wall_color)
+        state.entities.append(Entity(
+            entity_type="room",
+            position=(hall_x, hall_y),
+            size=(hall_w, hall_h),
+            variant="burial_hall",
+            metadata={"name": "Main Burial Hall", "style": "tomb"}
+        ))
+
+        # Side chambers branching from main hall
+        room_count = params.get("building_count", 5)
+        side_rooms = []
+        for i in range(room_count):
+            rw = rng.integers(max(10, w // 15), max(15, w // 8))
+            rh = rng.integers(max(10, h // 15), max(15, h // 8))
+            side = rng.choice(["left", "right", "top", "bottom"])
+            if side == "left":
+                rx = hall_x - rw - 2
+                ry = hall_y + rng.integers(0, max(1, hall_h - rh))
+            elif side == "right":
+                rx = hall_x + hall_w + 2
+                ry = hall_y + rng.integers(0, max(1, hall_h - rh))
+            elif side == "top":
+                rx = hall_x + rng.integers(0, max(1, hall_w - rw))
+                ry = hall_y - rh - 2
+            else:
+                rx = hall_x + rng.integers(0, max(1, hall_w - rw))
+                ry = hall_y + hall_h + 2
+
+            if 0 <= rx < w - rw and 0 <= ry < h - rh:
+                self._draw_filled_rect(state, rx, ry, rw, rh, floor_color, wall_color)
+                side_rooms.append((rx, ry, rw, rh))
+                state.entities.append(Entity(
+                    entity_type="room",
+                    position=(rx, ry),
+                    size=(rw, rh),
+                    variant="tomb_chamber",
+                    metadata={"name": f"Chamber {i + 1}", "style": "tomb"}
+                ))
+
+        # Connect side rooms to main hall
+        corridors = self._connect_rooms_corridors(
+            state, [(hall_x, hall_y, hall_w, hall_h)] + side_rooms, rng,
+            floor_color=floor_color, corridor_w=3)
+
+        # Entrance corridor from bottom
+        entrance_w = max(4, w // 40)
+        for y in range(hall_y + hall_h, min(h - 5, hall_y + hall_h + h // 4)):
+            for dx in range(-entrance_w // 2, entrance_w // 2 + 1):
+                nx = w // 2 + dx
+                if 0 <= nx < w and 0 <= y < h:
+                    state.walkability[y, nx] = True
+                    state.terrain_color[y, nx] = floor_color
+
+        state.structure_mask = ~state.walkability
+        return {"rooms_created": len(side_rooms) + 1, "corridors": corridors}
+
+    # ── Graveyard (outdoor with headstones) ─────────────────────────────
+
+    def _generate_graveyard(self, state: SharedState, params: dict) -> dict:
+        """Generate an outdoor graveyard with headstones, paths, and a chapel."""
+        rng = np.random.default_rng(state.config.seed + 700)
+        h, w = state.config.height, state.config.width
+
+        # Fence perimeter
+        fence_color = (50, 45, 35)
+        margin = max(15, w // 10)
+        thick = max(1, w // 120)
+        self._draw_rect_walls(state, margin, margin, w - margin, h - margin,
+                               thick, fence_color, state.terrain_color[h // 2, w // 2].tolist())
+
+        # Gate at south
+        gate_w = max(6, w // 30)
+        for gx in range(w // 2 - gate_w // 2, w // 2 + gate_w // 2):
+            gy = h - margin
+            if 0 <= gx < w and 0 <= gy < h:
+                state.walkability[gy, gx] = True
+
+        # Place headstones in rows
+        headstone_color = (160, 155, 145)
+        row_spacing = max(8, w // 25)
+        col_spacing = max(6, w // 30)
+        headstones = 0
+        for ry in range(margin + row_spacing, h - margin - row_spacing, row_spacing):
+            for cx in range(margin + col_spacing, w - margin - col_spacing, col_spacing):
+                if rng.random() < 0.75:
+                    sw, sh = max(2, w // 100), max(3, h // 80)
+                    for dy in range(sh):
+                        for dx in range(sw):
+                            nx, ny = cx + dx, ry + dy
+                            if 0 <= nx < w and 0 <= ny < h:
+                                state.terrain_color[ny, nx] = headstone_color
+                                state.walkability[ny, nx] = False
+                                state.structure_mask[ny, nx] = True
+                    headstones += 1
+
+        # Small chapel in corner
+        chapel_w = max(20, w // 8)
+        chapel_h = max(15, h // 8)
+        self._draw_filled_rect(state, margin + 5, margin + 5,
+                                chapel_w, chapel_h, (110, 105, 95), (70, 65, 55))
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(margin + 5, margin + 5),
+            size=(chapel_w, chapel_h),
+            variant="chapel",
+            metadata={"name": "Graveyard Chapel", "style": "graveyard"}
+        ))
+
+        return {"structure_type": "graveyard", "headstones": headstones}
+
+    # ── Dock (waterfront with piers) ────────────────────────────────────
+
+    def _generate_dock(self, state: SharedState, params: dict) -> dict:
+        """Generate a dock/harbor with piers extending into water and warehouses."""
+        rng = np.random.default_rng(state.config.seed + 710)
+        h, w = state.config.height, state.config.width
+
+        wood_color = (110, 85, 50)
+        plank_color = (120, 95, 58)
+
+        # Place water on one side (south half)
+        water_line = h // 2
+        for y in range(water_line, h):
+            for x in range(w):
+                depth_ratio = (y - water_line) / max(1, h - water_line)
+                state.water_mask[y, x] = True
+                state.walkability[y, x] = False
+                state.terrain_color[y, x] = (
+                    int(40 + 20 * (1 - depth_ratio)),
+                    int(90 + 40 * (1 - depth_ratio)),
+                    int(150 + 30 * (1 - depth_ratio)),
+                )
+
+        # Build piers extending into water
+        pier_count = rng.integers(3, 6)
+        pier_spacing = w // (pier_count + 1)
+        pier_width = max(4, w // 50)
+        pier_length = max(20, h // 4)
+
+        for i in range(pier_count):
+            px = pier_spacing * (i + 1)
+            for y in range(water_line - 5, min(h - 5, water_line + pier_length)):
+                for dx in range(-pier_width // 2, pier_width // 2 + 1):
+                    nx = px + dx
+                    if 0 <= nx < w and 0 <= y < h:
+                        state.walkability[y, nx] = True
+                        state.water_mask[y, nx] = False
+                        state.terrain_color[y, nx] = wood_color if (y + dx) % 3 else plank_color
+                        state.structure_mask[y, nx] = True
+
+            state.entities.append(Entity(
+                entity_type="building",
+                position=(px - pier_width // 2, water_line - 5),
+                size=(pier_width, pier_length),
+                variant="pier",
+                metadata={"name": f"Pier {i + 1}", "style": "dock"}
+            ))
+
+        # Warehouses on land side
+        result = self._place_buildings(state, "dock",
+                                        params.get("building_count", 4))
+
+        return {
+            "structure_type": "dock",
+            "piers": pier_count,
+            "buildings": result.get("buildings_placed", 0),
+        }
+
+    # ── Factory (industrial complex) ────────────────────────────────────
+
+    def _generate_factory(self, state: SharedState, params: dict) -> dict:
+        """Generate an industrial factory with main building, furnaces, and loading areas."""
+        rng = np.random.default_rng(state.config.seed + 720)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (70, 68, 65)
+        floor_color = (95, 90, 85)
+        metal_color = (110, 108, 105)
+
+        # Main factory building (centered, large)
+        margin_x = max(20, w // 5)
+        margin_y = max(20, h // 4)
+        self._draw_rect_walls(state, margin_x, margin_y,
+                               w - margin_x, h - margin_y,
+                               max(3, w // 60), wall_color, floor_color)
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(margin_x, margin_y),
+            size=(w - margin_x * 2, h - margin_y * 2),
+            variant="factory_main",
+            metadata={"name": "Main Factory", "style": "factory"}
+        ))
+
+        # Machinery/furnace blocks inside
+        inner_w = w - margin_x * 2
+        inner_h = h - margin_y * 2
+        machine_count = params.get("building_count", 5)
+        machines = 0
+        for _ in range(machine_count * 5):
+            mw = rng.integers(max(5, inner_w // 12), max(8, inner_w // 6))
+            mh = rng.integers(max(5, inner_h // 12), max(8, inner_h // 6))
+            mx = margin_x + rng.integers(5, max(6, inner_w - mw - 5))
+            my = margin_y + rng.integers(5, max(6, inner_h - mh - 5))
+
+            overlap = False
+            for ey in range(my, min(h, my + mh)):
+                for ex in range(mx, min(w, mx + mw)):
+                    if not state.walkability[ey, ex]:
+                        overlap = True
+                        break
+                if overlap:
+                    break
+
+            if not overlap:
+                for ey in range(my, min(h, my + mh)):
+                    for ex in range(mx, min(w, mx + mw)):
+                        state.walkability[ey, ex] = False
+                        state.terrain_color[ey, ex] = metal_color
+                        state.structure_mask[ey, ex] = True
+                state.entities.append(Entity(
+                    entity_type="building",
+                    position=(mx, my),
+                    size=(mw, mh),
+                    variant="machinery",
+                    metadata={"name": f"Machine {machines + 1}", "style": "factory"}
+                ))
+                machines += 1
+                if machines >= machine_count:
+                    break
+
+        # Loading bay entrance
+        gate_w = max(10, w // 20)
+        for gx in range(w // 2 - gate_w // 2, w // 2 + gate_w // 2):
+            gy = h - margin_y
+            if 0 <= gx < w and 0 <= gy < h:
+                state.walkability[gy, gx] = True
+                state.terrain_color[gy, gx] = (80, 75, 68)
+
+        return {"structure_type": "factory", "machines": machines}
+
+    # ── Temple (large religious structure) ───────────────────────────────
+
+    def _generate_temple(self, state: SharedState, params: dict) -> dict:
+        """Generate a grand temple with sanctum, prayer halls, and columns."""
+        rng = np.random.default_rng(state.config.seed + 730)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (120, 115, 105)
+        floor_color = (160, 155, 145)
+        pillar_color = (130, 125, 115)
+
+        # Outer temple walls
+        margin = max(15, w // 8)
+        wall_thick = max(3, w // 60)
+        self._draw_rect_walls(state, margin, margin, w - margin, h - margin,
+                               wall_thick, wall_color, floor_color)
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(margin, margin),
+            size=(w - margin * 2, h - margin * 2),
+            variant="temple_main",
+            metadata={"name": "The Temple", "style": "temple"}
+        ))
+
+        # Columns along the nave
+        col_spacing = max(15, (w - margin * 2) // 8)
+        col_r = max(2, w // 100)
+        for cx in [margin + col_spacing, w - margin - col_spacing]:
+            for cy in range(margin + col_spacing, h - margin, col_spacing):
+                for dy in range(-col_r, col_r + 1):
+                    for dx in range(-col_r, col_r + 1):
+                        nx, ny = cx + dx, cy + dy
+                        if (0 <= nx < w and 0 <= ny < h and
+                            dx*dx + dy*dy <= col_r*col_r):
+                            state.walkability[ny, nx] = False
+                            state.terrain_color[ny, nx] = pillar_color
+
+        # Inner sanctum at the far end
+        sanctum_w = max(25, (w - margin * 2) // 3)
+        sanctum_h = max(20, (h - margin * 2) // 4)
+        sanctum_x = w // 2 - sanctum_w // 2
+        sanctum_y = margin + wall_thick + 5
+        self._draw_filled_rect(state, sanctum_x, sanctum_y,
+                                sanctum_w, sanctum_h, (170, 165, 150), wall_color)
+        state.entities.append(Entity(
+            entity_type="room",
+            position=(sanctum_x, sanctum_y),
+            size=(sanctum_w, sanctum_h),
+            variant="sanctum",
+            metadata={"name": "Inner Sanctum", "style": "temple"}
+        ))
+
+        # Altar in center of sanctum
+        altar_r = max(2, sanctum_w // 8)
+        acx = sanctum_x + sanctum_w // 2
+        acy = sanctum_y + sanctum_h // 2
+        for dy in range(-altar_r, altar_r + 1):
+            for dx in range(-altar_r, altar_r + 1):
+                nx, ny = acx + dx, acy + dy
+                if 0 <= nx < w and 0 <= ny < h:
+                    state.walkability[ny, nx] = False
+                    state.terrain_color[ny, nx] = (180, 170, 140)
+
+        # Entrance
+        gate_w = max(8, w // 25)
+        for gx in range(w // 2 - gate_w // 2, w // 2 + gate_w // 2):
+            gy = h - margin
+            if 0 <= gx < w and 0 <= gy < h:
+                state.walkability[gy, gx] = True
+                state.terrain_color[gy, gx] = (140, 130, 115)
+
+        return {"structure_type": "temple"}
+
+    # ── Church (smaller religious building) ──────────────────────────────
+
+    def _generate_church(self, state: SharedState, params: dict) -> dict:
+        """Generate a church with nave, altar, and bell tower."""
+        rng = np.random.default_rng(state.config.seed + 740)
+        h, w = state.config.height, state.config.width
+
+        wall_color = (110, 105, 95)
+        floor_color = (150, 145, 135)
+
+        # Main nave (rectangular, centered)
+        nave_w = max(30, w // 3)
+        nave_h = max(40, h // 2)
+        nave_x = w // 2 - nave_w // 2
+        nave_y = h // 2 - nave_h // 3
+        wall_thick = max(2, w // 80)
+        self._draw_rect_walls(state, nave_x, nave_y,
+                               nave_x + nave_w, nave_y + nave_h,
+                               wall_thick, wall_color, floor_color)
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(nave_x, nave_y),
+            size=(nave_w, nave_h),
+            variant="nave",
+            metadata={"name": "Church Nave", "style": "church"}
+        ))
+
+        # Altar area at the top of the nave
+        altar_w = max(10, nave_w // 3)
+        altar_h = max(5, nave_h // 8)
+        altar_x = nave_x + nave_w // 2 - altar_w // 2
+        altar_y = nave_y + wall_thick + 3
+        for ay in range(altar_y, min(h, altar_y + altar_h)):
+            for ax in range(altar_x, min(w, altar_x + altar_w)):
+                if 0 <= ax < w and 0 <= ay < h:
+                    state.walkability[ay, ax] = False
+                    state.terrain_color[ay, ax] = (170, 160, 140)
+                    state.structure_mask[ay, ax] = True
+
+        state.entities.append(Entity(
+            entity_type="building",
+            position=(altar_x, altar_y),
+            size=(altar_w, altar_h),
+            variant="altar",
+            metadata={"name": "Altar", "style": "church"}
+        ))
+
+        # Bell tower (square, attached to top-left)
+        tower_size = max(12, nave_w // 4)
+        tower_x = nave_x - tower_size + wall_thick
+        tower_y = nave_y
+        if tower_x >= 0:
+            self._draw_filled_rect(state, tower_x, tower_y,
+                                    tower_size, tower_size, floor_color, wall_color)
+            state.entities.append(Entity(
+                entity_type="building",
+                position=(tower_x, tower_y),
+                size=(tower_size, tower_size),
+                variant="bell_tower",
+                metadata={"name": "Bell Tower", "style": "church"}
+            ))
+
+        # Entrance door
+        gate_w = max(4, nave_w // 6)
+        for gx in range(nave_x + nave_w // 2 - gate_w // 2,
+                        nave_x + nave_w // 2 + gate_w // 2):
+            gy = nave_y + nave_h - 1
+            if 0 <= gx < w and 0 <= gy < h:
+                state.walkability[gy, gx] = True
+                state.terrain_color[gy, gx] = (80, 55, 30)
+
+        # Place pews (small obstacles in rows)
+        pew_start_y = nave_y + wall_thick + altar_h + 10
+        pew_spacing = max(5, nave_h // 10)
+        for py in range(pew_start_y, nave_y + nave_h - 10, pew_spacing):
+            for side in [-1, 1]:
+                px = nave_x + nave_w // 2 + side * (nave_w // 5)
+                pw = max(3, nave_w // 6)
+                for dx in range(pw):
+                    nx = px + dx - pw // 2
+                    if nave_x + wall_thick < nx < nave_x + nave_w - wall_thick and 0 <= py < h:
+                        state.terrain_color[py, nx] = (100, 75, 45)
+
+        return {"structure_type": "church"}
+
+    # ── Helper methods ──────────────────────────────────────────────────
+
+    def _place_random_rooms(self, state, rng, count, floor_color, wall_color,
+                             entity_variant="room", min_room_frac=10, max_room_frac=5):
+        """Place non-overlapping rectangular rooms. Returns list of (x,y,w,h)."""
+        h, w = state.config.height, state.config.width
+        min_room = max(15, w // min_room_frac)
+        max_room = max(30, w // max_room_frac)
+
+        rooms = []
+        for _ in range(count * 3):
+            rw = rng.integers(min_room, max_room)
+            rh = rng.integers(min_room, max_room)
+            rx = rng.integers(5, w - rw - 5)
+            ry = rng.integers(5, h - rh - 5)
+
+            overlap = False
+            for (ex, ey, ew, eh) in rooms:
+                if (rx < ex + ew + 4 and rx + rw + 4 > ex and
+                    ry < ey + eh + 4 and ry + rh + 4 > ey):
+                    overlap = True
+                    break
+
+            if not overlap:
+                rooms.append((rx, ry, rw, rh))
+                self._draw_filled_rect(state, rx, ry, rw, rh, floor_color, wall_color)
+                state.entities.append(Entity(
+                    entity_type="room",
+                    position=(rx, ry),
+                    size=(rw, rh),
+                    variant=entity_variant,
+                    metadata={"name": f"Chamber {len(state.entities) + 1}"}
+                ))
+                if len(rooms) >= count:
+                    break
+
+        return rooms
+
+    def _connect_rooms_corridors(self, state, rooms, rng, floor_color, corridor_w=3):
+        """Connect rooms with L-shaped corridors. Returns corridor count."""
+        h, w = state.config.height, state.config.width
+        corridors = 0
+
+        for i in range(len(rooms) - 1):
+            r1, r2 = rooms[i], rooms[i + 1]
+            cx1 = r1[0] + r1[2] // 2
+            cy1 = r1[1] + r1[3] // 2
+            cx2 = r2[0] + r2[2] // 2
+            cy2 = r2[1] + r2[3] // 2
+
+            hw = corridor_w // 2
+            if rng.random() < 0.5:
+                for x in range(min(cx1, cx2), max(cx1, cx2) + 1):
+                    for dy in range(-hw, hw + 1):
+                        ny = cy1 + dy
+                        if 0 <= x < w and 0 <= ny < h:
+                            state.walkability[ny, x] = True
+                            state.terrain_color[ny, x] = floor_color
+                for y in range(min(cy1, cy2), max(cy1, cy2) + 1):
+                    for dx in range(-hw, hw + 1):
+                        nx = cx2 + dx
+                        if 0 <= nx < w and 0 <= y < h:
+                            state.walkability[y, nx] = True
+                            state.terrain_color[y, nx] = floor_color
+            else:
+                for y in range(min(cy1, cy2), max(cy1, cy2) + 1):
+                    for dx in range(-hw, hw + 1):
+                        nx = cx1 + dx
+                        if 0 <= nx < w and 0 <= y < h:
+                            state.walkability[y, nx] = True
+                            state.terrain_color[y, nx] = floor_color
+                for x in range(min(cx1, cx2), max(cx1, cx2) + 1):
+                    for dy in range(-hw, hw + 1):
+                        ny = cy2 + dy
+                        if 0 <= x < w and 0 <= ny < h:
+                            state.walkability[ny, x] = True
+                            state.terrain_color[ny, x] = floor_color
+            corridors += 1
+
+        return corridors
+
+    def _draw_rect_walls(self, state, x1, y1, x2, y2, thick, wall_color, floor_color):
+        """Draw a rectangular perimeter wall with interior floor."""
+        h, w = state.config.height, state.config.width
+        for y in range(max(0, y1), min(h, y2)):
+            for x in range(max(0, x1), min(w, x2)):
+                is_wall = (y < y1 + thick or y >= y2 - thick or
+                           x < x1 + thick or x >= x2 - thick)
+                if is_wall:
+                    state.walkability[y, x] = False
+                    state.structure_mask[y, x] = True
+                    state.terrain_color[y, x] = wall_color
+                else:
+                    state.walkability[y, x] = True
+                    state.terrain_color[y, x] = floor_color
+
+    def _draw_filled_rect(self, state, rx, ry, rw, rh, fill_color, wall_color):
+        """Draw a filled rectangle with walls on the border."""
+        h, w = state.config.height, state.config.width
+        for by in range(max(0, ry), min(h, ry + rh)):
+            for bx in range(max(0, rx), min(w, rx + rw)):
+                is_border = (by == ry or by == ry + rh - 1 or
+                             bx == rx or bx == rx + rw - 1)
+                if is_border:
+                    state.terrain_color[by, bx] = wall_color
+                    state.walkability[by, bx] = False
+                else:
+                    state.terrain_color[by, bx] = fill_color
+                    state.walkability[by, bx] = True
+                state.structure_mask[by, bx] = True
