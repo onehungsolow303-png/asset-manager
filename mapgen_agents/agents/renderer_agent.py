@@ -4,6 +4,7 @@ Draws terrain, water overlay, roads, structures, assets, labels,
 compass rose, legend, title banner, and atmospheric vignette.
 """
 
+import json
 import numpy as np
 from base_agent import BaseAgent
 from shared_state import SharedState
@@ -274,12 +275,139 @@ class RendererAgent(BaseAgent):
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
         final.save(output_path, quality=95)
 
+        # ---- Export per-layer data for pygame viewer ---------------
+        output_dir = os.path.dirname(output_path) or "."
+        map_data_json = self._export_layered_data(shared_state, output_dir)
+
         return {
             "output_path": output_path,
             "format": output_format,
             "dimensions": f"{w}x{total_h}",
             "file_size_kb": os.path.getsize(output_path) // 1024,
+            "map_data_json": map_data_json,
         }
+
+    # ------------------------------------------------------------------
+    # Per-layer export for pygame viewer
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _convert_value(v):
+        """Convert numpy/non-standard types to JSON-safe Python natives."""
+        if isinstance(v, (np.integer,)):
+            return int(v)
+        if isinstance(v, (np.floating,)):
+            return float(v)
+        if isinstance(v, np.ndarray):
+            return v.tolist()
+        if isinstance(v, dict):
+            return {k: RendererAgent._convert_value(val) for k, val in v.items()}
+        if isinstance(v, (list, tuple)):
+            return [RendererAgent._convert_value(item) for item in v]
+        return v
+
+    def _export_layered_data(self, shared_state: SharedState, output_dir: str) -> str:
+        """Export all z-level data as per-layer PNGs + a map_data.json manifest."""
+        os.makedirs(output_dir, exist_ok=True)
+
+        cfg = shared_state.config
+        z_levels_data = []
+
+        for z in sorted(shared_state.levels.keys()):
+            level = shared_state.levels[z]
+
+            # --- PNG filename ---
+            if z >= 0:
+                png_name = f"z_{z}.png"
+            else:
+                png_name = f"z_neg{abs(z)}.png"
+
+            # --- Save terrain PNG ---
+            if level.terrain_color is not None:
+                img = Image.fromarray(level.terrain_color, "RGB")
+                img.save(os.path.join(output_dir, png_name))
+
+            # --- Walkability as flat 0/1 list ---
+            if level.walkability is not None:
+                walk_flat = level.walkability.astype(int).ravel().tolist()
+            else:
+                walk_flat = []
+
+            # --- Entities ---
+            entities_data = []
+            for e in level.entities:
+                entities_data.append({
+                    "type": e.entity_type,
+                    "x": int(e.position[0]),
+                    "y": int(e.position[1]),
+                    "w": int(e.size[0]),
+                    "h": int(e.size[1]),
+                    "variant": e.variant,
+                    "metadata": self._convert_value(e.metadata),
+                })
+
+            z_levels_data.append({
+                "z": z,
+                "terrain_png": png_name,
+                "walkability": walk_flat,
+                "entities": entities_data,
+            })
+
+        # --- Transitions ---
+        transitions_data = []
+        for t in shared_state.transitions:
+            transitions_data.append({
+                "x": int(t.x),
+                "y": int(t.y),
+                "from_z": int(t.from_z),
+                "to_z": int(t.to_z),
+                "type": t.transition_type,
+            })
+
+        # --- Spawns ---
+        spawns_data = []
+        for sp in shared_state.spawns:
+            spawns_data.append({
+                "x": int(sp.x),
+                "y": int(sp.y),
+                "z": int(sp.z),
+                "token_type": sp.token_type,
+                "name": sp.name,
+                "stats": self._convert_value(sp.stats),
+                "ai_behavior": sp.ai_behavior,
+            })
+
+        # --- Labels across all levels ---
+        labels_data = []
+        for z in sorted(shared_state.levels.keys()):
+            level = shared_state.levels[z]
+            for lbl in level.labels:
+                labels_data.append({
+                    "x": int(lbl.position[0]),
+                    "y": int(lbl.position[1]),
+                    "z": z,
+                    "text": lbl.text,
+                    "category": lbl.category,
+                })
+
+        map_data = {
+            "config": {
+                "width": cfg.width,
+                "height": cfg.height,
+                "biome": cfg.biome,
+                "map_type": cfg.map_type,
+                "seed": cfg.seed,
+            },
+            "z_levels": z_levels_data,
+            "transitions": transitions_data,
+            "spawns": spawns_data,
+            "labels": labels_data,
+        }
+
+        json_path = os.path.join(output_dir, "map_data.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(map_data, f, indent=2)
+
+        return json_path
 
     # ------------------------------------------------------------------
     # Vignette
