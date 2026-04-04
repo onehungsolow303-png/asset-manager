@@ -1,0 +1,57 @@
+"""Viewer configuration, constants, and keybindings."""
+import pygame
+
+# Display
+WINDOW_TITLE = "Map Generator - Playtest Viewer"
+WINDOW_WIDTH = 1280
+WINDOW_HEIGHT = 900
+FPS = 60
+TILE_SIZE = 16
+
+# Colors (R, G, B)
+COLOR_BLACK = (0, 0, 0)
+COLOR_WHITE = (255, 255, 255)
+COLOR_PLAYER = (59, 130, 246)
+COLOR_PLAYER_BORDER = (96, 165, 250)
+COLOR_ENEMY = (239, 68, 68)
+COLOR_ENEMY_BORDER = (248, 113, 113)
+COLOR_NPC = (212, 160, 60)
+COLOR_NPC_BORDER = (240, 192, 96)
+COLOR_FOG_UNEXPLORED = (0, 0, 0)
+COLOR_FOG_EXPLORED = (0, 0, 0, 128)
+COLOR_HP_GREEN = (34, 197, 94)
+COLOR_HP_RED = (239, 68, 68)
+COLOR_HP_BG = (30, 30, 30)
+COLOR_UI_BG = (26, 26, 46, 220)
+COLOR_UI_TEXT = (234, 234, 234)
+COLOR_UI_GOLD = (212, 160, 60)
+COLOR_GRID = (255, 255, 255, 40)
+COLOR_TRANSITION = (180, 130, 255)
+
+# Parallax
+PARALLAX_STRENGTH = 0.05
+
+# Fog of war
+FOW_SIGHT_RADIUS = 12
+
+# Combat
+COMBAT_DETECT_RANGE = 12
+MOVEMENT_PER_TURN = 6
+
+# Keybindings
+KEY_MOVE_UP = [pygame.K_w, pygame.K_UP]
+KEY_MOVE_DOWN = [pygame.K_s, pygame.K_DOWN]
+KEY_MOVE_LEFT = [pygame.K_a, pygame.K_LEFT]
+KEY_MOVE_RIGHT = [pygame.K_d, pygame.K_RIGHT]
+KEY_INTERACT = pygame.K_f
+KEY_END_TURN = pygame.K_SPACE
+KEY_TOGGLE_PERSPECTIVE = pygame.K_TAB
+KEY_ZLEVEL_UP = pygame.K_RIGHTBRACKET
+KEY_ZLEVEL_DOWN = pygame.K_LEFTBRACKET
+KEY_TOGGLE_GRID = pygame.K_g
+KEY_TOGGLE_FOG = pygame.K_v
+KEY_QUIT = pygame.K_ESCAPE
+
+# Token rendering
+TOKEN_RADIUS = 6
+TOKEN_BORDER = 2
