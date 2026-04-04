@@ -24,6 +24,7 @@ from agents.unity_terrain_exporter import UnityTerrainExporter
 from agents.unity_scene_exporter import UnitySceneExporter
 from agents.unity_csharp_exporter import UnityCSharpExporter
 from agents.unity_tilemap_exporter import UnityTilemapExporter
+from agents.spawn_agent import SpawnAgent
 
 
 # Agent registry: maps agent type strings to classes
@@ -39,6 +40,7 @@ AGENT_REGISTRY: dict[str, type[BaseAgent]] = {
     "UnitySceneExporter": UnitySceneExporter,
     "UnityCSharpExporter": UnityCSharpExporter,
     "UnityTilemapExporter": UnityTilemapExporter,
+    "SpawnAgent": SpawnAgent,
 }
 
 
