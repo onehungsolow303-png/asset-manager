@@ -324,6 +324,14 @@ class MapGeneratorGUI:
         )
         self.gallery_btn.pack(fill="x", pady=(0, 2))
 
+        self.playtest_btn = tk.Button(
+            btn_row, text="Playtest", command=self._on_playtest,
+            bg=BG_CARD, fg=GOLD, activebackground=BG_LIGHT,
+            activeforeground=GOLD, relief="flat",
+            font=("Segoe UI", 9, "bold"), pady=3, cursor="hand2",
+        )
+        self.playtest_btn.pack(fill="x", pady=(2, 0))
+
         btn_row2 = ttk.Frame(actions)
         btn_row2.pack(fill="x", pady=(0, 0))
 
@@ -514,6 +522,7 @@ class MapGeneratorGUI:
         self._live_shared_state = None
         self.generate_btn.config(text="Generating...", bg=TEXT_DIM, state="disabled")
         self.gallery_btn.config(state="disabled")
+        self.playtest_btn.config(state="disabled")
         self.status_var.set("Generating...")
         self.info_var.set("")
         self._log_clear()
@@ -559,6 +568,7 @@ class MapGeneratorGUI:
         self.last_result = result
         self.generate_btn.config(text="Generate Map", bg=ACCENT, state="normal")
         self.gallery_btn.config(state="normal")
+        self.playtest_btn.config(state="normal")
 
         map_name = result.get("map_name", "Untitled")
         output_path = result.get("output_path", "")
@@ -585,6 +595,7 @@ class MapGeneratorGUI:
         self.generating = False
         self.generate_btn.config(text="Generate Map", bg=ACCENT, state="normal")
         self.gallery_btn.config(state="normal")
+        self.playtest_btn.config(state="normal")
         self.status_var.set("Error")
         self.info_var.set(f"Failed after {elapsed:.1f}s")
         self._log(f"ERROR: {error_msg}")
@@ -600,6 +611,7 @@ class MapGeneratorGUI:
         self.generating = True
         self.generate_btn.config(text="Gallery...", bg=TEXT_DIM, state="disabled")
         self.gallery_btn.config(state="disabled")
+        self.playtest_btn.config(state="disabled")
         self.status_var.set("Generating seed gallery...")
         self.info_var.set("9 variations with different seeds")
         self._log_clear()
@@ -654,6 +666,7 @@ class MapGeneratorGUI:
         self.generating = False
         self.generate_btn.config(text="Generate Map", bg=ACCENT, state="normal")
         self.gallery_btn.config(state="normal")
+        self.playtest_btn.config(state="normal")
         self.gallery_images = results
         self.status_var.set(f"Gallery complete -- {len(results)} maps")
         self.info_var.set(f"{elapsed:.1f}s total | Click a thumbnail to select")
@@ -850,6 +863,26 @@ class MapGeneratorGUI:
         if path:
             self.preview_image.save(path, quality=95)
             self._log(f"Saved: {path}")
+
+    def _on_playtest(self):
+        """Launch the pygame viewer for the last generated map."""
+        if self.last_result is None:
+            messagebox.showinfo("Playtest", "Generate a map first.")
+            return
+        output_path = self.last_result.get("output_path", "")
+        if not output_path:
+            messagebox.showinfo("Playtest", "No output path found.")
+            return
+        map_dir = os.path.dirname(os.path.abspath(output_path))
+        if not os.path.exists(os.path.join(map_dir, "map_data.json")):
+            messagebox.showinfo("Playtest", "map_data.json not found. Regenerate the map.")
+            return
+
+        import subprocess
+        viewer_path = os.path.join(os.path.dirname(__file__), "viewer", "main.py")
+        python_exe = sys.executable
+        subprocess.Popen([python_exe, viewer_path, map_dir])
+        self._log("Launched playtest viewer")
 
     def _log(self, msg):
         self.log_text.config(state="normal")
