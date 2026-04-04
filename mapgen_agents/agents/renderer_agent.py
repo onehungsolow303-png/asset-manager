@@ -131,10 +131,8 @@ class RendererAgent(BaseAgent):
                 if meta_color and isinstance(meta_color, (list, tuple)) and len(meta_color) >= 3:
                     fill_r, fill_g, fill_b = int(meta_color[0]), int(meta_color[1]), int(meta_color[2])
                 elif entity.entity_type == "room":
-                    # Stone gray for dungeon rooms
                     fill_r, fill_g, fill_b = 140, 138, 130
                 else:
-                    # Warm wood tone for generic buildings
                     fill_r, fill_g, fill_b = 160, 120, 75
 
                 # Shadow (offset 2px down-right, 50% opacity black)
@@ -142,17 +140,43 @@ class RendererAgent(BaseAgent):
                     [x + 2, y + 2, x + bw + 1, y + bh + 1],
                     fill=(0, 0, 0, 128),
                 )
-                # Fill
+                # Walls (2px border in darker tone)
+                wall = (max(fill_r - 60, 0), max(fill_g - 60, 0), max(fill_b - 60, 0), 240)
+                struct_draw.rectangle([x, y, x + bw - 1, y + bh - 1], fill=wall)
+                # Floor interior (inset 2px)
+                if bw > 6 and bh > 6:
+                    floor = (fill_r, fill_g, fill_b, 230)
+                    struct_draw.rectangle(
+                        [x + 2, y + 2, x + bw - 3, y + bh - 3], fill=floor)
+                # Roof ridge line (darker stripe across top third)
+                if bh > 10 and entity.entity_type != "room":
+                    ridge_y = y + bh // 3
+                    roof_c = (max(fill_r - 35, 0), max(fill_g - 35, 0), max(fill_b - 35, 0), 200)
+                    struct_draw.line([(x + 2, ridge_y), (x + bw - 3, ridge_y)],
+                                     fill=roof_c, width=1)
+                # Door (small dark square on bottom edge, centered)
+                if bw > 8 and bh > 8:
+                    door_w = max(2, bw // 6)
+                    door_h = max(3, bh // 5)
+                    dx = x + (bw - door_w) // 2
+                    dy = y + bh - door_h - 1
+                    struct_draw.rectangle([dx, dy, dx + door_w, dy + door_h],
+                                          fill=(50, 35, 20, 255))
+                # Window dots (small light squares on walls)
+                if bw > 14 and bh > 14 and entity.entity_type != "room":
+                    win_c = (200, 210, 180, 200)
+                    # Left window
+                    wx = x + bw // 4
+                    wy = y + bh // 3
+                    struct_draw.rectangle([wx, wy, wx + 2, wy + 2], fill=win_c)
+                    # Right window
+                    wx2 = x + 3 * bw // 4 - 2
+                    struct_draw.rectangle([wx2, wy, wx2 + 2, wy + 2], fill=win_c)
+                # Outline
+                outline_c = (max(fill_r - 70, 0), max(fill_g - 70, 0), max(fill_b - 70, 0), 255)
                 struct_draw.rectangle(
                     [x, y, x + bw - 1, y + bh - 1],
-                    fill=(fill_r, fill_g, fill_b, 230),
-                )
-                # 1 px darker outline
-                darker = (max(fill_r - 50, 0), max(fill_g - 50, 0), max(fill_b - 50, 0), 255)
-                struct_draw.rectangle(
-                    [x, y, x + bw - 1, y + bh - 1],
-                    outline=darker,
-                    width=1,
+                    outline=outline_c, width=1,
                 )
 
         canvas.alpha_composite(struct_layer)
@@ -244,15 +268,6 @@ class RendererAgent(BaseAgent):
         # Thin gold inner border
         border_draw.rectangle([2, 2, w - 3, total_h - 3], outline=(160, 130, 80, 120), width=1)
         canvas.alpha_composite(border_layer)
-
-        # ---- Sprite compositing ------------------------------------
-        if _SPRITES_AVAILABLE:
-            try:
-                mgr = SpriteManager()
-                if mgr.available:
-                    canvas = composite_sprites(canvas, shared_state, mgr)
-            except Exception:
-                pass  # graceful fallback to rendered shapes
 
         # ---- Save as RGB ------------------------------------------
         final = canvas.convert("RGB")
