@@ -23,7 +23,7 @@ class Camera:
         self._follow_speed = 0.12  # interpolation factor per frame
 
         # Zoom
-        self.zoom = 1.0
+        self.zoom = 2.0
         self._zoom_min = 0.25
         self._zoom_max = 4.0
 

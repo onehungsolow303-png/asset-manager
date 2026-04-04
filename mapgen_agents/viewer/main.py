@@ -251,7 +251,7 @@ def main():
 
         # ---- Render ----
         renderer.render(camera, creatures, fog, player.z, engine)
-        ui.render(engine, player, creatures, camera)
+        ui.render(engine, player, creatures, camera, fog=fog, game_map=game_map)
         pygame.display.flip()
 
     pygame.quit()

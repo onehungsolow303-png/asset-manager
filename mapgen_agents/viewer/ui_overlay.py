@@ -1,11 +1,14 @@
-"""HUD overlay: stats panel, combat log, turn order, mode indicator."""
+"""HUD overlay: stats panel, combat log, turn order, mode indicator, minimap."""
 
 import pygame
+import numpy as np
 from config import (
+    TILE_SIZE,
     COLOR_BLACK, COLOR_WHITE, COLOR_UI_BG, COLOR_UI_TEXT,
     COLOR_UI_GOLD, COLOR_HP_GREEN, COLOR_HP_RED, COLOR_HP_BG,
     COLOR_PLAYER, COLOR_ENEMY, COLOR_NPC,
 )
+from fog_of_war import UNEXPLORED, EXPLORED, VISIBLE
 from game_engine import GameState
 
 
@@ -17,6 +20,7 @@ class UIOverlay:
         self._font = None
         self._font_small = None
         self._font_large = None
+        self._minimap_cache = {}  # z -> pygame.Surface
         self._init_fonts()
 
     def _init_fonts(self):
@@ -30,7 +34,7 @@ class UIOverlay:
             self._font_small = pygame.font.Font(None, 14)
             self._font_large = pygame.font.Font(None, 20)
 
-    def render(self, engine, player, creatures, camera):
+    def render(self, engine, player, creatures, camera, fog=None, game_map=None):
         """Draw all HUD elements."""
         self._draw_mode_indicator(engine, camera)
         self._draw_player_stats(player)
@@ -38,6 +42,9 @@ class UIOverlay:
 
         if engine.state == GameState.COMBAT:
             self._draw_turn_order(engine)
+
+        if game_map is not None:
+            self._draw_minimap(player, creatures, fog, game_map, camera)
 
     def _draw_mode_indicator(self, engine, camera):
         """Draw mode indicator top-left: state, z-level, perspective."""
@@ -216,3 +223,105 @@ class UIOverlay:
                 self.screen.blit(arrow, (x + panel_w - 18, cy + 3))
 
             cy += line_h
+
+    def _draw_minimap(self, player, creatures, fog, game_map, camera):
+        """Draw a minimap in the bottom-right corner."""
+        sw = self.screen.get_width()
+        sh = self.screen.get_height()
+
+        # Minimap size: scale to fit 160px max dimension
+        map_w = game_map.width
+        map_h = game_map.height
+        max_dim = 160
+        scale = min(max_dim / map_w, max_dim / map_h)
+        mm_w = int(map_w * scale)
+        mm_h = int(map_h * scale)
+
+        margin = 10
+        mm_x = sw - mm_w - margin
+        mm_y = sh - mm_h - margin - 10
+
+        # Background
+        bg = pygame.Surface((mm_w + 4, mm_h + 4), pygame.SRCALPHA)
+        bg.fill((0, 0, 0, 200))
+        self.screen.blit(bg, (mm_x - 2, mm_y - 2))
+
+        # Draw terrain from cached minimap surface
+        pz = player.z if player else 0
+        if pz not in self._minimap_cache:
+            terrain_img = game_map.terrain_images.get(pz)
+            if terrain_img is not None:
+                import PIL.Image
+                mini_pil = terrain_img.resize((mm_w, mm_h), PIL.Image.Resampling.NEAREST)
+                mini_data = mini_pil.tobytes()
+                self._minimap_cache[pz] = pygame.image.fromstring(
+                    mini_data, (mm_w, mm_h), "RGB")
+            else:
+                s = pygame.Surface((mm_w, mm_h))
+                s.fill((40, 40, 40))
+                self._minimap_cache[pz] = s
+
+        mini_surf = self._minimap_cache[pz].copy()
+
+        # Apply fog to minimap (numpy-accelerated)
+        if fog is not None and fog.enabled:
+            fog_arr = fog._fog.get(pz)
+            if fog_arr is not None:
+                # Resample fog to minimap size using nearest-neighbor
+                fh, fw = fog_arr.shape
+                ys = np.clip((np.arange(mm_h) / scale).astype(int), 0, fh - 1)
+                xs = np.clip((np.arange(mm_w) / scale).astype(int), 0, fw - 1)
+                fog_mini = fog_arr[np.ix_(ys, xs)]
+
+                # Build RGBA overlay: unexplored=black opaque, explored=black semi
+                alpha = np.zeros((mm_h, mm_w), dtype=np.uint8)
+                alpha[fog_mini == UNEXPLORED] = 255
+                alpha[fog_mini == EXPLORED] = 140
+                # VISIBLE tiles get alpha=0 (transparent)
+
+                fog_rgba = np.zeros((mm_h, mm_w, 4), dtype=np.uint8)
+                fog_rgba[:, :, 3] = alpha
+
+                fog_overlay = pygame.image.frombuffer(
+                    fog_rgba.tobytes(), (mm_w, mm_h), "RGBA")
+                mini_surf.blit(fog_overlay, (0, 0))
+
+        self.screen.blit(mini_surf, (mm_x, mm_y))
+
+        # Draw creature dots
+        for c in creatures:
+            if not c.alive or c.z != pz:
+                continue
+            cx = int(c.x * scale)
+            cy_pos = int(c.y * scale)
+            if c.token_type == "player":
+                color = COLOR_PLAYER
+                r = 3
+            elif c.token_type == "enemy":
+                if fog is not None and fog.enabled and not fog.is_visible(c.x, c.y, c.z):
+                    continue
+                color = COLOR_ENEMY
+                r = 2
+            else:
+                color = COLOR_NPC
+                r = 2
+            pygame.draw.circle(self.screen, color, (mm_x + cx, mm_y + cy_pos), r)
+
+        # Draw viewport rectangle
+        w_tl_x, w_tl_y = camera.screen_to_world(0, 0)
+        w_br_x, w_br_y = camera.screen_to_world(camera.screen_w, camera.screen_h)
+        vx1 = int(w_tl_x / TILE_SIZE * scale)
+        vy1 = int(w_tl_y / TILE_SIZE * scale)
+        vx2 = int(w_br_x / TILE_SIZE * scale)
+        vy2 = int(w_br_y / TILE_SIZE * scale)
+        vx1 = max(0, min(mm_w, vx1))
+        vy1 = max(0, min(mm_h, vy1))
+        vx2 = max(0, min(mm_w, vx2))
+        vy2 = max(0, min(mm_h, vy2))
+        if vx2 > vx1 and vy2 > vy1:
+            pygame.draw.rect(self.screen, COLOR_WHITE,
+                             (mm_x + vx1, mm_y + vy1, vx2 - vx1, vy2 - vy1), 1)
+
+        # Border
+        pygame.draw.rect(self.screen, (100, 100, 100),
+                         (mm_x - 1, mm_y - 1, mm_w + 2, mm_h + 2), 1)
