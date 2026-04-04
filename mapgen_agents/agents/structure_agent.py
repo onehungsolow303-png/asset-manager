@@ -6,7 +6,7 @@ and rule-based placement for villages/cities/forts/castles.
 
 import numpy as np
 from base_agent import BaseAgent
-from shared_state import SharedState, Entity
+from shared_state import SharedState, Entity, Transition
 from typing import Any
 
 
@@ -187,6 +187,27 @@ BUILDING_TEMPLATES = {
     ],
 }
 
+# Floor configs: list of (z_offset, floor_label) per structure type
+FLOOR_CONFIGS = {
+    "village": [(1, "roof")],
+    "town": [(1, "roof")],
+    "city": [(1, "upper"), (2, "roof")],
+    "castle": [(-1, "dungeon"), (-2, "vault"), (1, "upper_hall"), (2, "battlements")],
+    "fort": [(1, "upper"), (2, "roof")],
+    "tower": [(1, "floor2"), (2, "floor3"), (3, "top")],
+    "dungeon": [(-1, "level1"), (-2, "level2")],
+    "cave": [(-1, "depths")],
+    "mine": [(-1, "shaft1"), (-2, "shaft2")],
+    "temple": [(-1, "crypt"), (1, "belfry")],
+    "church": [(-1, "crypt"), (1, "belfry")],
+    "tavern": [(1, "rooms")],
+    "prison": [(-1, "cells")],
+    "library": [(1, "upper_stacks")],
+    "throne_room": [(1, "gallery")],
+    "crypt": [(-1, "deep_crypt"), (-2, "ossuary")],
+    "tomb": [(-1, "burial_chamber"), (-2, "sealed_vault")],
+}
+
 
 class StructureAgent(BaseAgent):
     name = "StructureAgent"
@@ -230,6 +251,77 @@ class StructureAgent(BaseAgent):
             return self._generate_church(shared_state, params)
         else:
             return self._place_buildings(shared_state, structure_type, building_count)
+
+    # ── Multi-floor generation ─────────────────────────────────────────
+
+    def _generate_floors(self, shared_state: SharedState, x: int, y: int,
+                         w: int, h: int, structure_type: str, rng) -> None:
+        """Create additional z-levels for a building footprint."""
+        floors = FLOOR_CONFIGS.get(structure_type, [(1, "roof")])
+
+        # Colors
+        roof_color = (140, 120, 80)
+        interior_color = (160, 140, 110)
+        below_color = (80, 75, 65)
+
+        # Sort floors so we process them in order of z_offset
+        for z_offset, label in sorted(floors, key=lambda f: f[0]):
+            level = shared_state.add_zlevel(z_offset)
+
+            # Pick fill color based on depth/label
+            if label == "roof":
+                fill_color = roof_color
+            elif z_offset < 0:
+                fill_color = below_color
+            else:
+                fill_color = interior_color
+
+            wall_color = tuple(max(0, c - 25) for c in fill_color)
+
+            # Fill the building footprint on this z-level
+            map_h, map_w = shared_state.config.height, shared_state.config.width
+            for by in range(max(0, y), min(map_h, y + h)):
+                for bx in range(max(0, x), min(map_w, x + w)):
+                    is_edge = (by == y or by == y + h - 1 or
+                               bx == x or bx == x + w - 1)
+                    level.structure_mask[by, bx] = True
+                    if is_edge:
+                        level.terrain_color[by, bx] = wall_color
+                        level.walkability[by, bx] = False
+                    else:
+                        level.terrain_color[by, bx] = fill_color
+                        level.walkability[by, bx] = True
+
+            # Place stairs connecting the adjacent z-level to this one
+            stair_x = x + w // 2
+            stair_y = y + h // 2
+
+            # Clamp to map bounds
+            stair_x = max(0, min(stair_x, map_w - 1))
+            stair_y = max(0, min(stair_y, map_h - 1))
+
+            if z_offset > 0:
+                # Going up: from the level below to this one
+                from_z = z_offset - 1
+                shared_state.add_transition(Transition(
+                    x=stair_x, y=stair_y,
+                    from_z=from_z, to_z=z_offset,
+                    transition_type="stairs_up",
+                ))
+            else:
+                # Going down: from the level above to this one
+                from_z = z_offset + 1
+                shared_state.add_transition(Transition(
+                    x=stair_x, y=stair_y,
+                    from_z=from_z, to_z=z_offset,
+                    transition_type="stairs_down",
+                ))
+
+            # Make stair tile walkable on both levels
+            level.walkability[stair_y, stair_x] = True
+            # Also ensure stair tile is walkable on the from_z level
+            if from_z in shared_state.levels:
+                shared_state.levels[from_z].walkability[stair_y, stair_x] = True
 
     # ── Generic building placement ──────────────────────────────────────
 
@@ -301,6 +393,11 @@ class StructureAgent(BaseAgent):
                     variant=name_prefix.lower(),
                     metadata={"name": f"{name_prefix} {placed + 1}", "style": stype}
                 ))
+
+                # Generate additional floors for this building
+                floor_type = name_prefix.lower() if name_prefix.lower() in FLOOR_CONFIGS else stype
+                self._generate_floors(state, x, y, bw, bh, floor_type, rng)
+
                 placed += 1
 
         return {
