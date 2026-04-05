@@ -1073,15 +1073,6 @@ def _draw_sarcophagus(surf, cx, cy, rng):
     pygame.draw.rect(surf, stone_light, (x + sw - 1, y - 2, 3, sh), 1)
 
 
-ENTITY_DRAWERS = {
-    "chest": _draw_chest,
-    "barrel": _draw_barrel,
-    "torch": _draw_torch,
-    "bones": _draw_bones,
-    "cobweb": _draw_cobweb,
-    "crate": _draw_crate,
-}
-
 def _draw_pillar(surf, cx, cy, rng):
     """Stone pillar."""
     stone = (150, 145, 135)
@@ -1141,6 +1132,153 @@ def _draw_statue(surf, cx, cy, rng):
     pygame.draw.circle(surf, stone_dark, (cx, cy - 10), 4, 1)
     # Shadow
     pygame.draw.ellipse(surf, (0, 0, 0, 30), (cx - 6, cy + 8, 12, 4))
+
+
+def _draw_armor_stand(surf, cx, cy, rng):
+    """Armor stand with plate armor."""
+    wood = (110, 80, 50)
+    metal = (160, 155, 145)
+    dark = (100, 95, 85)
+    pygame.draw.line(surf, wood, (cx, cy + 12), (cx, cy - 8), 2)
+    pygame.draw.line(surf, wood, (cx - 6, cy + 12), (cx + 6, cy + 12), 2)
+    pygame.draw.ellipse(surf, metal, (cx - 6, cy - 6, 12, 14))
+    pygame.draw.ellipse(surf, dark, (cx - 6, cy - 6, 12, 14), 1)
+    pygame.draw.circle(surf, metal, (cx, cy - 8), 4)
+    pygame.draw.circle(surf, dark, (cx, cy - 8), 4, 1)
+
+def _draw_shield_display(surf, cx, cy, rng):
+    """Shield mounted on wall."""
+    wood = (120, 90, 55)
+    metal = (140, 140, 130)
+    pygame.draw.rect(surf, wood, (cx - 3, cy - 10, 6, 20))
+    pygame.draw.polygon(surf, metal, [(cx, cy - 8), (cx - 7, cy - 2), (cx - 5, cy + 7), (cx, cy + 10), (cx + 5, cy + 7), (cx + 7, cy - 2)])
+    pygame.draw.polygon(surf, (100, 100, 90), [(cx, cy - 8), (cx - 7, cy - 2), (cx - 5, cy + 7), (cx, cy + 10), (cx + 5, cy + 7), (cx + 7, cy - 2)], 1)
+    pygame.draw.line(surf, (180, 50, 50), (cx - 3, cy - 4), (cx + 3, cy + 4), 2)
+
+def _draw_banner(surf, cx, cy, rng):
+    """Hanging banner/flag."""
+    rod = (130, 100, 60)
+    colors = [(140, 30, 30), (30, 30, 140), (30, 100, 30), (120, 90, 30)]
+    color = colors[rng.integers(0, len(colors))]
+    pygame.draw.line(surf, rod, (cx - 8, cy - 12), (cx + 8, cy - 12), 2)
+    pygame.draw.polygon(surf, color, [(cx - 6, cy - 11), (cx + 6, cy - 11), (cx + 4, cy + 8), (cx, cy + 12), (cx - 4, cy + 8)])
+    dark = tuple(max(0, c - 40) for c in color)
+    pygame.draw.polygon(surf, dark, [(cx - 6, cy - 11), (cx + 6, cy - 11), (cx + 4, cy + 8), (cx, cy + 12), (cx - 4, cy + 8)], 1)
+
+def _draw_bunk_bed(surf, cx, cy, rng):
+    """Bunk bed from above."""
+    wood = (120, 85, 50)
+    dark = (80, 55, 30)
+    blanket = (100, 80, 60)
+    pygame.draw.rect(surf, dark, (cx - 6, cy - 10, 12, 20))
+    pygame.draw.rect(surf, wood, (cx - 5, cy - 9, 10, 18))
+    pygame.draw.rect(surf, blanket, (cx - 4, cy - 7, 8, 7))
+    pygame.draw.rect(surf, (blanket[0] - 15, blanket[1] - 15, blanket[2] - 10), (cx - 4, cy + 3, 8, 7))
+    pygame.draw.line(surf, dark, (cx - 5, cy), (cx + 5, cy), 1)
+
+def _draw_footlocker(surf, cx, cy, rng):
+    """Small footlocker/trunk."""
+    wood = (100, 75, 45)
+    metal = (130, 125, 115)
+    pygame.draw.rect(surf, wood, (cx - 5, cy - 3, 10, 6))
+    pygame.draw.rect(surf, (70, 50, 30), (cx - 5, cy - 3, 10, 6), 1)
+    pygame.draw.line(surf, metal, (cx - 5, cy), (cx + 5, cy), 1)
+    pygame.draw.rect(surf, metal, (cx - 1, cy - 1, 2, 2))
+
+def _draw_grindstone(surf, cx, cy, rng):
+    """Sharpening wheel."""
+    stone = (140, 138, 130)
+    wood = (110, 80, 50)
+    pygame.draw.line(surf, wood, (cx - 6, cy + 4), (cx + 6, cy + 4), 2)
+    pygame.draw.circle(surf, stone, (cx, cy), 6)
+    pygame.draw.circle(surf, (110, 108, 100), (cx, cy), 6, 1)
+    pygame.draw.circle(surf, (170, 168, 160), (cx - 1, cy - 1), 2)
+
+def _draw_lantern(surf, cx, cy, rng):
+    """Hanging lantern (similar to torch but smaller glow)."""
+    metal = (130, 125, 110)
+    glow = (255, 200, 80)
+    pygame.draw.rect(surf, metal, (cx - 3, cy - 5, 6, 8))
+    pygame.draw.rect(surf, (90, 85, 70), (cx - 3, cy - 5, 6, 8), 1)
+    pygame.draw.rect(surf, glow, (cx - 2, cy - 3, 4, 4))
+    pygame.draw.circle(surf, (255, 220, 120, 60), (cx, cy), 8)
+
+def _draw_trophy_pile(surf, cx, cy, rng):
+    """Pile of trophies/skulls."""
+    bone = (200, 190, 170)
+    dark = (140, 130, 110)
+    for i in range(4):
+        ox = rng.integers(-6, 7)
+        oy = rng.integers(-4, 5)
+        pygame.draw.circle(surf, bone, (cx + ox, cy + oy), 3)
+        pygame.draw.circle(surf, dark, (cx + ox, cy + oy), 3, 1)
+        pygame.draw.circle(surf, (40, 40, 40), (cx + ox - 1, cy + oy), 1)
+        pygame.draw.circle(surf, (40, 40, 40), (cx + ox + 1, cy + oy), 1)
+
+def _draw_gate(surf, cx, cy, rng):
+    """Iron gate/portcullis."""
+    metal = (100, 95, 85)
+    dark = (60, 55, 45)
+    for dx in range(-8, 9, 4):
+        pygame.draw.line(surf, metal, (cx + dx, cy - 12), (cx + dx, cy + 12), 2)
+    for dy in range(-8, 9, 8):
+        pygame.draw.line(surf, dark, (cx - 10, cy + dy), (cx + 10, cy + dy), 1)
+
+def _draw_guard_alcove(surf, cx, cy, rng):
+    """Small alcove niche."""
+    stone = (120, 115, 105)
+    dark = (80, 75, 65)
+    pygame.draw.rect(surf, dark, (cx - 6, cy - 6, 12, 12))
+    pygame.draw.rect(surf, stone, (cx - 5, cy - 5, 10, 10))
+    pygame.draw.rect(surf, dark, (cx - 5, cy - 5, 10, 10), 1)
+
+
+ENTITY_DRAWERS = {
+    "chest": _draw_chest,
+    "barrel": _draw_barrel,
+    "torch": _draw_torch,
+    "bones": _draw_bones,
+    "cobweb": _draw_cobweb,
+    "crate": _draw_crate,
+    "table": _draw_table,
+    "weapon_rack": _draw_weapon_rack,
+    "bookshelf": _draw_bookshelf,
+    "altar": _draw_altar,
+    "pit": _draw_pit,
+    "trap": _draw_trap,
+    "cage": _draw_cage,
+    "chains": _draw_chains,
+    "cauldron": _draw_cauldron,
+    "iron_maiden": _draw_iron_maiden,
+    "brazier": _draw_brazier,
+    "shackles": _draw_shackles,
+    "broken_pottery": _draw_broken_pottery,
+    "blood_trail": _draw_blood_trail,
+    "glowing_fungus": _draw_glowing_fungus,
+    "coin_pile": _draw_coin_pile,
+    "potion": _draw_potion,
+    "scroll": _draw_scroll,
+    "tapestry": _draw_tapestry,
+    "bed": _draw_bed,
+    "bench": _draw_bench,
+    "spike_trap": _draw_spike_trap,
+    "web": _draw_web,
+    "rubble": _draw_rubble,
+    "sarcophagus": _draw_sarcophagus,
+    "pillar": _draw_pillar,
+    "fountain": _draw_fountain,
+    "statue": _draw_statue,
+    "armor_stand": _draw_armor_stand,
+    "shield_display": _draw_shield_display,
+    "banner": _draw_banner,
+    "bunk_bed": _draw_bunk_bed,
+    "footlocker": _draw_footlocker,
+    "grindstone": _draw_grindstone,
+    "lantern": _draw_lantern,
+    "trophy_pile": _draw_trophy_pile,
+    "gate": _draw_gate,
+    "guard_alcove": _draw_guard_alcove,
+}
 
 
 # Room themes: (name, drawers, floor_tint)
@@ -1268,10 +1406,63 @@ class Renderer:
         rooms_data = self._find_rooms(room_mask, walk, w, h)
         tint_map = {}  # (tx, ty) -> tint color
         room_themes = {}  # room_index -> (name, drawers, tint)
+
+        # Map pipeline room purposes to theme tints
+        _PURPOSE_TINTS = {
+            "entrance":       (155, 155, 145),
+            "boss_lair":      (145, 120, 130),
+            "guard_room":     (150, 140, 128),
+            "barracks":       (155, 145, 130),
+            "armory":         (148, 142, 128),
+            "storage":        (152, 142, 122),
+            "cell":           (142, 128, 122),
+            "shrine":         (135, 135, 160),
+            "alchemy_lab":    (130, 150, 130),
+            "library":        (140, 132, 118),
+            "crypt":          (125, 130, 150),
+            "treasure_vault": (160, 150, 125),
+            "safe_haven":     (170, 162, 148),
+            "common_room":    (165, 155, 138),
+            "secret_chamber": (140, 125, 140),
+        }
+
+        # Try to match pipeline rooms to geometric rooms by overlap
+        pipeline_rooms = {}
+        for e in entities:
+            if e.get("type") == "room" and e.get("variant") == "graph_room":
+                purpose = e.get("purpose") or (e.get("metadata", {}) or {}).get("purpose")
+                # Also check the zone field in metadata
+                if not purpose:
+                    name = e.get("name") or (e.get("metadata", {}) or {}).get("name", "")
+                    purpose = name  # node_id might hint at purpose
+                pipeline_rooms[(e.get("x", 0), e.get("y", 0))] = e
+
         for room_idx, (room_tiles, wall_adj, center_tiles) in enumerate(rooms_data):
-            theme = ROOM_THEMES[rng.integers(0, len(ROOM_THEMES))]
-            room_themes[room_idx] = theme
-            tint = theme[2]
+            # Try to find pipeline purpose for this geometric room
+            tint = None
+            if room_tiles and pipeline_rooms:
+                # Sample a tile from this room and find which pipeline room contains it
+                sample_tx, sample_ty = next(iter(room_tiles))
+                for (rx, ry), pe in pipeline_rooms.items():
+                    pw, ph = pe.get("w", 0), pe.get("h", 0)
+                    if rx <= sample_tx < rx + pw and ry <= sample_ty < ry + ph:
+                        purpose = pe.get("purpose") or (pe.get("metadata", {}) or {}).get("purpose", "")
+                        tint = _PURPOSE_TINTS.get(purpose)
+                        # Also find matching ROOM_THEMES entry for furniture
+                        for t in ROOM_THEMES:
+                            if t[0] == purpose or t[0] in purpose:
+                                room_themes[room_idx] = t
+                                break
+                        break
+
+            if tint is None:
+                theme = ROOM_THEMES[rng.integers(0, len(ROOM_THEMES))]
+                room_themes[room_idx] = theme
+                tint = theme[2]
+            elif room_idx not in room_themes:
+                theme = ROOM_THEMES[rng.integers(0, len(ROOM_THEMES))]
+                room_themes[room_idx] = theme
+
             for tx, ty in room_tiles:
                 tint_map[(tx, ty)] = tint
 
@@ -1318,7 +1509,16 @@ class Renderer:
     def _place_curated_entities(self, surf, entities, walk, room_mask, w, h, rng,
                                 rooms_data=None, room_themes=None):
         """Place a curated subset of entities with logical positioning."""
-        # Categorize entities
+        # Check if pipeline dressing is present — if so, use it exclusively
+        pipeline_dressing = [e for e in entities if e.get("type") == "dressing"]
+        pipeline_doors = [e for e in entities if e.get("type") == "door"]
+        has_pipeline_data = len(pipeline_dressing) > 0
+
+        if has_pipeline_data:
+            self._place_pipeline_entities(surf, entities, walk, room_mask, w, h, rng)
+            return
+
+        # Legacy path: categorize entities for old curated system
         by_type = {}
         for e in entities:
             t = e.get("type", "")
@@ -1496,6 +1696,73 @@ class Renderer:
             drawer = CORRIDOR_DRESSING[rng.integers(0, len(CORRIDOR_DRESSING))]
             if _try_place(drawer, tx, ty):
                 placed_dressing += 1
+
+    def _place_pipeline_entities(self, surf, entities, walk, room_mask, w, h, rng):
+        """Draw entities from the generation pipeline (dressing, doors, traps)."""
+        placed = set()
+
+        def _try_place(drawer, tx, ty):
+            if (tx, ty) in placed or tx < 0 or ty < 0 or tx >= w or ty >= h:
+                return False
+            placed.add((tx, ty))
+            cx = tx * TS + TS // 2
+            cy = ty * TS + TS // 2
+            drawer(surf, cx, cy, rng)
+            return True
+
+        # 1. Draw all pipeline dressing entities at their positions
+        for e in entities:
+            if e.get("type") != "dressing":
+                continue
+            variant = e.get("variant", "")
+            tx, ty = e.get("x", 0), e.get("y", 0)
+            if variant in ENTITY_DRAWERS:
+                _try_place(ENTITY_DRAWERS[variant], tx, ty)
+
+        # 2. Draw doors
+        for e in entities:
+            if e.get("type") != "door":
+                continue
+            tx, ty = e.get("x", 0), e.get("y", 0)
+            if 0 <= tx < w and 0 <= ty < h and (tx, ty) not in placed:
+                cx = tx * TS + TS // 2
+                cy = ty * TS + TS // 2
+                stone = (130, 120, 100)
+                dark = (80, 70, 55)
+                pygame.draw.rect(surf, dark, (cx - 12, cy - 14, 24, 28))
+                pygame.draw.rect(surf, stone, (cx - 10, cy - 12, 20, 24))
+                pygame.draw.rect(surf, (90, 85, 70), (cx - 6, cy - 8, 12, 20))
+                placed.add((tx, ty))
+
+        # 3. Add torches on walls (supplement pipeline dressing for atmosphere)
+        wall_adjacent = []
+        for ty in range(1, h - 1):
+            for tx in range(1, w - 1):
+                if not walk[ty, tx]:
+                    continue
+                for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    ny, nx = ty + dy, tx + dx
+                    if 0 <= ny < h and 0 <= nx < w and not walk[ny, nx]:
+                        wall_adjacent.append((tx, ty))
+                        break
+
+        rng.shuffle(wall_adjacent)
+        torch_count = max(6, len(wall_adjacent) // 10)
+        placed_torches = 0
+        for tx, ty in wall_adjacent:
+            if placed_torches >= torch_count:
+                break
+            too_close = any(abs(ptx - tx) + abs(pty - ty) < 6 for ptx, pty in placed)
+            if not too_close:
+                _try_place(_draw_torch, tx, ty)
+                placed_torches += 1
+
+        # 4. Add bones/cobwebs in corridors for atmosphere
+        corridor_tiles = [(tx, ty) for tx, ty in wall_adjacent if not room_mask[ty, tx]]
+        rng.shuffle(corridor_tiles)
+        for i, (tx, ty) in enumerate(corridor_tiles[:max(3, len(corridor_tiles) // 15)]):
+            drawer = _draw_bones if rng.random() < 0.5 else _draw_cobweb
+            _try_place(drawer, tx, ty)
 
     def _find_rooms(self, room_mask, walk, w, h):
         """Find individual rooms via flood fill and classify tiles."""
