@@ -226,3 +226,30 @@ class TestSharedStateZLevels:
         assert s["z_range"] == (-1, 0)
         assert s["transitions"] == 1
         assert s["spawns"] == 1
+
+
+class TestSharedStatePipelineFields:
+    """Tests for new pipeline-related fields on SharedState."""
+
+    def test_cave_mask_initialized_none(self):
+        config = MapConfig(width=64, height=64, biome="dungeon", map_type="dungeon", seed=1)
+        state = SharedState(config)
+        assert state.cave_mask is None
+
+    def test_cave_mask_settable(self):
+        config = MapConfig(width=64, height=64, biome="dungeon", map_type="dungeon", seed=1)
+        state = SharedState(config)
+        mask = np.zeros((64, 64), dtype=bool)
+        state.cave_mask = mask
+        assert state.cave_mask is not None
+        assert state.cave_mask.shape == (64, 64)
+
+    def test_natural_openings_initialized_empty(self):
+        config = MapConfig(width=64, height=64, biome="dungeon", map_type="dungeon", seed=1)
+        state = SharedState(config)
+        assert state.natural_openings == []
+
+    def test_room_graph_initialized_none(self):
+        config = MapConfig(width=64, height=64, biome="dungeon", map_type="dungeon", seed=1)
+        state = SharedState(config)
+        assert state.room_graph is None
