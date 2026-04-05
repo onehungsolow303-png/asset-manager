@@ -213,6 +213,10 @@ class StructureAgent(BaseAgent):
     name = "StructureAgent"
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
+        # RoomGraph-based placement takes priority when requested
+        if params.get("use_room_graph") and shared_state.room_graph is not None:
+            return self._place_rooms_from_graph(shared_state, params)
+
         structure_type = params.get("type", shared_state.config.map_type)
         building_count = params.get("building_count", 8)
 
@@ -1755,6 +1759,87 @@ class StructureAgent(BaseAgent):
             cross_c = (140, 135, 120)
             vline(cx_, cy_ - 2, cy_ + 3, cross_c)
             hline(cy_, cx_ - 1, cx_ + 2, cross_c)
+
+    # ── RoomGraph-based placement ───────────────────────────────────────
+
+    def _place_rooms_from_graph(self, state: SharedState, params: dict) -> dict:
+        """Place rooms using positions from RoomGraph. Falls back to random placement."""
+        rng = np.random.default_rng(state.config.seed + 650)
+        h, w = state.config.height, state.config.width
+        graph = state.room_graph
+
+        floor_color = (75, 70, 62)
+        wall_color = (45, 40, 35)
+
+        # Room size range
+        min_room = max(15, w // 12)
+        max_room = max(25, w // 6)
+
+        placed = []  # list of (x, y, w, h) for collision detection
+        count = graph.node_count
+
+        # Try to place rooms in natural openings first
+        openings = getattr(state, 'natural_openings', []) or []
+
+        for node in graph.nodes:
+            room_w = int(rng.integers(min_room, max_room))
+            room_h = int(rng.integers(min_room, max_room))
+
+            placed_ok = False
+            rx, ry = 5, 5
+
+            # Try natural openings first
+            for ox, oy, ow, oh in openings:
+                for _attempt in range(20):
+                    rx = int(rng.integers(ox + 2, max(ox + 3, ox + ow - room_w - 2)))
+                    ry = int(rng.integers(oy + 2, max(oy + 3, oy + oh - room_h - 2)))
+                    if self._check_no_overlap(rx, ry, room_w, room_h, placed, w, h):
+                        placed_ok = True
+                        break
+                if placed_ok:
+                    break
+
+            # Fall back to random placement
+            if not placed_ok:
+                for _attempt in range(count * 3 + 50):
+                    rx = int(rng.integers(5, max(6, w - room_w - 5)))
+                    ry = int(rng.integers(5, max(6, h - room_h - 5)))
+                    if self._check_no_overlap(rx, ry, room_w, room_h, placed, w, h):
+                        placed_ok = True
+                        break
+
+            if placed_ok:
+                node.position = (rx, ry)
+                node.size = (room_w, room_h)
+                placed.append((rx, ry, room_w, room_h))
+                self._draw_filled_rect(state, rx, ry, room_w, room_h, floor_color, wall_color)
+                state.entities.append(Entity(
+                    entity_type="room",
+                    position=(rx, ry),
+                    size=(room_w, room_h),
+                    variant="graph_room",
+                    metadata={"name": node.node_id, "zone": node.zone}
+                ))
+            else:
+                # Emergency: place at margin
+                rx = 5
+                ry = 5 + len(placed) * (max_room + 5)
+                node.position = (rx, ry)
+                node.size = (room_w, room_h)
+                placed.append((rx, ry, room_w, room_h))
+                self._draw_filled_rect(state, rx, ry, room_w, room_h, floor_color, wall_color)
+
+        return {"rooms_placed": len(placed), "mode": "room_graph", "status": "completed"}
+
+    def _check_no_overlap(self, rx, ry, rw, rh, placed, map_w, map_h, buffer=4):
+        """Return True if rect (rx,ry,rw,rh) fits inside map bounds and doesn't overlap placed rooms."""
+        if rx < 2 or ry < 2 or rx + rw >= map_w - 2 or ry + rh >= map_h - 2:
+            return False
+        for ex, ey, ew, eh in placed:
+            if (rx < ex + ew + buffer and rx + rw + buffer > ex and
+                    ry < ey + eh + buffer and ry + rh + buffer > ey):
+                return False
+        return True
 
     # ── Helper methods ──────────────────────────────────────────────────
 
