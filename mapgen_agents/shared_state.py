@@ -142,6 +142,11 @@ class SharedState:
             "agents_completed": [],
         }
 
+        # Pipeline fields (populated by generation pipeline agents)
+        self.cave_mask: np.ndarray | None = None
+        self.natural_openings: list[tuple[int, int, int, int]] = []  # (x, y, w, h)
+        self.room_graph = None  # RoomGraph, set by TopologyAgent
+
     # ------------------------------------------------------------------
     # Ground-level backwards-compat properties
     # All existing agents write to shared_state.terrain_color etc. — these

@@ -117,6 +117,16 @@ BIOME_PRESETS = {
         "moisture_scale": 120, "moisture_base": 0.2,
         "walkability_threshold": 0.75,
     },
+    "flat_floor": {
+        "elevation_scale": 500, "elevation_octaves": 1,
+        "moisture_scale": 500, "moisture_base": 0.3,
+        "walkability_threshold": 0.99,
+    },
+    "road_ready": {
+        "elevation_scale": 150, "elevation_octaves": 3,
+        "moisture_scale": 80, "moisture_base": 0.4,
+        "walkability_threshold": 0.92,
+    },
 }
 
 # Color palettes for each biome
@@ -241,6 +251,9 @@ class TerrainAgent(BaseAgent):
             octaves=preset["elevation_octaves"],
         )
 
+        # Store raw elevation for CaveCarverAgent consumption
+        shared_state.metadata["raw_elevation"] = shared_state.elevation.copy()
+
         # Generate moisture
         shared_state.moisture = perlin_noise_2d(
             (h, w),
@@ -259,6 +272,12 @@ class TerrainAgent(BaseAgent):
         steepness = np.sqrt(gradient_y**2 + gradient_x**2)
         steepness_threshold = 1.0 - preset["walkability_threshold"]
         shared_state.walkability = steepness < steepness_threshold
+
+        # Flat floor: override to near-constant elevation for interior maps
+        if biome == "flat_floor":
+            shared_state.elevation = np.full((h, w), 0.3, dtype=np.float32)
+            shared_state.elevation += perlin_noise_2d((h, w), scale=500, seed=seed, octaves=1) * 0.02
+            shared_state.walkability[:] = True
 
         # For dungeon/cave: use cellular automata to carve spaces
         if biome in ("cave", "dungeon"):

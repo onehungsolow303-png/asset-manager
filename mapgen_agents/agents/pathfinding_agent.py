@@ -63,6 +63,9 @@ class PathfindingAgent(BaseAgent):
     name = "PathfindingAgent"
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
+        if params.get("mode") == "validate":
+            return self._validate_connectivity(shared_state)
+
         algorithm = params.get("algorithm", "a_star")
         road_density = params.get("road_density", "medium")
         road_type = params.get("road_type", "road")
@@ -135,6 +138,45 @@ class PathfindingAgent(BaseAgent):
             "roads_created": roads_created,
             "poi_count": len(pois),
             "algorithm": algorithm,
+        }
+
+    def _validate_connectivity(self, state: SharedState) -> dict:
+        """Check that all rooms in the RoomGraph are physically reachable via walkable tiles."""
+        graph = getattr(state, 'room_graph', None)
+        if graph is None or graph.node_count == 0:
+            return {"all_connected": True, "orphaned_rooms": [], "checked_edges": 0}
+
+        orphaned = []
+        checked = 0
+        walkable = state.walkability
+
+        for edge in graph.edges:
+            from_node = graph.get_node(edge.from_id)
+            to_node = graph.get_node(edge.to_id)
+
+            if from_node is None or to_node is None:
+                continue
+            if from_node.position is None or to_node.position is None:
+                continue
+
+            # Compute room centers: position is (col, row), size is (col_size, row_size)
+            fx = from_node.position[0] + (from_node.size[0] // 2 if from_node.size else 0)
+            fy = from_node.position[1] + (from_node.size[1] // 2 if from_node.size else 0)
+            tx = to_node.position[0] + (to_node.size[0] // 2 if to_node.size else 0)
+            ty = to_node.position[1] + (to_node.size[1] // 2 if to_node.size else 0)
+
+            # astar expects (x, y) = (col, row) tuples, grid indexed as grid[y, x]
+            path = astar(walkable, (fx, fy), (tx, ty))
+            checked += 1
+
+            if not path:
+                if edge.to_id not in orphaned:
+                    orphaned.append(edge.to_id)
+
+        return {
+            "all_connected": len(orphaned) == 0,
+            "orphaned_rooms": orphaned,
+            "checked_edges": checked,
         }
 
     def _generate_spread_points(self, walkable: np.ndarray, count: int,
