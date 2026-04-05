@@ -19,6 +19,12 @@ from agents.topology_agent import TopologyAgent
 from agents.connector_agent import ConnectorAgent
 from agents.structure_agent import StructureAgent
 from agents.pathfinding_agent import PathfindingAgent
+from agents.room_purpose_agent import RoomPurposeAgent
+from agents.encounter_agent import EncounterAgent
+from agents.trap_agent import TrapAgent
+from agents.loot_agent import LootAgent
+from agents.dressing_agent import DressingAgent
+from agents.spawn_agent import SpawnAgent
 from data.game_tables import SIZE_ROOM_COUNTS
 
 SIZE_DIMENSIONS: dict[str, tuple[int, int]] = {
@@ -138,4 +144,36 @@ class PipelineCoordinator:
         return validate_layout(state, path_result.get("details", {}))
 
     def run_phase3(self) -> ValidationResult:
-        return validate_population(self.shared_state)
+        state = self.shared_state
+        profile = self.profile
+
+        # RoomPurposeAgent
+        RoomPurposeAgent().execute(state, {"profile": profile})
+
+        # EncounterAgent
+        EncounterAgent().execute(state, {
+            "profile": profile,
+            "party_level": self.request.party_level,
+            "party_size": self.request.party_size,
+        })
+
+        # TrapAgent
+        TrapAgent().execute(state, {"profile": profile})
+
+        # LootAgent
+        LootAgent().execute(state, {
+            "profile": profile,
+            "party_level": self.request.party_level,
+            "party_size": self.request.party_size,
+        })
+
+        # DressingAgent
+        DressingAgent().execute(state, {"profile": profile})
+
+        # SpawnAgent (enhanced)
+        SpawnAgent().execute(state, {
+            "map_type": self.request.map_type,
+            "use_encounter_data": True,
+        })
+
+        return validate_population(state)

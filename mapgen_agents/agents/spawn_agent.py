@@ -135,6 +135,9 @@ class SpawnAgent(BaseAgent):
     name = "SpawnAgent"
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
+        if params.get("use_encounter_data") and shared_state.room_graph is not None:
+            return self._spawn_from_encounter_data(shared_state, params)
+
         rng = shared_state.rng
         map_type = params.get("map_type", shared_state.config.map_type)
         walkable = shared_state.get_walkable_positions()  # bool mask (h, w)
@@ -208,6 +211,92 @@ class SpawnAgent(BaseAgent):
             "npcs_placed": npcs_placed,
             "total_spawns": len(shared_state.spawns),
         }
+
+    # ------------------------------------------------------------------
+    # Encounter-data mode
+    # ------------------------------------------------------------------
+
+    def _spawn_from_encounter_data(self, state: SharedState, params: dict) -> dict:
+        """Place spawns using room_graph encounter metadata instead of map-type defaults."""
+        rng = state.rng
+        graph = state.room_graph
+
+        walkable = state.get_walkable_positions()  # bool mask (h, w)
+        h, w = walkable.shape
+        ys, xs = np.where(walkable)
+        if len(ys) == 0:
+            ys, xs = np.where(np.ones((h, w), dtype=bool))
+
+        enemy_spawns = 0
+
+        # ── 1. Player spawn at entrance node ─────────────────────────────────
+        entrance = graph.entrance_node
+        if entrance is not None and entrance.position is not None:
+            rx, ry = entrance.position
+            rw, rh = entrance.size if entrance.size else (1, 1)
+            cx = rx + rw // 2
+            cy = ry + rh // 2
+            player_pos = self._nearest_walkable(cx, cy, xs, ys)
+        else:
+            player_pos = self._nearest_walkable(w // 2, h // 2, xs, ys)
+
+        state.spawns.append(SpawnPoint(
+            x=player_pos[0], y=player_pos[1], z=0,
+            token_type="player", name="Player",
+            stats=dict(PLAYER_STATS),
+            ai_behavior="static",
+        ))
+
+        # ── 2. Enemy spawns from encounter data ───────────────────────────────
+        for node in graph.nodes:
+            encounter = node.metadata.get("encounter", {})
+            creatures = encounter.get("creatures", [])
+            if not creatures:
+                continue
+
+            # Determine room bounds for placement
+            if node.position is not None and node.size is not None:
+                rx, ry = node.position
+                rw, rh = node.size
+
+                # Build a walkable sub-array for this room
+                x_lo = max(0, rx)
+                x_hi = min(w, rx + rw)
+                y_lo = max(0, ry)
+                y_hi = min(h, ry + rh)
+
+                room_mask = walkable[y_lo:y_hi, x_lo:x_hi]
+                room_ys_rel, room_xs_rel = np.where(room_mask)
+                room_xs = room_xs_rel + x_lo
+                room_ys = room_ys_rel + y_lo
+            else:
+                room_xs, room_ys = xs, ys
+
+            if len(room_xs) == 0:
+                room_xs, room_ys = xs, ys
+
+            for creature_type, count in creatures:
+                template = ENEMY_TEMPLATES.get(creature_type)
+                if template is None:
+                    # Unknown creature — fall back to rat stats
+                    template = ENEMY_TEMPLATES["rat"]
+
+                ai = template["ai_behavior"]
+                stats = {k: v for k, v in template.items() if k != "ai_behavior"}
+
+                for _ in range(count):
+                    idx = int(rng.integers(0, len(room_xs)))
+                    pos = (int(room_xs[idx]), int(room_ys[idx]))
+                    state.spawns.append(SpawnPoint(
+                        x=pos[0], y=pos[1], z=0,
+                        token_type="enemy",
+                        name=creature_type.capitalize(),
+                        stats=stats,
+                        ai_behavior=ai,
+                    ))
+                    enemy_spawns += 1
+
+        return {"player_spawns": 1, "enemy_spawns": enemy_spawns}
 
     # ------------------------------------------------------------------
     # Helpers

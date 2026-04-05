@@ -67,5 +67,20 @@ def validate_layout(state: SharedState, pathfinding_details: dict = None) -> Val
 
 
 def validate_population(state: SharedState) -> ValidationResult:
-    """Validate Phase 3 (Population) output. Stub for Phase 3 plan."""
-    return ValidationResult(passed=True, errors=[])
+    """Validate Phase 3 (Population) output."""
+    errors = []
+    graph = getattr(state, 'room_graph', None)
+    if graph is None:
+        return ValidationResult(passed=True, errors=[])  # No graph = skip validation
+
+    # Check all rooms have purposes
+    unpurposed = [n.node_id for n in graph.nodes if n.purpose is None]
+    if unpurposed:
+        errors.append(f"Rooms without purpose: {unpurposed}")
+
+    # Check player spawn exists
+    player_spawns = [s for s in state.spawns if s.token_type == "player"]
+    if not player_spawns:
+        errors.append("No player spawn point")
+
+    return ValidationResult(passed=len(errors) == 0, errors=errors)
