@@ -72,10 +72,20 @@ class PipelineCoordinator:
                 self.shared_state.metadata["terrain_retry"] = attempt + 1
 
         # Phase 2: Layout
-        self.run_phase2()
+        for attempt in range(MAX_RETRIES):
+            result = self.run_phase2()
+            if result.passed:
+                break
+            if attempt < MAX_RETRIES - 1:
+                self.shared_state.metadata["layout_retry"] = attempt + 1
 
-        # Phase 3: Population (stub)
-        self.run_phase3()
+        # Phase 3: Population
+        for attempt in range(MAX_RETRIES):
+            result = self.run_phase3()
+            if result.passed:
+                break
+            if attempt < MAX_RETRIES - 1:
+                self.shared_state.metadata["population_retry"] = attempt + 1
 
         return self.shared_state
 

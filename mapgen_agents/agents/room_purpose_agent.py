@@ -81,11 +81,18 @@ class RoomPurposeAgent(BaseAgent):
             ]
 
             if adj_rules and weighted_pool:
-                # Score every candidate purpose
+                # First select a candidate from weighted pool (respects rarity),
+                # then score unique purposes to avoid bias from duplicate entries
+                unique_purposes = list(dict.fromkeys(weighted_pool))
+                # Build weight map: count occurrences in weighted pool
+                purpose_weights = {}
+                for p in weighted_pool:
+                    purpose_weights[p] = purpose_weights.get(p, 0) + 1
+
                 best_purpose = None
                 best_score = None
 
-                for purpose in weighted_pool:
+                for purpose in unique_purposes:
                     rules = adj_rules.get(purpose, {})
                     near = rules.get("near", [])
                     far = rules.get("far", [])
@@ -102,6 +109,9 @@ class RoomPurposeAgent(BaseAgent):
                         score += 5
                     if purpose in _UTILITY_PURPOSES and 0 <= node.zone <= 2:
                         score += 5
+
+                    # Weight bonus: common purposes get slight preference
+                    score += purpose_weights.get(purpose, 1) * 0.5
 
                     # Deterministic jitter to break ties
                     score += int(rng.integers(-3, 4))

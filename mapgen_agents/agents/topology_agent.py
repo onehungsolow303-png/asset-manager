@@ -157,8 +157,19 @@ class TopologyAgent(BaseAgent):
         hub = RoomNode(node_id="hub", zone=0)
         graph.add_node(hub)
 
-        remaining = room_count - 1  # one slot used by hub
-        num_wings = max(3, min(remaining // 3, 5))
+        # Create entrance node that connects to hub
+        entrance = RoomNode(node_id="entrance", zone=0, tags={"entrance"})
+        graph.add_node(entrance)
+        graph.add_edge(GraphEdge(
+            from_id="entrance",
+            to_id="hub",
+            connection_type="corridor",
+            bidirectional=True,
+        ))
+
+        remaining = room_count - 2  # hub + entrance
+        remaining = max(0, remaining)
+        num_wings = max(1, min(remaining // 2 + 1, 5)) if remaining > 0 else 1
 
         # Distribute rooms across wings (round-robin)
         wings: list[list[str]] = [[] for _ in range(num_wings)]
@@ -186,16 +197,6 @@ class TopologyAgent(BaseAgent):
                     connection_type="corridor",
                     bidirectional=True,
                 ))
-
-        # Create entrance node that connects to hub
-        entrance = RoomNode(node_id="entrance", zone=0, tags={"entrance"})
-        graph.add_node(entrance)
-        graph.add_edge(GraphEdge(
-            from_id="entrance",
-            to_id="hub",
-            connection_type="corridor",
-            bidirectional=True,
-        ))
 
         return graph
 

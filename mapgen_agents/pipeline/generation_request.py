@@ -7,6 +7,12 @@ VALID_SIZES = [
     "standard", "large", "region", "open_world",
 ]
 
+VALID_BIOMES = [
+    "forest", "mountain", "desert", "swamp", "plains", "tundra",
+    "volcanic", "cave", "dungeon", "jungle", "underwater", "sky",
+    "flat_floor", "road_ready",
+]
+
 
 @dataclass
 class GenerationRequest:
@@ -27,3 +33,5 @@ class GenerationRequest:
             raise ValueError(f"party_size must be >= 1, got {self.party_size}")
         if self.size not in VALID_SIZES:
             raise ValueError(f"size must be one of {VALID_SIZES}, got '{self.size}'")
+        if self.biome not in VALID_BIOMES:
+            raise ValueError(f"biome must be one of {VALID_BIOMES}, got '{self.biome}'")

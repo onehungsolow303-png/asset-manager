@@ -36,7 +36,56 @@ DRESSING_PALETTES: dict[str, dict] = {
             "entrance": ["gate", "guard_alcove"],
         },
     },
-    # Other palettes fall back to "dungeon"
+    "settlement": {
+        "universal": ["barrel", "crate", "lantern", "cart", "signpost"],
+        "by_purpose": {
+            "town_square": ["fountain", "market_stall", "bench", "flagpole"],
+            "house": ["table", "chair", "bed", "fireplace", "shelf"],
+            "tavern": ["bar_counter", "table", "chair", "keg", "fireplace"],
+            "shop": ["counter", "shelf", "display_case", "sign"],
+            "farm": ["hay_bale", "plow", "trough", "fence"],
+            "well": ["well_bucket", "stone_ring"],
+            "blacksmith": ["anvil", "forge", "bellows", "tongs"],
+            "inn": ["bed", "nightstand", "candle", "wardrobe"],
+            "stable": ["hay_bale", "trough", "saddle_rack", "horseshoe"],
+            "entrance": ["gate", "signpost"],
+        },
+    },
+    "tavern": {
+        "universal": ["lantern", "barrel", "mug"],
+        "by_purpose": {
+            "common_room": ["table", "chair", "fireplace", "chandelier"],
+            "kitchen": ["stove", "pot", "cutting_board", "pantry"],
+            "bar": ["bar_counter", "keg", "bottle_rack", "stool"],
+            "guest_room": ["bed", "nightstand", "candle", "washbasin"],
+            "storage": ["barrel", "crate", "sack", "shelf"],
+            "cellar": ["wine_rack", "barrel", "cobweb", "lantern"],
+            "owner_quarters": ["desk", "bed", "safe", "bookshelf"],
+            "entrance": ["doormat", "coat_rack"],
+        },
+    },
+    "fortification": {
+        "universal": ["torch", "banner", "arrow_slit", "stone_block"],
+        "by_purpose": {
+            "guard_room": ["weapon_rack", "table", "chair", "lantern"],
+            "barracks": ["bunk_bed", "footlocker", "armor_stand"],
+            "armory": ["weapon_rack", "shield_display", "grindstone"],
+            "storage": ["crate", "barrel", "supply_chest"],
+            "boss_lair": ["throne", "banner", "trophy_pile", "brazier"],
+            "treasure_vault": ["chest", "gold_pile", "pedestal"],
+            "entrance": ["portcullis", "murder_holes", "guard_alcove"],
+        },
+    },
+    "outdoor": {
+        "universal": ["rock", "fallen_log", "bush", "mushroom"],
+        "by_purpose": {
+            "shrine": ["altar", "candles", "standing_stone"],
+            "crypt": ["headstone", "coffin", "dead_tree"],
+            "safe_haven": ["campfire", "bedroll", "log_bench"],
+            "storage": ["crate", "tarp", "sack"],
+            "entrance": ["trail_marker", "signpost"],
+        },
+    },
 }
 
 ATMOSPHERE: dict[str, dict] = {

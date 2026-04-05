@@ -27,10 +27,18 @@ SIZE_ROOM_COUNTS: dict[str, dict[str, int]] = {
     "open_world":       {"underground": 25, "fortification": 20, "settlement": 20, "interior": 15, "outdoor": 15, "large_scale": 50},
 }
 
-# Loot tier -> difficulty multiplier (used for both XP and treasure budgets)
+# Loot tier -> encounter difficulty multiplier (XP budgets)
 DIFFICULTY_MULT: dict[str, float] = {
     "low": 0.6,
     "medium": 1.0,
     "high": 1.5,
     "legendary": 2.0,
+}
+
+# Loot tier -> treasure multiplier (gold/item budgets, per spec Section 9)
+LOOT_TIER_MULT: dict[str, float] = {
+    "low": 0.5,
+    "medium": 1.0,
+    "high": 1.5,
+    "legendary": 2.5,
 }

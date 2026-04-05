@@ -36,6 +36,16 @@ TRAP_TABLES: dict[str, dict[str, list[str]]] = {
         "uncommon": ["rockslide"],
         "rare":     [],
     },
+    "settlement": {
+        "common":   ["tripwire", "false_floor"],
+        "uncommon": ["alarm", "poison_needle"],
+        "rare":     [],
+    },
+    "large_scale": {
+        "common":   ["snare", "camouflaged_pit", "tripwire"],
+        "uncommon": ["rockslide", "alarm"],
+        "rare":     ["boulder"],
+    },
 }
 
 # Rarity thresholds: 60 % common, 30 % uncommon, 10 % rare

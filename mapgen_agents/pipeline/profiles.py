@@ -283,7 +283,7 @@ MAP_TYPE_PROFILES: dict[str, dict] = {
         "room_pool": {
             "required": ["entrance", "town_square"],
             "common": ["house", "tavern", "shop", "farm", "well"],
-            "uncommon": ["blacksmith", "inn", "stable"],
+            "uncommon": ["blacksmith", "temple", "inn", "stable"],
             "rare": ["manor", "hidden_cellar"],
         },
         "creature_table": {

@@ -88,7 +88,8 @@ class TestHubAndSpokeTopology:
 class TestHybridTopology:
     def test_has_hub_and_cycles(self):
         state = make_state()
-        TopologyAgent().execute(state, {"topology_preference": ["hybrid"], "size_topology_override": {}, "size": "standard", "room_count": 12})
+        # Need enough rooms (20) so wings have 3+ nodes for back-edge insertion
+        TopologyAgent().execute(state, {"topology_preference": ["hybrid"], "size_topology_override": {}, "size": "standard", "room_count": 20})
         graph = state.room_graph
         max_degree = max(len(graph.neighbors(n.node_id)) for n in graph.nodes)
         assert max_degree >= 3
@@ -96,7 +97,7 @@ class TestHybridTopology:
 
     def test_all_nodes_reachable(self):
         state = make_state()
-        TopologyAgent().execute(state, {"topology_preference": ["hybrid"], "size_topology_override": {}, "size": "standard", "room_count": 12})
+        TopologyAgent().execute(state, {"topology_preference": ["hybrid"], "size_topology_override": {}, "size": "standard", "room_count": 20})
         assert state.room_graph.all_reachable_from(state.room_graph.entrance_node.node_id)
 
 class TestZoneAssignment:

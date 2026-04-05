@@ -69,7 +69,7 @@ class LootAgent(BaseAgent):
     name = "LootAgent"
 
     def _run(self, shared_state: SharedState, params: dict[str, Any]) -> dict:
-        from data.game_tables import TREASURE_TABLE, DIFFICULTY_MULT
+        from data.game_tables import TREASURE_TABLE, LOOT_TIER_MULT
         from data.room_purposes import ROOM_PURPOSES
 
         graph = shared_state.room_graph
@@ -84,7 +84,7 @@ class LootAgent(BaseAgent):
 
         # ── Budget calculation ────────────────────────────────────────────────
         base_gold = TREASURE_TABLE.get(party_level, TREASURE_TABLE[5]) * party_size
-        tier_mult = DIFFICULTY_MULT.get(profile.get("loot_tier", "medium"), 1.0)
+        tier_mult = LOOT_TIER_MULT.get(profile.get("loot_tier", "medium"), 1.0)
         total_budget = int(base_gold * tier_mult)
         main_pool = int(total_budget * 0.60)
         boss_pool = int(total_budget * 0.25)
@@ -131,7 +131,7 @@ class LootAgent(BaseAgent):
             risk = (xp / max_xp) * 0.5 + danger * 0.3 + depth * 0.2
             purpose = getattr(node, "purpose", None) or ""
             loot_mult = ROOM_PURPOSES.get(purpose, {}).get("loot_mult", 0.5)
-            node._risk_score = risk * loot_mult
+            node.metadata["_risk_score"] = risk * loot_mult
 
         total_distributed = 0
         rooms_with_loot = 0
@@ -140,7 +140,7 @@ class LootAgent(BaseAgent):
         if exploration_nodes:
             # Weight by risk score; fall back to equal split if all zero
             exp_scores = np.array(
-                [max(n._risk_score, 0.01) for n in exploration_nodes], dtype=float
+                [max(n.metadata.get("_risk_score", 0), 0.01) for n in exploration_nodes], dtype=float
             )
             exp_scores /= exp_scores.sum()
             for node, share in zip(exploration_nodes, exp_scores):
@@ -157,7 +157,7 @@ class LootAgent(BaseAgent):
         eligible_main = [n for n in main_nodes if n.node_id not in entrance_node_ids]
         if eligible_main:
             scores = np.array(
-                [max(n._risk_score, 0.0) for n in eligible_main], dtype=float
+                [max(n.metadata.get("_risk_score", 0), 0.0) for n in eligible_main], dtype=float
             )
             total_score = scores.sum()
             if total_score <= 0:

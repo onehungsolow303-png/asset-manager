@@ -1821,9 +1821,17 @@ class StructureAgent(BaseAgent):
                     metadata={"name": node.node_id, "zone": node.zone}
                 ))
             else:
-                # Emergency: place at margin
+                # Emergency: place at margin, clamped to map bounds
                 rx = 5
-                ry = 5 + len(placed) * (max_room + 5)
+                ry = min(h - room_h - 5, 5 + len(placed) * (max_room + 5))
+                ry = max(5, ry)
+                room_w = min(room_w, w - rx - 5)
+                room_h = min(room_h, h - ry - 5)
+                if room_w < 5 or room_h < 5:
+                    # Map too small for more rooms — skip this one
+                    node.position = (5, 5)
+                    node.size = (5, 5)
+                    continue
                 node.position = (rx, ry)
                 node.size = (room_w, room_h)
                 placed.append((rx, ry, room_w, room_h))
