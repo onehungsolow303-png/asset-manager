@@ -39,9 +39,31 @@ def validate_terrain(state: SharedState, family: str,
     return ValidationResult(passed=len(errors) == 0, errors=errors)
 
 
-def validate_layout(state: SharedState) -> ValidationResult:
-    """Validate Phase 2 (Layout) output. Stub for Phase 2 plan."""
-    return ValidationResult(passed=True, errors=[])
+def validate_layout(state: SharedState, pathfinding_details: dict = None) -> ValidationResult:
+    """Validate Phase 2 (Layout) output."""
+    errors = []
+
+    # Check room graph exists
+    graph = getattr(state, 'room_graph', None)
+    if graph is None or graph.node_count == 0:
+        errors.append("No room graph generated")
+        return ValidationResult(passed=False, errors=errors)
+
+    # Check all rooms have positions
+    unpositioned = [n.node_id for n in graph.nodes if n.position is None]
+    if unpositioned:
+        errors.append(f"Rooms without positions: {unpositioned}")
+
+    # Check entrance exists
+    if graph.entrance_node is None:
+        errors.append("No entrance node in room graph")
+
+    # Check connectivity from pathfinding
+    if pathfinding_details and not pathfinding_details.get("all_connected", True):
+        orphaned = pathfinding_details.get("orphaned_rooms", [])
+        errors.append(f"Disconnected rooms: {orphaned}")
+
+    return ValidationResult(passed=len(errors) == 0, errors=errors)
 
 
 def validate_population(state: SharedState) -> ValidationResult:
