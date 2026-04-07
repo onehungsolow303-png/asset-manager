@@ -37,11 +37,18 @@ logger = logging.getLogger(__name__)
 _SEED_CREATURES: list[tuple[str, str, tuple[int, int, int, int]]] = [
     # Forest
     ("Wolf",            "forest",  (140, 140, 145, 255)),  # slate gray
+    ("Wolf Pup",        "forest",  (160, 160, 170, 255)),  # lighter gray
+    ("Dire Wolf",       "forest",  (90,  90,  100, 255)),  # darker, larger feel
+    ("Alpha Wolf",      "forest",  (60,  60,  80,  255)),  # near-black, intimidating
     # Plains
     ("Bandit",          "plains",  (130, 90,  60,  255)),  # leather brown
+    ("Bandit Captain",  "plains",  (90,  50,  30,  255)),  # darker leather + steel
+    ("Cultist",         "plains",  (60,  20,  60,  255)),  # purple robe
     # Ruins
     ("Skeleton",        "ruins",   (230, 225, 205, 255)),  # bone
+    ("Skeleton Archer", "ruins",   (210, 200, 170, 255)),  # weathered bone
     ("Mutant",          "ruins",   (90,  140, 70,  255)),  # bile green
+    ("Mutant Hulk",     "ruins",   (60,  100, 40,  255)),  # darker, mass
     # Dungeon (static encounter "dungeon_boss")
     ("Hollow Guardian", "dungeon", (170, 130, 60,  255)),  # tarnished bronze
     # Castle (static encounter "castle_boss")
