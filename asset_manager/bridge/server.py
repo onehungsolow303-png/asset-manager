@@ -1,14 +1,9 @@
-"""Asset Manager HTTP bridge - FastAPI app on port 7801.
-
-Endpoints (Phase 2 stubs):
-    GET  /health
-    GET  /catalog
-    POST /select
-    POST /generate
-    POST /validate
-    POST /bake
-"""
+"""Asset Manager HTTP bridge - FastAPI app on port 7801."""
 from __future__ import annotations
+
+import uuid
+from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI
 
@@ -20,12 +15,23 @@ from asset_manager.bridge.schemas import (
     GenerationRequest,
     GenerationResponse,
 )
+from asset_manager.generators.procedural_sprite import (
+    generate_creature_token,
+    generate_item_icon,
+)
+from asset_manager.generators.texture import (
+    generate_terrain_texture,
+    generate_tileset,
+)
 from asset_manager.library.catalog import Catalog
+from asset_manager.library.manifest import make_manifest
+from asset_manager.library.storage import Storage
 from asset_manager.selectors.selector import Selector
 
 app = FastAPI(title="Asset Manager", version=__version__)
 _catalog = Catalog()
 _selector = Selector(_catalog)
+_storage = Storage()
 
 
 @app.get("/health")
@@ -55,14 +61,82 @@ def select(req: AssetSelectionRequest) -> AssetSelectionResponse:
     )
 
 
+def _color(spec: dict[str, Any]) -> tuple[int, int, int, int]:
+    """Convert a JSON [R, G, B, A] array to a Python RGBA tuple."""
+    c = spec.get("color", [255, 255, 255, 255])
+    return (int(c[0]), int(c[1]), int(c[2]), int(c[3]) if len(c) > 3 else 255)
+
+
+def _handle_creature_token(req: GenerationRequest) -> tuple[str, Path]:
+    color = _color(req.constraints)
+    size = int(req.constraints.get("size", 32))
+    asset_id = f"token_{uuid.uuid4().hex[:8]}"
+    out = _storage.path_for("creature_token", asset_id, ext="png")
+    generate_creature_token(color, size=size, out_path=out)
+    return asset_id, out
+
+
+def _handle_item_icon(req: GenerationRequest) -> tuple[str, Path]:
+    color = _color(req.constraints)
+    size = int(req.constraints.get("size", 16))
+    shape = str(req.constraints.get("shape", "square"))
+    asset_id = f"icon_{uuid.uuid4().hex[:8]}"
+    out = _storage.path_for("item_icon", asset_id, ext="png")
+    generate_item_icon(color, shape=shape, size=size, out_path=out)
+    return asset_id, out
+
+
+def _handle_terrain(req: GenerationRequest) -> tuple[str, Path]:
+    width = int(req.constraints.get("width", 32))
+    height = int(req.constraints.get("height", 32))
+    floor = _color({"color": req.constraints.get("floor_color", [100, 80, 60, 255])})
+    wall = _color({"color": req.constraints.get("wall_color", [50, 40, 30, 255])})
+    seed = int(req.constraints.get("seed", 42))
+    asset_id = f"terrain_{uuid.uuid4().hex[:8]}"
+    out = _storage.path_for("terrain", asset_id, ext="png")
+    generate_terrain_texture(width, height, floor, wall, seed=seed, out_path=out)
+    return asset_id, out
+
+
+def _handle_tileset(req: GenerationRequest) -> tuple[str, Path]:
+    tile_size = int(req.constraints.get("tile_size", 16))
+    tiles_per_row = int(req.constraints.get("tiles_per_row", 4))
+    raw_colors = req.constraints.get("tile_colors", [[100, 0, 0, 255]])
+    colors = [_color({"color": c}) for c in raw_colors]
+    seed = int(req.constraints.get("seed", 42))
+    asset_id = f"tileset_{uuid.uuid4().hex[:8]}"
+    out = _storage.path_for("tileset", asset_id, ext="png")
+    generate_tileset(tile_size, tiles_per_row, colors, seed=seed, out_path=out)
+    return asset_id, out
+
+
+_GENERATION_HANDLERS = {
+    "creature_token": _handle_creature_token,
+    "item_icon": _handle_item_icon,
+    "terrain": _handle_terrain,
+    "tileset": _handle_tileset,
+}
+
+
 @app.post("/generate", response_model=GenerationResponse)
 def generate(req: GenerationRequest) -> GenerationResponse:
+    handler = _GENERATION_HANDLERS.get(req.kind)
+    if handler is None:
+        return GenerationResponse(
+            accepted=False,
+            notes=[
+                f"unknown kind: {req.kind!r} (supported: {sorted(_GENERATION_HANDLERS.keys())})"
+            ],
+        )
+    try:
+        asset_id, out_path = handler(req)
+    except Exception as e:  # boundary - log and return failure
+        return GenerationResponse(accepted=False, notes=[f"generation failed: {e}"])
     return GenerationResponse(
-        accepted=False,
-        notes=[
-            "Phase 2 stub: generation gateway not yet wired. "
-            "See spec §14 follow-up #1 and the gateway/ stubs."
-        ],
+        accepted=True,
+        asset_id=asset_id,
+        path=str(out_path),
+        notes=[],
     )
 
 
@@ -80,7 +154,14 @@ def validate(payload: dict) -> dict:
 
 @app.post("/bake")
 def bake(payload: dict) -> dict:
-    return {
-        "baked": False,
-        "notes": ["Phase 2 stub: baking pipeline not yet wired"],
-    }
+    """Register a previously-generated asset in the catalog."""
+    asset_id = payload.get("asset_id")
+    if not asset_id:
+        return {"baked": False, "notes": ["missing 'asset_id' field"]}
+    manifest = make_manifest(
+        asset_id=asset_id,
+        kind=payload.get("kind", "unknown"),
+        path=payload.get("path", ""),
+    )
+    _catalog.add(asset_id, manifest)
+    return {"baked": True, "asset_id": asset_id}
