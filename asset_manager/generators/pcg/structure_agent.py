@@ -5,8 +5,8 @@ and rule-based placement for villages/cities/forts/castles.
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState, Entity, Transition
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState, Entity, Transition
 from typing import Any
 
 

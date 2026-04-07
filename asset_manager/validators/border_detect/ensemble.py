@@ -5,8 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 import cv2
 import numpy as np
 
-from border_detect.preprocess import preprocess
-from border_detect.techniques import get_all_techniques
+from .preprocess import preprocess
+from .techniques import get_all_techniques
 
 # Images above this pixel count get downsampled before processing
 MAX_PIXELS = 2_000_000  # ~1920x1040

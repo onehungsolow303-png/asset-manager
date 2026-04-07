@@ -1,6 +1,6 @@
 """Test all map types to verify they generate without errors."""
 
-from map_generator import MapGenerator
+from .map_generator import MapGenerator
 import time
 
 gen = MapGenerator(verbose=False)

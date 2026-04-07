@@ -4,9 +4,9 @@ the RoomGraph, using profile room-pool weights and adjacency-preference scoring.
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState
-from data.room_purposes import ADJACENCY_RULES
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState
+from .data.room_purposes import ADJACENCY_RULES
 from typing import Any
 
 # Zone-alignment hints: purposes that gain +5 when placed in combat-heavy or

@@ -6,8 +6,8 @@ compass rose, legend, title banner, and atmospheric vignette.
 
 import json
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState
 from typing import Any
 from PIL import Image, ImageDraw, ImageFont
 import os

@@ -11,8 +11,8 @@ from typing import Any
 
 import numpy as np
 
-from base_agent import BaseAgent
-from shared_state import SharedState, Entity
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState, Entity
 
 # ---------------------------------------------------------------------------
 # Dressing palettes

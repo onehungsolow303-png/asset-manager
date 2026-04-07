@@ -6,25 +6,23 @@ manages shared state, and handles errors with retries.
 
 import time
 from typing import Any
-from dag_engine import TaskDAG, TaskNode
-from shared_state import SharedState, MapConfig
-from base_agent import BaseAgent
+from .dag_engine import TaskDAG, TaskNode
+from asset_manager.shared_state import SharedState, MapConfig
+from .base_agent import BaseAgent
 
 # Import all agents
-import sys
-sys.path.insert(0, 'agents')
-from agents.terrain_agent import TerrainAgent
-from agents.water_agent import WaterAgent
-from agents.pathfinding_agent import PathfindingAgent
-from agents.structure_agent import StructureAgent
-from agents.asset_agent import AssetAgent
-from agents.labeling_agent import LabelingAgent
-from agents.renderer_agent import RendererAgent
-from agents.unity_terrain_exporter import UnityTerrainExporter
-from agents.unity_scene_exporter import UnitySceneExporter
-from agents.unity_csharp_exporter import UnityCSharpExporter
-from agents.unity_tilemap_exporter import UnityTilemapExporter
-from agents.spawn_agent import SpawnAgent
+from .terrain_agent import TerrainAgent
+from .water_agent import WaterAgent
+from .pathfinding_agent import PathfindingAgent
+from .structure_agent import StructureAgent
+from .asset_agent import AssetAgent
+from .labeling_agent import LabelingAgent
+from .renderer_agent import RendererAgent
+from asset_manager.exporters.unity_terrain import UnityTerrainExporter
+from asset_manager.exporters.unity_scene import UnitySceneExporter
+from asset_manager.exporters.unity_csharp import UnityCSharpExporter
+from asset_manager.exporters.unity_tilemap import UnityTilemapExporter
+from .spawn_agent import SpawnAgent
 
 
 # Agent registry: maps agent type strings to classes

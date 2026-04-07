@@ -4,8 +4,8 @@ Can use LLM for richer output, but falls back to Markov chain / template system.
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState, Label
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState, Label
 from typing import Any
 
 

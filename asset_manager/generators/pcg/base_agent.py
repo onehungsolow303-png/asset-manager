@@ -4,7 +4,7 @@ Each agent reads from and writes to SharedState.
 """
 
 from abc import ABC, abstractmethod
-from shared_state import SharedState
+from asset_manager.shared_state import SharedState
 from typing import Any
 import time
 

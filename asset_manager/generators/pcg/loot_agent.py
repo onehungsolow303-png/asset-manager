@@ -12,8 +12,8 @@ from typing import Any
 
 import numpy as np
 
-from base_agent import BaseAgent
-from shared_state import SharedState
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState
 
 # Exploration purposes that draw from the exploration pool instead of main pool.
 _EXPLORATION_PURPOSES = {"secret_chamber", "hidden_cellar"}

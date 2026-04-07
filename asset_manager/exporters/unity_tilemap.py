@@ -9,8 +9,8 @@ Useful for top-down 2D views or minimap overlays.
 import os
 import json
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState
+from asset_manager.generators.pcg.base_agent import BaseAgent
+from asset_manager.shared_state import SharedState
 from typing import Any
 from PIL import Image
 

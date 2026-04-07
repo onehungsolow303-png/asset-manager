@@ -4,8 +4,8 @@ Creates natural-looking paths that avoid water and steep terrain.
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState, PathSegment
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState, PathSegment
 from typing import Any
 import heapq
 

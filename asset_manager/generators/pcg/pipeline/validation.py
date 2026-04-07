@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 import numpy as np
-from shared_state import SharedState
+from asset_manager.shared_state import SharedState
 
 CAVE_FAMILIES = {"underground", "outdoor", "large_scale"}
 

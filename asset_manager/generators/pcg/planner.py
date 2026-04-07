@@ -5,9 +5,9 @@ All DAGs now include Unity export steps as final pipeline stages.
 """
 
 import json
-from dag_engine import TaskDAG, TaskNode
-from llm_adapter import create_adapter, LLMAdapter, MockLLMAdapter
-from llm_adapter import PLANNER_SYSTEM_PROMPT, build_planner_prompt
+from .dag_engine import TaskDAG, TaskNode
+from .llm_adapter import create_adapter, LLMAdapter, MockLLMAdapter
+from .llm_adapter import PLANNER_SYSTEM_PROMPT, build_planner_prompt
 from typing import Any, Optional
 
 

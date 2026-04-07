@@ -6,26 +6,26 @@ Phase 3 (Population): Stub (implemented in Plan 3)
 """
 
 import numpy as np
-from shared_state import SharedState, MapConfig
-from pipeline.generation_request import GenerationRequest
-from pipeline.profiles import get_profile, FAMILIES
-from pipeline.validation import (
+from asset_manager.shared_state import SharedState, MapConfig
+from .generation_request import GenerationRequest
+from .profiles import get_profile, FAMILIES
+from .validation import (
     validate_terrain, validate_layout, validate_population, ValidationResult,
 )
-from agents.terrain_agent import TerrainAgent
-from agents.water_agent import WaterAgent
-from agents.cave_carver_agent import CaveCarverAgent
-from agents.topology_agent import TopologyAgent
-from agents.connector_agent import ConnectorAgent
-from agents.structure_agent import StructureAgent
-from agents.pathfinding_agent import PathfindingAgent
-from agents.room_purpose_agent import RoomPurposeAgent
-from agents.encounter_agent import EncounterAgent
-from agents.trap_agent import TrapAgent
-from agents.loot_agent import LootAgent
-from agents.dressing_agent import DressingAgent
-from agents.spawn_agent import SpawnAgent
-from data.game_tables import SIZE_ROOM_COUNTS
+from ..terrain_agent import TerrainAgent
+from ..water_agent import WaterAgent
+from ..cave_carver_agent import CaveCarverAgent
+from ..topology_agent import TopologyAgent
+from ..connector_agent import ConnectorAgent
+from ..structure_agent import StructureAgent
+from ..pathfinding_agent import PathfindingAgent
+from ..room_purpose_agent import RoomPurposeAgent
+from ..encounter_agent import EncounterAgent
+from ..trap_agent import TrapAgent
+from ..loot_agent import LootAgent
+from ..dressing_agent import DressingAgent
+from ..spawn_agent import SpawnAgent
+from ..data.game_tables import SIZE_ROOM_COUNTS
 
 SIZE_DIMENSIONS: dict[str, tuple[int, int]] = {
     "small_encounter": (256, 256),

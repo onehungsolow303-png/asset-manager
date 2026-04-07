@@ -8,8 +8,8 @@ Enemy stats follow d20 conventions: HP, AC, STR, DEX, CON, SPD, ATK (dice string
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState, SpawnPoint
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState, SpawnPoint
 from typing import Any
 
 

@@ -4,8 +4,8 @@ Supports multiple biome presets and terrain generation algorithms.
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState
 from typing import Any
 import math
 

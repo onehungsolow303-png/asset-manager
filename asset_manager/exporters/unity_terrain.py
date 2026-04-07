@@ -12,8 +12,8 @@ import numpy as np
 import struct
 import json
 import os
-from base_agent import BaseAgent
-from shared_state import SharedState
+from asset_manager.generators.pcg.base_agent import BaseAgent
+from asset_manager.shared_state import SharedState
 from typing import Any
 from PIL import Image
 

@@ -9,8 +9,8 @@ optionally places a door Entity at the corridor-room boundary, and converts
 """
 
 import numpy as np
-from base_agent import BaseAgent
-from shared_state import SharedState, Entity, PathSegment, Transition
+from .base_agent import BaseAgent
+from asset_manager.shared_state import SharedState, Entity, PathSegment, Transition
 from typing import Any
 
 # Floor tile colour used when carving corridors
