@@ -46,6 +46,7 @@ extend-exclude = [
     "asset_manager/exporters",       # legacy unity exporters — same
     "asset_manager/validators/border_detect",  # salvaged from Gut It Out — keep as-is
     "tests/legacy",                  # quarantined pre-pivot tests
+    "asset_manager/bridge/_generated_schemas.py",  # auto-generated, do not lint
 ]
 
 [tool.ruff.lint]
