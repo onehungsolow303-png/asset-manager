@@ -1,0 +1,56 @@
+# Sample recipe for the asset_manager.cli.bake CLI.
+# Run with:
+#     python -m asset_manager.cli.bake asset_manager/cli/sample_recipe.yaml
+#
+# Each entry MUST have `id` and `kind`. Other fields are kind-specific
+# and match the parameters of the corresponding generator function.
+
+assets:
+  - id: wolf_token
+    kind: creature_token
+    color: [120, 80, 60, 255]
+    size: 32
+
+  - id: goblin_token
+    kind: creature_token
+    color: [80, 140, 80, 255]
+    size: 32
+
+  - id: dagger_icon
+    kind: item_icon
+    color: [200, 200, 220, 255]
+    shape: diamond
+    size: 16
+
+  - id: shield_icon
+    kind: item_icon
+    color: [180, 140, 80, 255]
+    shape: circle
+    size: 16
+
+  - id: forest_terrain
+    kind: terrain
+    width: 32
+    height: 32
+    floor_color: [80, 120, 40, 255]
+    wall_color:  [50, 80, 20, 255]
+    seed: 7
+
+  - id: cave_terrain
+    kind: terrain
+    width: 32
+    height: 32
+    floor_color: [60, 50, 40, 255]
+    wall_color:  [30, 25, 20, 255]
+    seed: 11
+
+  - id: forge_tileset
+    kind: tileset
+    tile_size: 16
+    tiles_per_row: 2
+    tile_colors:
+      - [120, 80, 40, 255]
+      - [80, 50, 20, 255]
+      - [180, 100, 40, 255]
+      - [60, 30, 10, 255]
+    seed: 11
