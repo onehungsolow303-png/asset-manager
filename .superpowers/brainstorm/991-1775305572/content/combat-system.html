@@ -1,0 +1,115 @@
+<h2>Section 2: Tabletop RPG Combat System</h2>
+<p class="subtitle">D20-based rules (5e-inspired, no trademarked names)</p>
+
+<div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+
+  <!-- Token Types -->
+  <div class="mockup" style="flex: 1; min-width: 280px;">
+    <div class="mockup-header">Token Types</div>
+    <div class="mockup-body" style="padding: 1.5rem;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; border: 3px solid #60a5fa; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px;">P</div>
+        <div>
+          <div style="font-weight: bold; color: #3b82f6;">Player Token</div>
+          <div style="color: #8899aa; font-size: 12px;">Blue circle. WASD movement. You control this.</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #ef4444; border: 3px solid #f87171; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px;">E</div>
+        <div>
+          <div style="font-weight: bold; color: #ef4444;">Enemy Token</div>
+          <div style="color: #8899aa; font-size: 12px;">Red circle. Auto-placed by generator. Basic AI.</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #d4a03c; border: 3px solid #f0c060; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px;">N</div>
+        <div>
+          <div style="font-weight: bold; color: #d4a03c;">NPC Token</div>
+          <div style="color: #8899aa; font-size: 12px;">Gold circle. Non-hostile. Interact with E key.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="mockup" style="flex: 1; min-width: 280px;">
+    <div class="mockup-header">Creature Stats (all tokens)</div>
+    <div class="mockup-body" style="padding: 1.5rem; font-family: monospace; font-size: 12px; line-height: 2;">
+      <div><span style="color: #d4a03c;">HP:</span> Hit Points (health pool)</div>
+      <div><span style="color: #d4a03c;">AC:</span> Armor Class (hit threshold)</div>
+      <div><span style="color: #d4a03c;">STR:</span> Melee attack + damage mod</div>
+      <div><span style="color: #d4a03c;">DEX:</span> Initiative + ranged + AC mod</div>
+      <div><span style="color: #d4a03c;">CON:</span> HP bonus</div>
+      <div><span style="color: #d4a03c;">SPD:</span> Movement tiles per turn (default 6)</div>
+      <div><span style="color: #d4a03c;">ATK:</span> Attack dice (e.g. 1d8+3)</div>
+      <div style="margin-top: 0.5rem; color: #666; font-size: 11px;">INT/WIS/CHA tracked but not used in v1</div>
+    </div>
+  </div>
+</div>
+
+<!-- Combat Flow -->
+<div class="mockup" style="margin-top: 1.5rem;">
+  <div class="mockup-header">Combat Flow</div>
+  <div class="mockup-body" style="padding: 1.5rem;">
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; font-size: 13px;">
+      <div style="padding: 8px 14px; background: rgba(59,130,246,0.2); border: 1px solid #3b82f6; border-radius: 20px;">1. Exploration Mode</div>
+      <div style="color: #555;">&rarr;</div>
+      <div style="padding: 8px 14px; background: rgba(239,68,68,0.2); border: 1px solid #ef4444; border-radius: 20px;">2. Enemy in range &rarr; Initiative roll</div>
+      <div style="color: #555;">&rarr;</div>
+      <div style="padding: 8px 14px; background: rgba(212,160,60,0.2); border: 1px solid #d4a03c; border-radius: 20px;">3. Turn-based combat</div>
+      <div style="color: #555;">&rarr;</div>
+      <div style="padding: 8px 14px; background: rgba(46,204,113,0.2); border: 1px solid #2ecc71; border-radius: 20px;">4. All enemies dead &rarr; back to exploration</div>
+    </div>
+
+    <div style="margin-top: 1.5rem; display: flex; gap: 1.5rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 250px;">
+        <h4 style="color: #3b82f6; margin-bottom: 0.5rem;">Exploration Mode</h4>
+        <ul style="color: #aaa; font-size: 12px; line-height: 1.8;">
+          <li>Free WASD movement (real-time)</li>
+          <li>Fog of war reveals as you explore</li>
+          <li>Line-of-sight blocks through walls</li>
+          <li>E key to interact (doors, NPCs, stairs)</li>
+          <li>Camera follows player, parallax layers shift</li>
+        </ul>
+      </div>
+      <div style="flex: 1; min-width: 250px;">
+        <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Combat Mode (turn-based)</h4>
+        <ul style="color: #aaa; font-size: 12px; line-height: 1.8;">
+          <li>Grid snaps to tiles (5ft squares)</li>
+          <li>Click tile to move (within SPD range)</li>
+          <li>Click enemy to attack (within weapon range)</li>
+          <li>d20 + STR/DEX mod vs target AC</li>
+          <li>Hit: roll damage dice, subtract from HP</li>
+          <li>Enemy AI: move toward player, attack if adjacent</li>
+          <li>HP bar shown above each token</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="mockup" style="margin-top: 1.5rem;">
+  <div class="mockup-header">Keyboard Controls</div>
+  <div class="mockup-body" style="padding: 1.5rem; font-family: monospace; font-size: 12px; display: flex; gap: 2rem; flex-wrap: wrap;">
+    <div>
+      <div style="color: #d4a03c; font-weight: bold; margin-bottom: 0.5rem;">Movement</div>
+      <div>WASD / Arrow keys &mdash; Move player</div>
+      <div>Mouse wheel &mdash; Zoom in/out</div>
+      <div>Middle mouse drag &mdash; Pan camera</div>
+    </div>
+    <div>
+      <div style="color: #d4a03c; font-weight: bold; margin-bottom: 0.5rem;">Interaction</div>
+      <div>E &mdash; Interact (door/NPC/stairs)</div>
+      <div>Space &mdash; End turn (combat)</div>
+      <div>Tab &mdash; Toggle perspective mode</div>
+    </div>
+    <div>
+      <div style="color: #d4a03c; font-weight: bold; margin-bottom: 0.5rem;">View</div>
+      <div>[ / ] &mdash; Force z-level up/down</div>
+      <div>F &mdash; Toggle fog of war</div>
+      <div>G &mdash; Toggle grid overlay</div>
+      <div>Esc &mdash; Menu / quit</div>
+    </div>
+  </div>
+</div>

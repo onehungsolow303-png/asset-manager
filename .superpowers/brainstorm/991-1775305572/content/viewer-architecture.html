@@ -1,0 +1,142 @@
+<h2>Section 3: Pygame Viewer Architecture</h2>
+<p class="subtitle">Module layout, rendering pipeline, and how it connects to the map generator</p>
+
+<div class="mockup">
+  <div class="mockup-header">System Overview</div>
+  <div class="mockup-body" style="padding: 2rem; font-family: monospace; font-size: 12px;">
+    <pre style="color: #ccc; line-height: 1.7;">
+┌──────────────────────────────────────────────────────────────────┐
+│                        Map Generator (existing)                  │
+│  planner.py → orchestrator.py → agents/* → SharedState          │
+│                                                 │                │
+│                              now produces: LayeredMapData        │
+│                              (z-levels, transitions, spawns)     │
+└──────────────────────┬───────────────────────────────────────────┘
+                       │  saves to JSON + layer PNGs
+                       ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                     viewer/  (NEW - Pygame)                      │
+│                                                                  │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
+│  │ map_loader   │  │  renderer    │  │  game_engine           │  │
+│  │             │  │              │  │                        │  │
+│  │ Load JSON   │  │ Tile-based   │  │ Player movement        │  │
+│  │ Load PNGs   │  │ OpenGL accel │  │ Combat system          │  │
+│  │ Parse layers│  │ Layer comp.  │  │ Turn manager           │  │
+│  │ Build cache │  │ Parallax     │  │ AI controller          │  │
+│  │             │  │ Fog of war   │  │ Dice roller            │  │
+│  │             │  │ Lighting     │  │ Entity manager         │  │
+│  └──────┬──────┘  └──────┬───────┘  └───────────┬────────────┘  │
+│         │                │                      │               │
+│         └────────────────┼──────────────────────┘               │
+│                          ▼                                       │
+│                 ┌─────────────────┐                              │
+│                 │    main_loop    │                              │
+│                 │                 │                              │
+│                 │  60fps game     │                              │
+│                 │  loop with      │                              │
+│                 │  event pump     │                              │
+│                 └─────────────────┘                              │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
+│  │  camera      │  │  ui_overlay  │  │  config                │ │
+│  │              │  │              │  │                        │ │
+│  │ Pan/zoom     │  │ HP bars      │  │ Keybindings            │ │
+│  │ Parallax     │  │ Combat log   │  │ Tile size              │ │
+│  │ Follow mode  │  │ Stats panel  │  │ FOW settings           │ │
+│  │ Perspective  │  │ Minimap      │  │ Colors/tokens          │ │
+│  └──────────────┘  └──────────────┘  └────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────┘
+                       │
+                       │  GUI "Playtest" button launches viewer
+                       ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                     Existing GUI (tkinter)                        │
+│  Generate map → [Playtest] → subprocess: python viewer/main.py   │
+└──────────────────────────────────────────────────────────────────┘
+</pre>
+  </div>
+</div>
+
+<div style="display: flex; gap: 1.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+
+  <div class="mockup" style="flex: 1; min-width: 300px;">
+    <div class="mockup-header">File Structure</div>
+    <div class="mockup-body" style="padding: 1.5rem; font-family: monospace; font-size: 12px; line-height: 2;">
+      <div style="color: #d4a03c;">viewer/</div>
+      <div>&nbsp;&nbsp;__init__.py</div>
+      <div>&nbsp;&nbsp;main.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># Entry point, game loop</span></div>
+      <div>&nbsp;&nbsp;map_loader.py &nbsp;&nbsp;<span style="color:#666"># Load layered map data</span></div>
+      <div>&nbsp;&nbsp;renderer.py &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># Tile/layer/parallax drawing</span></div>
+      <div>&nbsp;&nbsp;camera.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># Pan, zoom, parallax offset</span></div>
+      <div>&nbsp;&nbsp;fog_of_war.py &nbsp;&nbsp;<span style="color:#666"># Visibility + LOS raycasting</span></div>
+      <div>&nbsp;&nbsp;game_engine.py &nbsp;<span style="color:#666"># State machine: explore/combat</span></div>
+      <div>&nbsp;&nbsp;combat.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># D20 rules, turn order, attacks</span></div>
+      <div>&nbsp;&nbsp;entities.py &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># Player, Enemy, NPC classes</span></div>
+      <div>&nbsp;&nbsp;ai.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># Enemy behavior (chase/patrol)</span></div>
+      <div>&nbsp;&nbsp;ui_overlay.py &nbsp;&nbsp;<span style="color:#666"># HUD, HP bars, combat log, minimap</span></div>
+      <div>&nbsp;&nbsp;config.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#666"># Settings, keybinds, constants</span></div>
+    </div>
+  </div>
+
+  <div class="mockup" style="flex: 1; min-width: 300px;">
+    <div class="mockup-header">Rendering Pipeline (per frame)</div>
+    <div class="mockup-body" style="padding: 1.5rem; font-size: 13px; line-height: 2.2;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">1</span>
+        Camera calculates visible tile range + parallax offset
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">2</span>
+        Draw z-levels below current (dimmed 50%)
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">3</span>
+        Draw current z-level terrain + structures
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">4</span>
+        Draw entities (tokens, furniture, doors)
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">5</span>
+        Apply fog of war mask (black unexplored, dim explored, clear visible)
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">6</span>
+        Draw UI overlay (HP bars, combat log, minimap, stats)
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="background: #233554; padding: 2px 10px; border-radius: 12px; font-size: 11px;">7</span>
+        Flip display buffer (vsync)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top: 1.5rem;">
+  <div class="mockup-header">GPU Utilization (RTX 5090)</div>
+  <div class="mockup-body" style="padding: 1.5rem; font-size: 13px;">
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 200px;">
+        <h4 style="color: #2ecc71; margin-bottom: 0.5rem;">OpenGL Accelerated</h4>
+        <ul style="color: #aaa; font-size: 12px; line-height: 1.8;">
+          <li>Tile blitting via GPU surfaces</li>
+          <li>Layer compositing on GPU</li>
+          <li>Fog of war as alpha overlay</li>
+          <li>Smooth zoom/pan transforms</li>
+          <li>VSync at native refresh rate</li>
+        </ul>
+      </div>
+      <div style="flex: 1; min-width: 200px;">
+        <h4 style="color: #d4a03c; margin-bottom: 0.5rem;">Future CUDA potential</h4>
+        <ul style="color: #aaa; font-size: 12px; line-height: 1.8;">
+          <li>GPU-accelerated LOS raycasting</li>
+          <li>Real-time dynamic lighting</li>
+          <li>Particle effects (fire, smoke)</li>
+          <li>Large map pathfinding (A* on GPU)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

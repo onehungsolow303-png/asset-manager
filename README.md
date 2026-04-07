@@ -1,145 +1,45 @@
-# Map Generator
+# Asset Manager - Library, Selector, Generator, AI Gateway
 
-A 3-tier multi-agent procedural map generation system for Unity, powered by Anthropic's Claude API.
+The sole writer of the asset library used by Forever engine. Catalogs every asset, selects the right one for a given context, generates new ones procedurally or via AI image models, validates AI-generated output before baking, exposes everything over HTTP on port 7801.
 
-Generates 30 map types including dungeons, castles, cities, temples, graveyards, docks, factories, and open world maps with full Unity export support.
+**Spec:** `C:\Dev\.shared\docs\superpowers\specs\2026-04-06-three-module-consolidation-design.md`
 
-## Quick Start
+## Status
 
-### 1. Install Dependencies
+Phase 2 of the three-module pivot. Currently a **scaffolded service** with stub generators, stub selectors, stub gateways, and the salvaged `border_detect/` + `quality_metrics.py` from Gut It Out wired into `validators/`. Real procedural generators, AI gateways, and library persistence are spec §14 follow-ups.
 
-```bash
-cd "Map Generator"
-pip install -r requirements.txt
-```
+## What this used to be
 
-### 2. Set Your API Key (Optional)
+Before the pivot, this directory was the legacy "Map Generator" - a Python pygame project plus 21 PCG agents. The pygame viewer has been archived to `C:\Dev\_archive\mapgen-pygame-viewer\`. The 21 PCG agents have been kept and moved to `asset_manager/generators/pcg/`.
 
-The system works without an API key using template-based planning. For Claude-powered creative planning and richer labeling, set your key:
+## Quick start
 
 ```bash
-# Windows (Command Prompt)
-set ANTHROPIC_API_KEY=sk-ant-your-key-here
-
-# Windows (PowerShell)
-$env:ANTHROPIC_API_KEY="sk-ant-your-key-here"
-
-# Mac/Linux
-export ANTHROPIC_API_KEY=sk-ant-your-key-here
+cd "C:/Dev/Asset Manager"
+python -m venv .venv
+source .venv/Scripts/activate
+pip install -e ".[dev]"
+uvicorn asset_manager.bridge.server:app --port 7801
 ```
-
-### 3. Generate a Map
-
-```python
-from mapgen_agents.map_generator import MapGenerator
-
-gen = MapGenerator(api_key="sk-ant-...", verbose=True)  # or api_key=None for templates
-
-result = gen.generate(
-    goal="A haunted graveyard shrouded in mist",
-    map_type="graveyard",
-    biome="forest",
-    size="standard",       # 512x512
-    seed=42,
-    unity_export=True,
-    output_dir="./output"
-)
-```
-
-### 4. Run the Demo
 
 ```bash
-cd mapgen_agents
-python demo.py
+curl http://127.0.0.1:7801/health
+# {"status":"ok","service":"asset_manager","version":"0.1.0"}
 ```
 
-### 5. Run All Tests
+## Tests
 
 ```bash
-cd mapgen_agents
-python test_all_types.py
+pytest tests/ -v
 ```
 
-## Supported Map Types (30)
+## Endpoints
 
-**Settlements:** village, town, city
-**Fortifications:** castle, fort, tower
-**Underground/Interior:** dungeon, cave, mine, maze, treasure_room
-**Religious/Burial:** crypt, tomb, graveyard, temple, church
-**Commercial/Industrial:** shop, shopping_center, factory
-**Waterfront:** dock
-**Combat:** arena
-**Field/Outdoor:** wilderness, camp, outpost, rest_area, crash_site
-**Large Scale:** biomes, region, open_world, world_box
-
-## Water Features (5)
-
-rivers, streams, ponds, lakes, oceans
-
-## Biomes (9)
-
-forest, mountain, desert, swamp, plains, tundra, volcanic, cave, dungeon
-
-## Size Presets
-
-| Preset | Resolution |
-|--------|-----------|
-| small_encounter | 256x256 |
-| medium_encounter | 512x512 |
-| large_encounter | 768x768 |
-| standard | 512x512 |
-| large | 1024x1024 |
-| region | 1024x1024 |
-| open_world | 1536x1536 |
-
-## Unity Export
-
-When `unity_export=True`, the system generates:
-
-- **Terrain data:** 16-bit RAW heightmap, splatmaps, water/walkability masks
-- **Scene file:** .unity YAML with lights, camera, terrain, water, structures
-- **C# scripts:** MapLoader, TerrainBuilder, EntitySpawner, WaterController
-- **Tilemap data:** 2D tile grid, palette sprite sheet, collision map, TilemapLoader.cs
-- **JSON data:** Full map state for runtime loading
-
-## Using with Claude Code
-
-```bash
-cd "Map Generator"
-claude
-```
-
-Then ask Claude to generate maps, modify agents, add new map types, or debug issues directly in the codebase.
-
-## Project Structure
-
-```
-Map Generator/
-  requirements.txt
-  ARCHITECTURE.md
-  README.md
-  mapgen_agents/
-    __init__.py
-    map_generator.py      # Top-level API
-    planner.py            # Tier 1 - Strategic planning + DAG templates
-    orchestrator.py       # Tier 2 - Task dispatch + retry logic
-    dag_engine.py         # DAG data structure + validation
-    base_agent.py         # Abstract agent base class
-    shared_state.py       # Central data layer (numpy arrays + dataclasses)
-    llm_adapter.py        # Claude API adapter + prompts
-    demo.py               # Quick demo script
-    test_all_types.py     # Full test suite (30 map types)
-    agents/
-      __init__.py
-      terrain_agent.py          # Perlin noise terrain + biome presets
-      water_agent.py            # Rivers, streams, ponds, lakes, oceans
-      pathfinding_agent.py      # A* roads + MST network
-      structure_agent.py        # 23 structure types (BSP, maze, tunnels, etc.)
-      asset_agent.py            # Poisson disk asset placement
-      labeling_agent.py         # Procedural name generation
-      renderer_agent.py         # Final PNG compositing
-      unity_terrain_exporter.py # Heightmaps + splatmaps
-      unity_scene_exporter.py   # .unity YAML scenes
-      unity_csharp_exporter.py  # C# MonoBehaviour scripts
-      unity_tilemap_exporter.py # 2D tilemap data + loader
-```
+| Method | Path | Purpose |
+|---|---|---|
+| GET  | /health | Liveness check |
+| GET  | /catalog | List cataloged assets |
+| POST | /select | Select an asset for a given request |
+| POST | /generate | Dispatch AI generation |
+| POST | /validate | Validate an asset on disk |
+| POST | /bake | Commit a validated asset to the library |

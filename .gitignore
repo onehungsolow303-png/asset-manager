@@ -1,6 +1,11 @@
-output/
-.venv/
 __pycache__/
 *.pyc
-.env
-.superpowers/
+.pytest_cache/
+.venv/
+*.egg-info/
+build/
+dist/
+
+output/
+input/temp/
+*.log

@@ -1,0 +1,94 @@
+<h2>Architecture: How to build the layered renderer + playtest engine</h2>
+<p class="subtitle">Three approaches with different complexity/capability trade-offs</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Pygame Viewer (Recommended)</h3>
+      <p>Build the playtest viewer as a <strong>pygame</strong> application. Pygame gives us a real game loop with keyboard input, sprite rendering, per-pixel drawing, and 60fps updates. The map generator stays as-is (generates layered data), and a new <code>viewer/</code> module renders it interactively.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Real game loop -- smooth movement, real-time input</li>
+            <li>Hardware-accelerated rendering</li>
+            <li>Natural fit for fog of war, LOS, combat animations</li>
+            <li>Huge ecosystem of tutorials and game dev patterns</li>
+            <li>Can later become an actual game prototype</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>New dependency (pygame)</li>
+            <li>Separate window from the GUI</li>
+            <li>More code (~1500-2000 lines for full playtest)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Tkinter Canvas Viewer</h3>
+      <p>Build the viewer directly into the existing tkinter GUI. Use a Canvas widget with tile-based rendering. The playtest mode is a tab/panel within the current app.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>No new dependencies</li>
+            <li>Integrated with existing GUI</li>
+            <li>Single window experience</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Tkinter Canvas is slow for real-time games</li>
+            <li>No proper game loop -- hacked with after() calls</li>
+            <li>Poor keyboard handling for WASD movement</li>
+            <li>Fog of war / LOS very hard to do performantly</li>
+            <li>Will feel sluggish compared to real game engines</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Web-Based Viewer (HTML5 Canvas)</h3>
+      <p>Build the viewer as a local web app. The Python backend serves map data via a local HTTP server, and a JavaScript frontend renders tiles on an HTML5 Canvas with WebGL acceleration.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Excellent rendering performance (Canvas/WebGL)</li>
+            <li>Cross-platform UI with modern look</li>
+            <li>Easy to add UI controls (HTML buttons, sliders)</li>
+            <li>Could become a web deployment later</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Two-language system (Python + JavaScript)</li>
+            <li>Server/client complexity for communication</li>
+            <li>Browser has to be open separately</li>
+            <li>Debugging split across two runtimes</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem; padding: 1.5rem; background: rgba(217, 160, 60, 0.1); border-left: 3px solid #d4a03c; border-radius: 4px;">
+  <h3 style="color: #d4a03c; margin-top: 0;">My Recommendation: A (Pygame)</h3>
+  <p>For a playtest viewer with movement, combat, fog of war, and LOS -- you need a real game loop. Pygame is the only option here that won't fight you at every step. Tkinter will feel sluggish and hacky for real-time input. The web option works but splits your codebase across two languages.</p>
+  <p>Pygame is a single <code>pip install pygame</code>, gives you everything a 2D game engine needs, and the viewer can evolve into an actual game prototype if you want.</p>
+</div>
