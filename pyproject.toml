@@ -13,6 +13,11 @@ dependencies = [
     "pydantic>=2.5",
     "numpy>=1.26",
     "pillow>=10.0",
+    # perlin_noise (note: different package from `noise` in [pcg] extras) is
+    # imported at module load time by asset_manager.generators._perlin, which
+    # is in turn imported by texture.py — which is imported by the bridge
+    # server. Without this, importing the server fails.
+    "perlin-noise>=1.13",
 ]
 
 [project.optional-dependencies]
