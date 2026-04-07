@@ -9,3 +9,6 @@ dist/
 output/
 input/temp/
 *.log
+
+# Superpowers brainstorm session state
+.superpowers/
