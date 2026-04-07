@@ -132,6 +132,15 @@ def generate(req: GenerationRequest) -> GenerationResponse:
         asset_id, out_path = handler(req)
     except Exception as e:  # boundary - log and return failure
         return GenerationResponse(accepted=False, notes=[f"generation failed: {e}"])
+
+    # Auto-bake into the catalog so subsequent /select calls find it.
+    manifest = make_manifest(
+        asset_id=asset_id,
+        kind=req.kind,
+        path=str(out_path),
+    )
+    _catalog.add(asset_id, manifest)
+
     return GenerationResponse(
         accepted=True,
         asset_id=asset_id,

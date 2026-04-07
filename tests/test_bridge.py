@@ -6,12 +6,18 @@ def test_health_returns_ok(client):
     assert body["service"] == "asset_manager"
 
 
-def test_catalog_returns_empty_initially(client):
+def test_catalog_endpoint_returns_valid_shape(client):
+    """The /catalog endpoint returns CatalogResponse — count and assets list.
+    The actual count depends on what's been auto-scanned from .shared/baked/
+    and what /generate has added during prior tests, so we only assert shape."""
     r = client.get("/catalog")
     assert r.status_code == 200
     body = r.json()
-    assert body["count"] == 0
-    assert body["assets"] == []
+    assert "count" in body
+    assert "assets" in body
+    assert isinstance(body["count"], int)
+    assert isinstance(body["assets"], list)
+    assert body["count"] == len(body["assets"])
 
 
 def test_select_returns_miss_in_stub(client):
