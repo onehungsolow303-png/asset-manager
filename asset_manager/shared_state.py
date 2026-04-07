@@ -4,11 +4,11 @@ Maintains the map's current state as numpy arrays (grid layers) and lists (entit
 Supports multiple z-levels for layered maps (dungeons, multi-floor buildings).
 """
 
-import numpy as np
+import time
 from dataclasses import dataclass, field
 from typing import Any
-import json
-import time
+
+import numpy as np
 
 
 @dataclass

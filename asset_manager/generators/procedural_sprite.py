@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image
 
@@ -19,7 +18,7 @@ from PIL import Image
 def generate_creature_token(
     base_color: tuple[int, int, int, int],
     size: int = 32,
-    out_path: Optional[Path] = None,
+    out_path: Path | None = None,
 ) -> Image.Image:
     """Filled-circle creature token with a single-pixel rim half as bright as base.
 
@@ -49,7 +48,7 @@ def generate_item_icon(
     color: tuple[int, int, int, int],
     shape: str = "square",
     size: int = 16,
-    out_path: Optional[Path] = None,
+    out_path: Path | None = None,
 ) -> Image.Image:
     """Item icon in one of three shapes: square (default), circle, diamond.
 

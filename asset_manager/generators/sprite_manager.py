@@ -14,20 +14,18 @@ automatically.
 Dependencies: Pillow (PIL), os, json, pathlib — nothing else.
 """
 
+import hashlib
 import json
 import os
-import hashlib
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image
-
 
 # ---------------------------------------------------------------------------
 # Path resolution
 # ---------------------------------------------------------------------------
 
-def _resolve_assets_root() -> Optional[Path]:
+def _resolve_assets_root() -> Path | None:
     """
     Return the absolute path to the Assets/ directory that lives at the
     project root.  The project root is two levels up from this file:
@@ -64,7 +62,7 @@ class SpriteManager:
     # Construction
     # ------------------------------------------------------------------
 
-    def __init__(self, assets_root: Optional[Path] = None):
+    def __init__(self, assets_root: Path | None = None):
         self._assets_root = assets_root or _resolve_assets_root()
 
         # pack_name -> sorted list of image Paths
@@ -165,7 +163,7 @@ class SpriteManager:
         pack sprite, OR the only image present.
         """
         try:
-            with open(meta_path, "r", encoding="utf-8") as fh:
+            with open(meta_path, encoding="utf-8") as fh:
                 meta = json.load(fh)
         except (json.JSONDecodeError, OSError):
             return
@@ -226,8 +224,8 @@ class SpriteManager:
         return img
 
     @staticmethod
-    def _pick_index(paths_or_count, variant: Optional[str],
-                    position: Optional[tuple[int, int]] = None) -> int:
+    def _pick_index(paths_or_count, variant: str | None,
+                    position: tuple[int, int] | None = None) -> int:
         """
         Choose a deterministic-but-varied index.
 
@@ -273,10 +271,10 @@ class SpriteManager:
     def get_sprite(
         self,
         pack: str,
-        variant: Optional[str] = None,
+        variant: str | None = None,
         size: tuple[int, int] = (32, 32),
-        position: Optional[tuple[int, int]] = None,
-    ) -> Optional[Image.Image]:
+        position: tuple[int, int] | None = None,
+    ) -> Image.Image | None:
         """
         Return a sprite from the named *pack* as an RGBA PIL Image at
         the requested *size*, or ``None`` if the pack does not exist or
@@ -334,10 +332,10 @@ class SpriteManager:
 
     def get_building_sprite(
         self,
-        variant: Optional[str] = None,
+        variant: str | None = None,
         size: tuple[int, int] = (32, 32),
-        position: Optional[tuple[int, int]] = None,
-    ) -> Optional[Image.Image]:
+        position: tuple[int, int] | None = None,
+    ) -> Image.Image | None:
         """
         Return a building sprite as an RGBA PIL Image at the requested
         *size*, or None if no building assets are loaded.
@@ -352,10 +350,10 @@ class SpriteManager:
 
     def get_npc_sprite(
         self,
-        variant: Optional[str] = None,
+        variant: str | None = None,
         size: tuple[int, int] = (16, 16),
-        position: Optional[tuple[int, int]] = None,
-    ) -> Optional[Image.Image]:
+        position: tuple[int, int] | None = None,
+    ) -> Image.Image | None:
         """
         Return an NPC token as an RGBA PIL Image at the requested *size*,
         or None if no NPC assets are loaded.
@@ -414,7 +412,7 @@ def composite_sprites(
         x, y = entity.position
         ew, eh = entity.size
 
-        sprite: Optional[Image.Image] = None
+        sprite: Image.Image | None = None
 
         if etype in _BUILDING_TYPES:
             # Size the sprite to the entity's footprint, clamped to

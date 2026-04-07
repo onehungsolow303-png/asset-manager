@@ -59,6 +59,7 @@ class AssetValidator:
         # ── Border score via v5+ pipeline coverage ──
         try:
             import cv2  # type: ignore
+
             from .border_detect.pipeline import run_pipeline
 
             img_bgr = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
@@ -84,6 +85,7 @@ class AssetValidator:
         # opaque_fraction as a [0,1] metric.
         try:
             from PIL import Image
+
             from .quality_metrics import alpha_stats
 
             with Image.open(image_path) as pil_img:

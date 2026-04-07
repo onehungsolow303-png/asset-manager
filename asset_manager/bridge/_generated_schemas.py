@@ -8,7 +8,7 @@
 # call jsonschema.validate() against the schema in C:/Dev/.shared/schemas/.
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -19,12 +19,12 @@ class ActionRequest(BaseModel):
     schema_version: Literal['1.0.0'] = '1.0.0'
     session_id: str
     actor_id: str
-    target_id: Optional[str] = None
+    target_id: str | None = None
     player_input: str
     actor_stats: dict[str, Any]
-    target_stats: Optional[dict] = None
-    scene_context: Optional[dict[str, Any]] = None
-    recent_history: Optional[list[str]] = None
+    target_stats: dict | None = None
+    scene_context: dict[str, Any] | None = None
+    recent_history: list[str] | None = None
 
 # from decision.schema.json
 class DecisionPayload(BaseModel):
@@ -35,10 +35,10 @@ class DecisionPayload(BaseModel):
     success: bool
     scale: int
     narrative_text: str
-    stat_effects: Optional[list[dict[str, Any]]] = None
-    fx_requests: Optional[list[dict[str, Any]]] = None
-    repetition_penalty: Optional[int] = None
-    deterministic_fallback: Optional[bool] = False
+    stat_effects: list[dict[str, Any]] | None = None
+    fx_requests: list[dict[str, Any]] | None = None
+    repetition_penalty: int | None = None
+    deterministic_fallback: bool | None = False
 
 # from selection.schema.json
 class AssetSelectionRequest(BaseModel):
@@ -46,8 +46,8 @@ class AssetSelectionRequest(BaseModel):
 
     schema_version: Literal['1.0.0'] = '1.0.0'
     kind: str
-    biome: Optional[str] = None
-    theme: Optional[str] = None
-    tags: Optional[list[str]] = None
-    constraints: Optional[dict[str, Any]] = None
-    allow_ai_generation: Optional[bool] = False
+    biome: str | None = None
+    theme: str | None = None
+    tags: list[str] | None = None
+    constraints: dict[str, Any] | None = None
+    allow_ai_generation: bool | None = False

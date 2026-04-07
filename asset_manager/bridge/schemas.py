@@ -20,7 +20,7 @@ Update flow when contracts change:
 """
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -38,9 +38,9 @@ class AssetSelectionResponse(BaseModel):
 
     schema_version: Literal["1.0.0"] = "1.0.0"
     found: bool
-    asset_id: Optional[str] = None
-    path: Optional[str] = None
-    manifest: Optional[dict[str, Any]] = None
+    asset_id: str | None = None
+    path: str | None = None
+    manifest: dict[str, Any] | None = None
     notes: list[str] = Field(default_factory=list)
 
 
@@ -52,7 +52,7 @@ class GenerationRequest(BaseModel):
     schema_version: Literal["1.0.0"] = "1.0.0"
     kind: str
     prompt: str
-    style: Optional[str] = None
+    style: str | None = None
     constraints: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -63,8 +63,8 @@ class GenerationResponse(BaseModel):
 
     schema_version: Literal["1.0.0"] = "1.0.0"
     accepted: bool
-    asset_id: Optional[str] = None
-    path: Optional[str] = None
+    asset_id: str | None = None
+    path: str | None = None
     notes: list[str] = Field(default_factory=list)
 
 

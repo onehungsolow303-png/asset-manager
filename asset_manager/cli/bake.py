@@ -70,6 +70,7 @@ from asset_manager.generators.texture import (
 )
 from asset_manager.library.storage import Storage
 
+
 # Reuse the bridge's color helper for [R,G,B,A] -> tuple
 def _color(spec: dict[str, Any], key: str, default: list[int]) -> tuple[int, int, int, int]:
     c = spec.get(key, default)
@@ -139,7 +140,7 @@ def bake_recipe(recipe_path: Path, root: Path | None = None) -> tuple[int, int]:
         return 0, -1
 
     if not isinstance(recipe, dict) or "assets" not in recipe:
-        print(f"FATAL: recipe must be a dict with an 'assets' key", file=sys.stderr)
+        print("FATAL: recipe must be a dict with an 'assets' key", file=sys.stderr)
         return 0, -1
 
     storage = Storage(root=root) if root is not None else Storage()

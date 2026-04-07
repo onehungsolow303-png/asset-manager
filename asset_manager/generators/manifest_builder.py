@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from PIL import Image
@@ -42,7 +42,7 @@ def build_manifest(asset_root: Path) -> AssetManifest:
     """Scan asset_root recursively for PNG files and return a manifest.
     Mirrors C# AssetManifestBuilder.Build."""
     manifest = AssetManifest(
-        created_at=datetime.now(timezone.utc).isoformat(timespec="seconds")
+        created_at=datetime.now(UTC).isoformat(timespec="seconds")
     )
     if not asset_root.exists():
         return manifest

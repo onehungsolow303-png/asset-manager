@@ -10,7 +10,6 @@ Spec: 2026-04-06-csharp-to-python-assetgen-port-design.md §5.2
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from PIL import Image
 
@@ -23,7 +22,7 @@ def generate_terrain_texture(
     floor_color: tuple[int, int, int, int],
     wall_color: tuple[int, int, int, int],
     seed: int = 42,
-    out_path: Optional[Path] = None,
+    out_path: Path | None = None,
 ) -> Image.Image:
     """Perlin-blended terrain. Mirrors C# GenerateTerrainTexture."""
     _perlin.seed(seed)
@@ -51,7 +50,7 @@ def generate_tileset(
     tiles_per_row: int,
     tile_colors: list[tuple[int, int, int, int]],
     seed: int = 42,
-    out_path: Optional[Path] = None,
+    out_path: Path | None = None,
 ) -> Image.Image:
     """Grid of single-color tiles with subtle Perlin variation.
     Mirrors C# GenerateTileset."""
