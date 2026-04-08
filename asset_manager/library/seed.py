@@ -127,6 +127,10 @@ def _ensure_manifest(
         path=str(png_path),
         biome=biome,
         tags=[name.lower()],
+        source="procedural",
+        license="CC0",
+        cost_usd=0.0,
+        swap_safe=True,
     )
     catalog.add(asset_id, manifest)
 
@@ -210,5 +214,9 @@ def _ensure_item_manifest(
         kind=_ITEM_KIND,
         path=str(png_path),
         tags=[asset_id, shape],
+        source="procedural",
+        license="CC0",
+        cost_usd=0.0,
+        swap_safe=True,
     )
     catalog.add(asset_id, manifest)

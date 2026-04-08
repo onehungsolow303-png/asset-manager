@@ -4,6 +4,11 @@ Disk-backed: persists to a single JSON file at .shared/state/asset_catalog.json
 by default. Loads on construction so set→restart→get works. Can also
 auto-scan a baked/ directory tree on construction to discover assets that
 were generated outside this catalog instance (e.g., by the bake CLI).
+
+On load, every entry is run through `manifest.migrate_manifest` so legacy
+catalog entries get the new provenance fields (source, license, cost_usd,
+swap_safe, etc.) inferred from their path. The migration is idempotent —
+already-migrated entries are no-ops.
 """
 from __future__ import annotations
 
@@ -11,6 +16,8 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
+
+from asset_manager.library.manifest import migrate_manifest
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +51,13 @@ class Catalog:
         # known-good catalog dict.
         if prune_on_load:
             self.prune_missing_files()
+
+        # Migrate every loaded entry to the new manifest schema. Inferred
+        # provenance is filled in for legacy entries (source/license from
+        # path), and missing fields get safe defaults. Idempotent — entries
+        # that already have the new schema are no-ops, so this is safe to
+        # run on every startup.
+        self._migrate_all()
 
         if auto_scan_baked:
             root = baked_root or DEFAULT_BAKED_ROOT
@@ -80,6 +94,24 @@ class Catalog:
         del self._by_id[asset_id]
         self._save()
         return True
+
+    def _migrate_all(self) -> int:
+        """Run manifest.migrate_manifest on every catalog entry.
+
+        Idempotent: entries that already have the new schema fields are
+        not modified. Returns the count of entries that were touched
+        (had new fields added). Persists once at the end if anything
+        changed, so a no-op startup costs zero disk writes.
+        """
+        before = json.dumps(self._by_id, sort_keys=True, default=str)
+        for manifest in self._by_id.values():
+            migrate_manifest(manifest)
+        after = json.dumps(self._by_id, sort_keys=True, default=str)
+        if before != after:
+            logger.info("[Catalog] migrated entries to new manifest schema")
+            self._save()
+            return 1
+        return 0
 
     def prune_missing_files(self) -> int:
         """Remove every catalog entry whose `path` no longer exists on disk.
