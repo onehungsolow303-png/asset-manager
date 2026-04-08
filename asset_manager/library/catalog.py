@@ -25,6 +25,7 @@ class Catalog:
         persist: bool = True,
         auto_scan_baked: bool = True,
         baked_root: Path | None = None,
+        prune_on_load: bool = True,
     ) -> None:
         self._by_id: dict[str, dict[str, Any]] = {}
         self._path = path or DEFAULT_CATALOG_PATH
@@ -36,6 +37,13 @@ class Catalog:
                     self._by_id = data
             except (OSError, json.JSONDecodeError) as e:
                 logger.warning("[Catalog] failed to load %s: %s", self._path, e)
+
+        # Drop stale entries (deleted/moved files, leftover pytest temp
+        # paths) BEFORE auto-scan so the auto-scan doesn't have to compete
+        # with phantom records. Off by default for tests that supply a
+        # known-good catalog dict.
+        if prune_on_load:
+            self.prune_missing_files()
 
         if auto_scan_baked:
             root = baked_root or DEFAULT_BAKED_ROOT
@@ -72,6 +80,44 @@ class Catalog:
         del self._by_id[asset_id]
         self._save()
         return True
+
+    def prune_missing_files(self) -> int:
+        """Remove every catalog entry whose `path` no longer exists on disk.
+
+        Catalogs accumulate stale references over time — pytest temp dirs
+        get cleaned up between runs, manually-deleted bakes stay registered,
+        moved files orphan their old entries. This sweep walks every entry
+        and drops the ones whose path can't be opened.
+
+        Idempotent and safe: in-memory entries with no `path` field are
+        left alone (they may be partial manifests under construction).
+
+        Returns the count of pruned entries. Persists once at the end so
+        pruning N stale entries is one disk write, not N.
+        """
+        stale: list[str] = []
+        for asset_id, manifest in self._by_id.items():
+            raw_path = manifest.get("path")
+            if not raw_path:
+                continue
+            try:
+                if not Path(raw_path).exists():
+                    stale.append(asset_id)
+            except (OSError, ValueError):
+                # Path() can raise ValueError on certain Windows paths
+                # (NUL chars, etc); treat unparseable paths as stale.
+                stale.append(asset_id)
+
+        for asset_id in stale:
+            del self._by_id[asset_id]
+
+        if stale:
+            logger.info(
+                "[Catalog] pruned %d stale entries with missing files",
+                len(stale),
+            )
+            self._save()
+        return len(stale)
 
     def wipe(self) -> None:
         """Clear in-memory and delete the on-disk file."""
