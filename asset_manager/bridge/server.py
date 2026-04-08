@@ -23,8 +23,10 @@ from asset_manager.generators.texture import (
     generate_terrain_texture,
     generate_tileset,
 )
-from asset_manager.library.catalog import Catalog
+from asset_manager.library.catalog import DEFAULT_BAKED_ROOT, Catalog
+from asset_manager.library.html_index import regenerate_index
 from asset_manager.library.manifest import make_manifest
+from asset_manager.library.pack_importer import PackSpec, import_pack
 from asset_manager.library.seed import (
     seed_default_creature_tokens,
     seed_default_item_icons,
@@ -44,6 +46,31 @@ _storage = Storage()
 # whose PNG already exists. See library/seed.py for the lists.
 seed_default_creature_tokens(_catalog)
 seed_default_item_icons(_catalog)
+
+
+_INDEX_PATH = DEFAULT_BAKED_ROOT / "index.html"
+
+
+def _refresh_html_index() -> None:
+    """Regenerate the HTML asset index after any catalog mutation.
+
+    Best-effort: failures are logged but never crash the bridge — the
+    index is a convenience tool, not a correctness boundary. Wrapped
+    in a function so /generate, /bake, and /import_pack can all call
+    the same code path.
+    """
+    try:
+        regenerate_index(_catalog, _INDEX_PATH)
+    except Exception as e:  # boundary - log and continue
+        import logging
+        logging.getLogger(__name__).warning(
+            "[server] HTML index regeneration failed: %s", e
+        )
+
+
+# Generate the initial HTML index now that seeds have run, so the user
+# can browse the post-seed catalog without making any HTTP calls first.
+_refresh_html_index()
 
 
 @app.get("/health")
@@ -150,8 +177,13 @@ def generate(req: GenerationRequest) -> GenerationResponse:
         asset_id=asset_id,
         kind=req.kind,
         path=str(out_path),
+        source="procedural",
+        license="CC0",
+        cost_usd=0.0,
+        prompt=req.prompt,
     )
     _catalog.add(asset_id, manifest)
+    _refresh_html_index()
 
     return GenerationResponse(
         accepted=True,
@@ -185,4 +217,85 @@ def bake(payload: dict) -> dict:
         path=payload.get("path", ""),
     )
     _catalog.add(asset_id, manifest)
+    _refresh_html_index()
     return {"baked": True, "asset_id": asset_id}
+
+
+@app.post("/import_pack")
+def import_pack_endpoint(payload: dict) -> dict:
+    """Import a third-party asset pack into the catalog.
+
+    Expected payload (all fields except notes are required):
+        {
+            "pack_id": "kaykit_dungeon",
+            "pack_name": "KayKit Dungeon Pack Remastered",
+            "license_code": "KayKit_free",
+            "redistribution": true,
+            "local_path": "C:/Dev/.shared/baked/packs/kaykit/dungeon",
+            "asset_id_prefix": "kaykit_dungeon_",
+            "tag_strategy": "both",
+            "kind_default": "dungeon_tile",
+            "kind_overrides": {"Walls": "dungeon_wall", "Props": "dungeon_prop"}
+        }
+
+    Returns:
+        {
+            "imported": true,
+            "pack_id": "kaykit_dungeon",
+            "added": 47,
+            "updated": 0,
+            "skipped": 0,
+            "asset_ids": [...]
+        }
+
+    Idempotent: re-running on a pack already imported updates entries
+    in place rather than duplicating. The endpoint does NOT download
+    the pack — local_path must already exist on disk (manual
+    download for Synty paid packs, scriptable installer for free
+    packs in a future enhancement).
+    """
+    pack_id = payload.get("pack_id")
+    pack_name = payload.get("pack_name")
+    local_path = payload.get("local_path")
+    license_code = payload.get("license_code", "unknown")
+    redistribution = bool(payload.get("redistribution", True))
+
+    if not (pack_id and pack_name and local_path):
+        return {
+            "imported": False,
+            "notes": ["missing required field: pack_id, pack_name, local_path"],
+        }
+
+    pack_root = Path(local_path)
+    if not pack_root.exists():
+        return {
+            "imported": False,
+            "notes": [
+                f"local_path does not exist: {local_path}. "
+                "For free packs, run the pack installer first. "
+                "For paid Synty packs, download from Unity Asset Store and extract."
+            ],
+        }
+
+    spec = PackSpec(
+        pack_id=pack_id,
+        pack_name=pack_name,
+        license_code=license_code,
+        redistribution=redistribution,
+        kind_default=payload.get("kind_default", "pack_asset"),
+        kind_overrides=payload.get("kind_overrides", {}) or {},
+        tag_strategy=payload.get("tag_strategy", "filename"),
+        asset_id_prefix=payload.get("asset_id_prefix"),
+    )
+
+    result = import_pack(_catalog, pack_root, spec)
+    _refresh_html_index()
+
+    return {
+        "imported": True,
+        "pack_id": result.pack_id,
+        "added": result.added,
+        "updated": result.updated,
+        "skipped": result.skipped,
+        "asset_ids": result.asset_ids,
+    }
