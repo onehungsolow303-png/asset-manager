@@ -24,7 +24,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from asset_manager.generators.procedural_sprite import generate_creature_token
+from asset_manager.generators.procedural_sprite import (
+    generate_creature_token,
+    generate_item_icon,
+)
 from asset_manager.library.catalog import DEFAULT_BAKED_ROOT
 from asset_manager.library.manifest import make_manifest
 
@@ -124,5 +127,88 @@ def _ensure_manifest(
         path=str(png_path),
         biome=biome,
         tags=[name.lower()],
+    )
+    catalog.add(asset_id, manifest)
+
+
+# ─── Item icon seeds ─────────────────────────────────────────────────────
+#
+# Forever engine's PlayerData.cs declares three item IDs:
+#   100  Food
+#   101  Water
+#   102  HealthPotion
+#
+# Until cloud art lands, the procedural item icons give the dialogue UI,
+# inventory screen, and combat HUD a real visual placeholder per item
+# kind instead of a single generic square. The asset_id is keyed by the
+# C# constant name in lowercase (food / water / health_potion) so
+# /select?kind=item_icon&tags=[health_potion] hits cleanly.
+#
+# Each entry: (name, color rgba, shape) — shape is one of square/circle/diamond
+# from generators.procedural_sprite.generate_item_icon.
+
+_SEED_ITEMS: list[tuple[str, tuple[int, int, int, int], str]] = [
+    ("Food",          (180, 120, 60,  255), "square"),   # warm bread brown
+    ("Water",         (60,  140, 220, 255), "circle"),   # deep blue droplet
+    ("Health Potion", (220, 50,  60,  255), "diamond"),  # crimson flask
+]
+
+_ITEM_KIND = "item_icon"
+_ITEM_SIZE = 16
+
+
+def seed_default_item_icons(
+    catalog: Any,
+    baked_root: Path | None = None,
+) -> int:
+    """Generate the default item icons and register them in the catalog.
+
+    Mirrors `seed_default_creature_tokens`: idempotent, file-on-disk is
+    the source of truth, existing PNGs are not regenerated, and a
+    full manifest with tags is registered so /select can match by tag.
+
+    Returns the number of icons newly generated.
+    """
+    root = baked_root or DEFAULT_BAKED_ROOT
+    out_dir = root / _ITEM_KIND
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    generated = 0
+    for name, color, shape in _SEED_ITEMS:
+        asset_id = name.lower().replace(" ", "_")
+        png_path = out_dir / f"{asset_id}.png"
+
+        if png_path.exists():
+            _ensure_item_manifest(catalog, asset_id, name, shape, png_path)
+            continue
+
+        try:
+            generate_item_icon(color, shape=shape, size=_ITEM_SIZE, out_path=png_path)
+        except Exception as e:
+            logger.warning("[seed] failed to generate item icon %s: %s", name, e)
+            continue
+
+        _ensure_item_manifest(catalog, asset_id, name, shape, png_path)
+        generated += 1
+
+    if generated > 0:
+        logger.info("[seed] created %d default item icons under %s", generated, out_dir)
+    return generated
+
+
+def _ensure_item_manifest(
+    catalog: Any,
+    asset_id: str,
+    name: str,
+    shape: str,
+    png_path: Path,
+) -> None:
+    """Register an item icon manifest with name + shape tags so /select
+    can match by either the lowercased name or the shape descriptor."""
+    manifest = make_manifest(
+        asset_id=asset_id,
+        kind=_ITEM_KIND,
+        path=str(png_path),
+        tags=[asset_id, shape],
     )
     catalog.add(asset_id, manifest)

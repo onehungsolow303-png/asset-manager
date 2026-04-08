@@ -25,7 +25,10 @@ from asset_manager.generators.texture import (
 )
 from asset_manager.library.catalog import Catalog
 from asset_manager.library.manifest import make_manifest
-from asset_manager.library.seed import seed_default_creature_tokens
+from asset_manager.library.seed import (
+    seed_default_creature_tokens,
+    seed_default_item_icons,
+)
 from asset_manager.library.storage import Storage
 from asset_manager.selectors.selector import Selector
 
@@ -34,11 +37,13 @@ _catalog = Catalog()
 _selector = Selector(_catalog)
 _storage = Storage()
 
-# Seed the library with default creature tokens on startup so Forever
-# engine's BattleManager.RequestEnemySprites gets visible asset hits
-# without the user having to manually bake anything. Idempotent: skips
-# any token whose PNG already exists. See library/seed.py for the list.
+# Seed the library with default creature tokens AND item icons on
+# startup so Forever engine's BattleManager.RequestEnemySprites and
+# the inventory/dialogue UI both get visible asset hits without the
+# user having to manually bake anything. Idempotent: skips anything
+# whose PNG already exists. See library/seed.py for the lists.
 seed_default_creature_tokens(_catalog)
+seed_default_item_icons(_catalog)
 
 
 @app.get("/health")
