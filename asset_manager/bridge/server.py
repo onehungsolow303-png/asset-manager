@@ -32,12 +32,15 @@ from asset_manager.library.seed import (
     seed_default_item_icons,
 )
 from asset_manager.library.storage import Storage
+from asset_manager.library.style_bible import StyleBible
+from asset_manager.pipeline.style_audit import AuditPolicy, audit
 from asset_manager.selectors.selector import Selector
 
 app = FastAPI(title="Asset Manager", version=__version__)
 _catalog = Catalog()
 _selector = Selector(_catalog)
 _storage = Storage()
+_style_bible = StyleBible()
 
 # Seed the library with default creature tokens AND item icons on
 # startup so Forever engine's BattleManager.RequestEnemySprites and
@@ -298,4 +301,172 @@ def import_pack_endpoint(payload: dict) -> dict:
         "updated": result.updated,
         "skipped": result.skipped,
         "asset_ids": result.asset_ids,
+    }
+
+
+# ─── Style bible (read-only inspection) ──────────────────────────────
+
+@app.get("/style_bible")
+def get_style_bible() -> dict[str, Any]:
+    """Return the full style bible JSON. Read-only inspection — no
+    side effects. Use this to debug what art direction is currently
+    in force, or to back up the bible before editing manually."""
+    return _style_bible.all()
+
+
+@app.get("/style_bible/category/{kind}")
+def get_style_bible_category(kind: str) -> dict[str, Any]:
+    """Return the EFFECTIVE style rules for one asset kind, with global
+    defaults merged with the kind-specific overrides. This is what a
+    generator would actually consume — not the raw bible."""
+    return {
+        "kind": kind,
+        "rules": _style_bible.get_category(kind),
+        "prompt_preamble": _style_bible.render_prompt_preamble(kind),
+    }
+
+
+# ─── Style audit (no asset generation, just inspection) ─────────────
+
+@app.post("/audit")
+def audit_endpoint(payload: dict) -> dict[str, Any]:
+    """Run the style/quality audit on an existing asset path.
+
+    Expected payload:
+        {
+            "asset_id": "wolf",
+            "kind": "creature_token",
+            "path": "C:/Dev/.shared/baked/creature_token/wolf.png"
+        }
+
+    Returns:
+        {
+            "passed": true,
+            "asset_id": "wolf",
+            "failures": [],
+            "warnings": []
+        }
+
+    NO state mutation. The asset is not registered, modified, or moved.
+    Use this to spot-check assets before committing them to the catalog,
+    or to audit existing catalog entries for new policy compliance.
+    """
+    asset_id = payload.get("asset_id", "")
+    kind = payload.get("kind", "")
+    path = payload.get("path", "")
+
+    if not (asset_id and kind and path):
+        return {
+            "passed": False,
+            "asset_id": asset_id,
+            "failures": ["missing required field: asset_id, kind, path"],
+            "warnings": [],
+        }
+
+    # Look up the manifest if the asset is in the catalog so the
+    # provenance check has something to validate against.
+    manifest = _catalog.get(asset_id)
+
+    report = audit(
+        asset_id=asset_id,
+        kind=kind,
+        path=path,
+        manifest=manifest,
+        catalog=_catalog,
+    )
+    return {
+        "passed": report.passed,
+        "asset_id": report.asset_id,
+        "failures": report.failures,
+        "warnings": report.warnings,
+    }
+
+
+# ─── Router status (current budget + tier availability) ─────────────
+
+@app.get("/router_status")
+def router_status() -> dict[str, Any]:
+    """Report which generation tiers are currently available + their
+    cost estimates. Useful for the user to see at a glance whether
+    their API keys are wired and how much budget the next session has.
+
+    Does NOT trigger any generation or network calls. Just inspects
+    env vars and reports the static availability state.
+    """
+    import os as _os
+    from asset_manager.gateway.nano_banana import NanoBananaGateway
+    from asset_manager.gateway.tripo3d import Tripo3DGateway
+    from asset_manager.generators.blender_renderer import BlenderRenderer
+    from asset_manager.generators.local_sd import LocalSDGateway
+    from asset_manager.pipeline.source_decision import TIER_COST_USD, Tier
+
+    tripo = Tripo3DGateway()
+    nano = NanoBananaGateway()
+    blender = BlenderRenderer()
+    local_sd = LocalSDGateway()
+
+    return {
+        "tiers": [
+            {
+                "name": "cache",
+                "tier": Tier.CACHE.value,
+                "available": True,
+                "cost_per_call_usd": TIER_COST_USD[Tier.CACHE],
+                "notes": "always available — content-addressable lookup",
+            },
+            {
+                "name": "library",
+                "tier": Tier.LIBRARY.value,
+                "available": True,
+                "cost_per_call_usd": TIER_COST_USD[Tier.LIBRARY],
+                "notes": (
+                    f"{_catalog.count()} assets currently registered in catalog"
+                ),
+            },
+            {
+                "name": "procedural",
+                "tier": Tier.PROCEDURAL.value,
+                "available": True,
+                "cost_per_call_usd": TIER_COST_USD[Tier.PROCEDURAL],
+                "notes": "Pillow + Perlin generators",
+            },
+            {
+                "name": "blender_renderer",
+                "tier": "blender",  # not in the Tier enum yet — render tier
+                "available": blender.is_available(),
+                "cost_per_call_usd": 0.0,
+                "notes": (
+                    f"executable: {blender.blender_executable}"
+                    if blender.is_available()
+                    else "Blender not found — set BLENDER_EXECUTABLE env var"
+                ),
+            },
+            {
+                "name": "local_sd_lora",
+                "tier": Tier.LOCAL_LORA_SD.value,
+                "available": local_sd.is_available(),
+                "cost_per_call_usd": TIER_COST_USD[Tier.LOCAL_LORA_SD],
+                "notes": (
+                    "scaffolding only — needs trained LoRA + webui wiring"
+                ),
+            },
+            {
+                "name": "nano_banana",
+                "tier": Tier.NANO_BANANA.value,
+                "available": nano.is_available(),
+                "cost_per_call_usd": TIER_COST_USD[Tier.NANO_BANANA],
+                "notes": (
+                    "Google Gemini 2.5 Flash Image — set GEMINI_API_KEY"
+                ),
+            },
+            {
+                "name": "tripo3d",
+                "tier": Tier.TRIPO3D.value,
+                "available": tripo.is_available(),
+                "cost_per_call_usd": TIER_COST_USD[Tier.TRIPO3D],
+                "notes": (
+                    "Tripo3D image-to-3D + text-to-3D — set TRIPO_API_KEY"
+                ),
+            },
+        ],
     }
