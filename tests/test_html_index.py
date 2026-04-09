@@ -48,17 +48,26 @@ def test_index_creates_parent_directory(tmp_path):
 
 
 def test_index_renders_image_assets_inline(tmp_path):
+    # Write a real PNG so the thumbnailer can produce a thumbnail.
+    # Pre-thumbnailing-rework, this test used a fake path because the
+    # HTML referenced source file:// URIs directly. The new code
+    # actually generates thumbnails, so the source must exist.
+    from PIL import Image
+    src = tmp_path / "wolf.png"
+    Image.new("RGB", (64, 64), (200, 100, 50)).save(src, format="PNG")
+
     catalog = FakeCatalog([
         make_manifest(asset_id="wolf", kind="creature_token",
-                       path="C:/baked/wolf.png", source="procedural"),
+                       path=str(src), source="procedural"),
     ])
     out = tmp_path / "index.html"
     regenerate_index(catalog, out)
 
     body = out.read_text(encoding="utf-8")
-    # PNG should produce an <img> tag, not a placeholder
+    # PNG should produce an <img> tag pointing at the generated thumbnail
     assert "<img" in body
-    assert "ext-placeholder" not in body or "PNG" not in body
+    # The thumbnail should land under thumbs/ relative to the HTML
+    assert (tmp_path / "thumbs").exists()
 
 
 def test_index_renders_3d_assets_with_placeholder(tmp_path):

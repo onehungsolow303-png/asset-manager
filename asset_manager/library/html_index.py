@@ -12,22 +12,29 @@ Why this exists:
   license via simple JS, and shows the actual images so visual review
   takes seconds instead of minutes.
 
+Thumbnail strategy:
+  Earlier versions referenced source images via `file://` URIs. That
+  worked for the seed assets (small, same-drive, no special chars in
+  path) but failed for everything interesting:
+    - OneDrive Files-On-Demand placeholders couldn't materialize on
+      browser request
+    - Cross-drive `file://` references are restricted in modern browsers
+    - Spaces and `&` in path components need URL encoding (%20, %26)
+    - Multi-MB source images made the page slow
+
+  The fix: pre-render small JPEG/PNG thumbnails INTO the same parent
+  as the HTML file (`<baked>/thumbs/<asset_id>.{jpg,png}`) and reference
+  them by relative path. All four problems disappear at once.
+
+  See library/html_index_thumbs.py for the rendering primitive.
+
 Output format:
   - Single HTML file, no external dependencies
   - Inline CSS for layout (responsive grid)
   - Tiny inline JS for filter controls
-  - Image thumbnails are direct file:// references to the asset paths
-    (no base64 encoding — keeps the HTML small and the images load
-    on demand from disk)
+  - Thumbnails referenced by relative path (./thumbs/<asset_id>.jpg)
   - Non-image assets (.glb, .fbx) get a placeholder card with metadata
     only — Blender thumbnail rendering is a future enhancement
-
-Limits:
-  - file:// links work when opening the HTML directly from disk on the
-    same machine that generated it. They will NOT work if the HTML is
-    served over HTTP without copying or symlinking the assets. For
-    remote review we'd need to add a /thumbnails HTTP endpoint, which
-    is a future enhancement.
 """
 from __future__ import annotations
 
@@ -35,6 +42,11 @@ import html
 import logging
 from pathlib import Path
 from typing import Any
+
+from asset_manager.library.html_index_thumbs import (
+    is_thumbnailable,
+    render_thumbnail,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +57,7 @@ _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 def regenerate_index(
     catalog: Any,
     out_path: Path,
+    thumbs_dir: Path | None = None,
 ) -> int:
     """Build the HTML index from the current catalog state.
 
@@ -52,12 +65,52 @@ def regenerate_index(
     out_path is where the HTML file should be written; the parent
     directory is created if it doesn't exist.
 
+    thumbs_dir is where pre-rendered thumbnails are stored. Default:
+    sibling of out_path called `thumbs/`. Thumbnails are referenced
+    from the HTML by relative path so the page renders correctly
+    regardless of which drive the source images are on.
+
     Returns the number of assets included in the index.
     """
     assets = catalog.all() if hasattr(catalog, "all") else []
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    cards_html = "\n".join(_render_card(a) for a in assets)
+    if thumbs_dir is None:
+        thumbs_dir = out_path.parent / "thumbs"
+
+    # Pre-render thumbnails for every image asset before composing the
+    # cards. The thumbnailer is idempotent so this is a no-op for assets
+    # whose source mtime hasn't changed since the last regen.
+    thumb_lookup: dict[str, Path] = {}
+    rendered = 0
+    skipped = 0
+    for asset in assets:
+        asset_id = str(asset.get("asset_id") or "")
+        path = str(asset.get("path") or "")
+        if not asset_id or not path:
+            continue
+        if not is_thumbnailable(path):
+            continue
+        thumb_path = render_thumbnail(
+            source_path=Path(path),
+            asset_id=asset_id,
+            thumbs_dir=thumbs_dir,
+        )
+        if thumb_path is not None:
+            thumb_lookup[asset_id] = thumb_path
+            rendered += 1
+        else:
+            skipped += 1
+
+    if rendered or skipped:
+        logger.info(
+            "[html_index] thumbnails rendered=%d skipped=%d",
+            rendered, skipped,
+        )
+
+    cards_html = "\n".join(
+        _render_card(a, thumb_lookup, out_path.parent) for a in assets
+    )
     page = _PAGE_TEMPLATE.format(
         count=len(assets),
         cards=cards_html,
@@ -68,8 +121,18 @@ def regenerate_index(
     return len(assets)
 
 
-def _render_card(asset: dict[str, Any]) -> str:
-    """Render a single asset as a flex card."""
+def _render_card(
+    asset: dict[str, Any],
+    thumb_lookup: dict[str, Path],
+    html_parent: Path,
+) -> str:
+    """Render a single asset as a flex card.
+
+    thumb_lookup maps asset_id → absolute path of the pre-rendered
+    thumbnail. The card uses a RELATIVE path from the HTML's parent
+    directory so the page renders correctly regardless of the source
+    image's drive or special characters.
+    """
     asset_id = html.escape(str(asset.get("asset_id", "?")))
     kind = html.escape(str(asset.get("kind", "?")))
     source = html.escape(str(asset.get("source", "unknown")))
@@ -88,13 +151,29 @@ def _render_card(asset: dict[str, Any]) -> str:
     redist_badge = "✓" if redistribution else "✗"
     swap_badge = "swap-safe" if swap_safe else "curated"
 
-    # Image preview if it's a recognized image extension; otherwise
-    # show a placeholder card with the file extension prominent
+    # Image preview: use the pre-rendered thumbnail when available,
+    # otherwise fall through to the extension placeholder card.
+    raw_id = str(asset.get("asset_id") or "")
     suffix = Path(path).suffix.lower() if path else ""
-    if suffix in _IMAGE_EXTENSIONS:
-        # file:// URI works when opening the index from disk locally
-        file_uri = f"file:///{path.replace(chr(92), '/').lstrip('/')}"
-        preview = f'<img src="{html.escape(file_uri)}" alt="{asset_id}" loading="lazy">'
+    thumb_path = thumb_lookup.get(raw_id)
+    if thumb_path is not None:
+        # Build a relative path from the HTML's directory to the thumb.
+        # This works on every drive, with special characters, and
+        # regardless of where the source image lives.
+        try:
+            rel = thumb_path.relative_to(html_parent)
+            rel_str = str(rel).replace("\\", "/")
+        except ValueError:
+            # Thumb dir is somehow outside the HTML's parent — fall
+            # back to absolute file:// URI as a last resort
+            rel_str = "file:///" + str(thumb_path).replace("\\", "/").lstrip("/")
+        preview = f'<img src="{html.escape(rel_str)}" alt="{asset_id}" loading="lazy">'
+    elif suffix in _IMAGE_EXTENSIONS:
+        # Image extension but thumbnail rendering failed (corrupt source,
+        # OneDrive placeholder that can't materialize, missing file).
+        # Show a "broken thumb" placeholder so the user knows there's
+        # an issue rather than silent emptiness.
+        preview = '<div class="ext-placeholder broken">img!</div>'
     else:
         ext_badge = (suffix or "?").lstrip(".").upper() or "?"
         preview = f'<div class="ext-placeholder">{html.escape(ext_badge)}</div>'
@@ -200,6 +279,11 @@ _PAGE_TEMPLATE = """<!DOCTYPE html>
     font-size: 28px;
     font-weight: bold;
     letter-spacing: 2px;
+  }}
+  .ext-placeholder.broken {{
+    color: #e07070;
+    font-size: 14px;
+    font-weight: normal;
   }}
   .meta {{ font-size: 11px; }}
   .title {{
