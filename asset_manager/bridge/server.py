@@ -33,7 +33,7 @@ from asset_manager.library.seed import (
 )
 from asset_manager.library.storage import Storage
 from asset_manager.library.style_bible import StyleBible
-from asset_manager.pipeline.style_audit import AuditPolicy, audit
+from asset_manager.pipeline.style_audit import audit
 from asset_manager.selectors.selector import Selector
 
 app = FastAPI(title="Asset Manager", version=__version__)
