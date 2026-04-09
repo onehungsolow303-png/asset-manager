@@ -37,7 +37,12 @@ class Catalog:
         self._by_id: dict[str, dict[str, Any]] = {}
         self._path = path or DEFAULT_CATALOG_PATH
         self._persist = persist
-        if self._persist and self._path.exists():
+        # Always load from disk if the file exists, regardless of `persist`.
+        # The persist flag controls WRITES (whether .add()/.remove() flush
+        # to disk), not READS. Read-only audit tools (like
+        # cli/ship_export_check.py) need to load the on-disk state without
+        # accidentally persisting any migrations they trigger.
+        if self._path.exists():
             try:
                 data = json.loads(self._path.read_text(encoding="utf-8"))
                 if isinstance(data, dict):
