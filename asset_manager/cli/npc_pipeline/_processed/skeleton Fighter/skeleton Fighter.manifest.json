@@ -1,0 +1,322 @@
+{
+  "model_name": "skeleton Fighter",
+  "source_file": "C:\\Pictures\\Assets\\NPCs\\Monsters\\skeleton Fighter.glb",
+  "total_parts": 18,
+  "categories": {
+    "accessory": 3,
+    "arm": 4,
+    "hand": 3,
+    "head": 3,
+    "leg": 2,
+    "lower_body": 2,
+    "shoulder": 1
+  },
+  "parts": [
+    {
+      "name": "accessory_0",
+      "original_name": "tripo_part_0",
+      "category": "accessory",
+      "center": [
+        0.0577,
+        -0.1916,
+        0.0926
+      ],
+      "dimensions": [
+        0.242,
+        0.1872,
+        0.3602
+      ],
+      "vertex_count": 59603,
+      "face_count": 111348
+    },
+    {
+      "name": "arm_0",
+      "original_name": "tripo_part_1",
+      "category": "arm",
+      "center": [
+        -0.097,
+        -0.1109,
+        0.1385
+      ],
+      "dimensions": [
+        0.1408,
+        0.1333,
+        0.3172
+      ],
+      "vertex_count": 53154,
+      "face_count": 98055
+    },
+    {
+      "name": "leg_0",
+      "original_name": "tripo_part_2",
+      "category": "leg",
+      "center": [
+        -0.0971,
+        -0.1038,
+        -0.4004
+      ],
+      "dimensions": [
+        0.1631,
+        0.1429,
+        0.1753
+      ],
+      "vertex_count": 51599,
+      "face_count": 95386
+    },
+    {
+      "name": "lower_body_0",
+      "original_name": "tripo_part_3",
+      "category": "lower_body",
+      "center": [
+        -0.0828,
+        -0.0395,
+        -0.1644
+      ],
+      "dimensions": [
+        0.1081,
+        0.1417,
+        0.3865
+      ],
+      "vertex_count": 55815,
+      "face_count": 99224
+    },
+    {
+      "name": "shoulder_0",
+      "original_name": "tripo_part_4",
+      "category": "shoulder",
+      "center": [
+        -0.0965,
+        -0.0513,
+        0.2784
+      ],
+      "dimensions": [
+        0.1126,
+        0.1426,
+        0.1147
+      ],
+      "vertex_count": 42182,
+      "face_count": 76380
+    },
+    {
+      "name": "head_0",
+      "original_name": "tripo_part_5",
+      "category": "head",
+      "center": [
+        -0.0458,
+        0.0319,
+        0.4091
+      ],
+      "dimensions": [
+        0.1538,
+        0.1223,
+        0.1625
+      ],
+      "vertex_count": 74253,
+      "face_count": 136715
+    },
+    {
+      "name": "head_1",
+      "original_name": "tripo_part_6",
+      "category": "head",
+      "center": [
+        -0.0593,
+        0.0303,
+        0.3294
+      ],
+      "dimensions": [
+        0.0563,
+        0.0656,
+        0.0803
+      ],
+      "vertex_count": 13922,
+      "face_count": 23666
+    },
+    {
+      "name": "arm_1",
+      "original_name": "tripo_part_7",
+      "category": "arm",
+      "center": [
+        -0.0646,
+        0.0349,
+        0.243
+      ],
+      "dimensions": [
+        0.1368,
+        0.183,
+        0.2157
+      ],
+      "vertex_count": 203038,
+      "face_count": 375299
+    },
+    {
+      "name": "hand_0",
+      "original_name": "tripo_part_8",
+      "category": "hand",
+      "center": [
+        -0.0913,
+        0.0378,
+        -0.0253
+      ],
+      "dimensions": [
+        0.1342,
+        0.2007,
+        0.2724
+      ],
+      "vertex_count": 112717,
+      "face_count": 208633
+    },
+    {
+      "name": "hand_1",
+      "original_name": "tripo_part_9",
+      "category": "hand",
+      "center": [
+        -0.0674,
+        0.0345,
+        -0.0738
+      ],
+      "dimensions": [
+        0.0598,
+        0.1394,
+        0.2104
+      ],
+      "vertex_count": 32592,
+      "face_count": 56797
+    },
+    {
+      "name": "arm_2",
+      "original_name": "tripo_part_10",
+      "category": "arm",
+      "center": [
+        -0.1076,
+        0.0485,
+        0.1585
+      ],
+      "dimensions": [
+        0.0568,
+        0.0583,
+        0.2088
+      ],
+      "vertex_count": 44908,
+      "face_count": 63602
+    },
+    {
+      "name": "head_2",
+      "original_name": "tripo_part_11",
+      "category": "head",
+      "center": [
+        -0.0366,
+        0.063,
+        0.302
+      ],
+      "dimensions": [
+        0.0327,
+        0.0434,
+        0.0249
+      ],
+      "vertex_count": 1671,
+      "face_count": 2302
+    },
+    {
+      "name": "hand_2",
+      "original_name": "tripo_part_12",
+      "category": "hand",
+      "center": [
+        -0.0826,
+        0.1199,
+        -0.0241
+      ],
+      "dimensions": [
+        0.091,
+        0.0584,
+        0.1066
+      ],
+      "vertex_count": 14336,
+      "face_count": 24790
+    },
+    {
+      "name": "arm_3",
+      "original_name": "tripo_part_13",
+      "category": "arm",
+      "center": [
+        -0.053,
+        0.1283,
+        0.2844
+      ],
+      "dimensions": [
+        0.1378,
+        0.1461,
+        0.1308
+      ],
+      "vertex_count": 44947,
+      "face_count": 80831
+    },
+    {
+      "name": "lower_body_1",
+      "original_name": "tripo_part_14",
+      "category": "lower_body",
+      "center": [
+        -0.0486,
+        0.1326,
+        -0.1741
+      ],
+      "dimensions": [
+        0.1261,
+        0.1413,
+        0.3768
+      ],
+      "vertex_count": 44384,
+      "face_count": 79408
+    },
+    {
+      "name": "leg_1",
+      "original_name": "tripo_part_15",
+      "category": "leg",
+      "center": [
+        -0.056,
+        0.1742,
+        -0.3485
+      ],
+      "dimensions": [
+        0.1063,
+        0.0989,
+        0.0645
+      ],
+      "vertex_count": 20488,
+      "face_count": 36346
+    },
+    {
+      "name": "accessory_1",
+      "original_name": "tripo_part_16",
+      "category": "accessory",
+      "center": [
+        -0.0233,
+        0.1907,
+        -0.4305
+      ],
+      "dimensions": [
+        0.1822,
+        0.1062,
+        0.1189
+      ],
+      "vertex_count": 28272,
+      "face_count": 51274
+    },
+    {
+      "name": "accessory_2",
+      "original_name": "tripo_part_17",
+      "category": "accessory",
+      "center": [
+        -0.0048,
+        0.2001,
+        0.0772
+      ],
+      "dimensions": [
+        0.2803,
+        0.1701,
+        0.4408
+      ],
+      "vertex_count": 166294,
+      "face_count": 312446
+    }
+  ]
+}

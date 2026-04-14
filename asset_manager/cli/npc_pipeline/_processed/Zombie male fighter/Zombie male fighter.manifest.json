@@ -1,0 +1,200 @@
+{
+  "model_name": "Zombie male fighter",
+  "source_file": "C:\\Pictures\\Assets\\NPCs\\Monsters\\Zombie male fighter.glb",
+  "total_parts": 11,
+  "categories": {
+    "arm": 4,
+    "hand": 3,
+    "leg": 2,
+    "lower_body": 2
+  },
+  "parts": [
+    {
+      "name": "hand_0",
+      "original_name": "tripo_part_0",
+      "category": "hand",
+      "center": [
+        0.0367,
+        -0.2167,
+        0.0415
+      ],
+      "dimensions": [
+        0.4125,
+        0.1602,
+        0.2612
+      ],
+      "vertex_count": 105927,
+      "face_count": 198202
+    },
+    {
+      "name": "arm_0",
+      "original_name": "tripo_part_1",
+      "category": "arm",
+      "center": [
+        -0.1212,
+        -0.1336,
+        0.1822
+      ],
+      "dimensions": [
+        0.1294,
+        0.1096,
+        0.1682
+      ],
+      "vertex_count": 35063,
+      "face_count": 62176
+    },
+    {
+      "name": "leg_0",
+      "original_name": "tripo_part_2",
+      "category": "leg",
+      "center": [
+        -0.1331,
+        -0.1115,
+        -0.3871
+      ],
+      "dimensions": [
+        0.1964,
+        0.1305,
+        0.205
+      ],
+      "vertex_count": 46547,
+      "face_count": 86449
+    },
+    {
+      "name": "hand_1",
+      "original_name": "tripo_part_3",
+      "category": "hand",
+      "center": [
+        -0.121,
+        0.036,
+        -0.0439
+      ],
+      "dimensions": [
+        0.2064,
+        0.3727,
+        0.5882
+      ],
+      "vertex_count": 397222,
+      "face_count": 672150
+    },
+    {
+      "name": "arm_1",
+      "original_name": "tripo_part_4",
+      "category": "arm",
+      "center": [
+        -0.0976,
+        0.0313,
+        0.3518
+      ],
+      "dimensions": [
+        0.2916,
+        0.2024,
+        0.2755
+      ],
+      "vertex_count": 172382,
+      "face_count": 321525
+    },
+    {
+      "name": "arm_2",
+      "original_name": "tripo_part_5",
+      "category": "arm",
+      "center": [
+        -0.12,
+        0.0367,
+        0.2554
+      ],
+      "dimensions": [
+        0.225,
+        0.3779,
+        0.1879
+      ],
+      "vertex_count": 103469,
+      "face_count": 192390
+    },
+    {
+      "name": "lower_body_0",
+      "original_name": "tripo_part_6",
+      "category": "lower_body",
+      "center": [
+        -0.1168,
+        0.0716,
+        -0.1246
+      ],
+      "dimensions": [
+        0.1444,
+        0.258,
+        0.2899
+      ],
+      "vertex_count": 45261,
+      "face_count": 81516
+    },
+    {
+      "name": "lower_body_1",
+      "original_name": "tripo_part_7",
+      "category": "lower_body",
+      "center": [
+        -0.1437,
+        0.1681,
+        -0.2871
+      ],
+      "dimensions": [
+        0.1302,
+        0.1169,
+        0.1
+      ],
+      "vertex_count": 27166,
+      "face_count": 48681
+    },
+    {
+      "name": "leg_1",
+      "original_name": "tripo_part_8",
+      "category": "leg",
+      "center": [
+        -0.1328,
+        0.1855,
+        -0.3951
+      ],
+      "dimensions": [
+        0.1957,
+        0.135,
+        0.189
+      ],
+      "vertex_count": 48447,
+      "face_count": 89466
+    },
+    {
+      "name": "arm_3",
+      "original_name": "tripo_part_9",
+      "category": "arm",
+      "center": [
+        -0.1169,
+        0.2165,
+        0.1379
+      ],
+      "dimensions": [
+        0.1182,
+        0.1602,
+        0.2482
+      ],
+      "vertex_count": 63062,
+      "face_count": 117053
+    },
+    {
+      "name": "hand_2",
+      "original_name": "tripo_part_10",
+      "category": "hand",
+      "center": [
+        -0.0973,
+        0.2589,
+        -0.0361
+      ],
+      "dimensions": [
+        0.0847,
+        0.0763,
+        0.1187
+      ],
+      "vertex_count": 28436,
+      "face_count": 51213
+    }
+  ]
+}

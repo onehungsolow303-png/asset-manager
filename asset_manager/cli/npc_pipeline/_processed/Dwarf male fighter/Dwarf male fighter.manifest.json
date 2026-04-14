@@ -1,0 +1,457 @@
+{
+  "model_name": "Dwarf male fighter",
+  "source_file": "C:\\Pictures\\Assets\\NPCs\\Dwarf male fighter.glb",
+  "total_parts": 26,
+  "categories": {
+    "accessory": 1,
+    "arm": 10,
+    "hand": 3,
+    "head": 5,
+    "leg": 1,
+    "lower_body": 6
+  },
+  "parts": [
+    {
+      "name": "lower_body_0",
+      "original_name": "tripo_part_0",
+      "category": "lower_body",
+      "center": [
+        -0.1633,
+        -0.3837,
+        -0.1284
+      ],
+      "dimensions": [
+        0.2206,
+        0.2117,
+        0.1037
+      ],
+      "vertex_count": 18299,
+      "face_count": 31885
+    },
+    {
+      "name": "lower_body_1",
+      "original_name": "tripo_part_1",
+      "category": "lower_body",
+      "center": [
+        -0.0323,
+        -0.3037,
+        -0.1461
+      ],
+      "dimensions": [
+        0.1499,
+        0.1633,
+        0.1375
+      ],
+      "vertex_count": 15763,
+      "face_count": 27206
+    },
+    {
+      "name": "hand_0",
+      "original_name": "tripo_part_2",
+      "category": "hand",
+      "center": [
+        -0.1021,
+        -0.2677,
+        -0.0027
+      ],
+      "dimensions": [
+        0.269,
+        0.2236,
+        0.3212
+      ],
+      "vertex_count": 69128,
+      "face_count": 127043
+    },
+    {
+      "name": "arm_0",
+      "original_name": "tripo_part_3",
+      "category": "arm",
+      "center": [
+        -0.1106,
+        -0.206,
+        0.2421
+      ],
+      "dimensions": [
+        0.3544,
+        0.276,
+        0.2487
+      ],
+      "vertex_count": 63043,
+      "face_count": 115864
+    },
+    {
+      "name": "lower_body_2",
+      "original_name": "tripo_part_4",
+      "category": "lower_body",
+      "center": [
+        -0.1069,
+        -0.1645,
+        -0.2518
+      ],
+      "dimensions": [
+        0.3433,
+        0.2887,
+        0.4755
+      ],
+      "vertex_count": 99060,
+      "face_count": 187053
+    },
+    {
+      "name": "lower_body_3",
+      "original_name": "tripo_part_5",
+      "category": "lower_body",
+      "center": [
+        0.1261,
+        -0.1787,
+        -0.2212
+      ],
+      "dimensions": [
+        0.3232,
+        0.2958,
+        0.3247
+      ],
+      "vertex_count": 89394,
+      "face_count": 166642
+    },
+    {
+      "name": "arm_1",
+      "original_name": "tripo_part_6",
+      "category": "arm",
+      "center": [
+        0.079,
+        -0.1321,
+        0.1056
+      ],
+      "dimensions": [
+        0.0441,
+        0.0419,
+        0.065
+      ],
+      "vertex_count": 1923,
+      "face_count": 2752
+    },
+    {
+      "name": "arm_2",
+      "original_name": "tripo_part_7",
+      "category": "arm",
+      "center": [
+        0.0926,
+        -0.119,
+        0.0891
+      ],
+      "dimensions": [
+        0.0302,
+        0.0311,
+        0.0595
+      ],
+      "vertex_count": 1174,
+      "face_count": 1547
+    },
+    {
+      "name": "arm_3",
+      "original_name": "tripo_part_8",
+      "category": "arm",
+      "center": [
+        0.1187,
+        -0.0805,
+        0.0494
+      ],
+      "dimensions": [
+        0.0583,
+        0.0565,
+        0.1058
+      ],
+      "vertex_count": 5876,
+      "face_count": 9871
+    },
+    {
+      "name": "head_0",
+      "original_name": "tripo_part_9",
+      "category": "head",
+      "center": [
+        0.0668,
+        -0.0389,
+        0.3376
+      ],
+      "dimensions": [
+        0.0706,
+        0.0749,
+        0.0482
+      ],
+      "vertex_count": 2316,
+      "face_count": 3408
+    },
+    {
+      "name": "arm_4",
+      "original_name": "tripo_part_10",
+      "category": "arm",
+      "center": [
+        -0.0864,
+        0.0035,
+        0.1574
+      ],
+      "dimensions": [
+        0.3658,
+        0.4068,
+        0.3444
+      ],
+      "vertex_count": 45244,
+      "face_count": 65882
+    },
+    {
+      "name": "head_1",
+      "original_name": "tripo_part_11",
+      "category": "head",
+      "center": [
+        -0.1472,
+        -0.0058,
+        0.2997
+      ],
+      "dimensions": [
+        0.1613,
+        0.255,
+        0.0656
+      ],
+      "vertex_count": 3894,
+      "face_count": 5919
+    },
+    {
+      "name": "accessory_0",
+      "original_name": "tripo_part_12",
+      "category": "accessory",
+      "center": [
+        0.1198,
+        0.0005,
+        0.097
+      ],
+      "dimensions": [
+        0.109,
+        0.2178,
+        0.3037
+      ],
+      "vertex_count": 29426,
+      "face_count": 51667
+    },
+    {
+      "name": "hand_1",
+      "original_name": "tripo_part_13",
+      "category": "hand",
+      "center": [
+        -0.0724,
+        0.0102,
+        -0.0067
+      ],
+      "dimensions": [
+        0.3914,
+        0.397,
+        0.1297
+      ],
+      "vertex_count": 25014,
+      "face_count": 41421
+    },
+    {
+      "name": "head_2",
+      "original_name": "tripo_part_14",
+      "category": "head",
+      "center": [
+        -0.0602,
+        0.0107,
+        0.3684
+      ],
+      "dimensions": [
+        0.2842,
+        0.2994,
+        0.2421
+      ],
+      "vertex_count": 81003,
+      "face_count": 145236
+    },
+    {
+      "name": "arm_5",
+      "original_name": "tripo_part_15",
+      "category": "arm",
+      "center": [
+        0.0362,
+        0.0087,
+        0.2326
+      ],
+      "dimensions": [
+        0.202,
+        0.3323,
+        0.3622
+      ],
+      "vertex_count": 56709,
+      "face_count": 101579
+    },
+    {
+      "name": "lower_body_4",
+      "original_name": "tripo_part_16",
+      "category": "lower_body",
+      "center": [
+        -0.0929,
+        0.045,
+        -0.1075
+      ],
+      "dimensions": [
+        0.3707,
+        0.394,
+        0.1858
+      ],
+      "vertex_count": 79266,
+      "face_count": 145675
+    },
+    {
+      "name": "arm_6",
+      "original_name": "tripo_part_17",
+      "category": "arm",
+      "center": [
+        0.1016,
+        0.1234,
+        0.0746
+      ],
+      "dimensions": [
+        0.092,
+        0.1014,
+        0.1561
+      ],
+      "vertex_count": 10598,
+      "face_count": 17811
+    },
+    {
+      "name": "head_3",
+      "original_name": "tripo_part_18",
+      "category": "head",
+      "center": [
+        -0.054,
+        0.1331,
+        0.2841
+      ],
+      "dimensions": [
+        0.0842,
+        0.0498,
+        0.0784
+      ],
+      "vertex_count": 2697,
+      "face_count": 4058
+    },
+    {
+      "name": "head_4",
+      "original_name": "tripo_part_19",
+      "category": "head",
+      "center": [
+        -0.1301,
+        0.1223,
+        0.3127
+      ],
+      "dimensions": [
+        0.144,
+        0.0698,
+        0.0393
+      ],
+      "vertex_count": 2360,
+      "face_count": 3344
+    },
+    {
+      "name": "arm_7",
+      "original_name": "tripo_part_20",
+      "category": "arm",
+      "center": [
+        -0.2523,
+        0.1377,
+        0.1774
+      ],
+      "dimensions": [
+        0.0702,
+        0.0907,
+        0.0969
+      ],
+      "vertex_count": 5024,
+      "face_count": 8041
+    },
+    {
+      "name": "arm_8",
+      "original_name": "tripo_part_21",
+      "category": "arm",
+      "center": [
+        -0.0185,
+        0.1308,
+        0.0662
+      ],
+      "dimensions": [
+        0.2381,
+        0.1544,
+        0.1761
+      ],
+      "vertex_count": 11175,
+      "face_count": 18667
+    },
+    {
+      "name": "lower_body_5",
+      "original_name": "tripo_part_22",
+      "category": "lower_body",
+      "center": [
+        -0.0087,
+        0.1519,
+        -0.0868
+      ],
+      "dimensions": [
+        0.1467,
+        0.1535,
+        0.1236
+      ],
+      "vertex_count": 10622,
+      "face_count": 18088
+    },
+    {
+      "name": "leg_0",
+      "original_name": "tripo_part_23",
+      "category": "leg",
+      "center": [
+        -0.1032,
+        0.1751,
+        -0.3016
+      ],
+      "dimensions": [
+        0.2686,
+        0.31,
+        0.3756
+      ],
+      "vertex_count": 79440,
+      "face_count": 149334
+    },
+    {
+      "name": "arm_9",
+      "original_name": "tripo_part_24",
+      "category": "arm",
+      "center": [
+        -0.1048,
+        0.2276,
+        0.2405
+      ],
+      "dimensions": [
+        0.3349,
+        0.2735,
+        0.2512
+      ],
+      "vertex_count": 56880,
+      "face_count": 103405
+    },
+    {
+      "name": "hand_2",
+      "original_name": "tripo_part_25",
+      "category": "hand",
+      "center": [
+        -0.0459,
+        0.332,
+        -0.0433
+      ],
+      "dimensions": [
+        0.3877,
+        0.3147,
+        0.4116
+      ],
+      "vertex_count": 175778,
+      "face_count": 331964
+    }
+  ]
+}

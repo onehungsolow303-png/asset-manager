@@ -1,0 +1,220 @@
+{
+  "model_name": "Human female fighter",
+  "source_file": "C:\\Pictures\\Assets\\NPCs\\Human female fighter.glb",
+  "total_parts": 12,
+  "categories": {
+    "accessory": 1,
+    "arm": 1,
+    "belt": 2,
+    "foot": 1,
+    "head": 1,
+    "leg": 2,
+    "lower_body": 4
+  },
+  "parts": [
+    {
+      "name": "lower_body_0",
+      "original_name": "tripo_part_0",
+      "category": "lower_body",
+      "center": [
+        0.0735,
+        -0.3081,
+        -0.1791
+      ],
+      "dimensions": [
+        0.1299,
+        0.2027,
+        0.2524
+      ],
+      "vertex_count": 18600,
+      "face_count": 34111
+    },
+    {
+      "name": "belt_0",
+      "original_name": "tripo_part_1",
+      "category": "belt",
+      "center": [
+        0.0046,
+        -0.2012,
+        -0.0282
+      ],
+      "dimensions": [
+        0.0529,
+        0.0689,
+        0.0767
+      ],
+      "vertex_count": 16607,
+      "face_count": 29291
+    },
+    {
+      "name": "foot_0",
+      "original_name": "tripo_part_2",
+      "category": "foot",
+      "center": [
+        -0.0185,
+        -0.1381,
+        -0.4529
+      ],
+      "dimensions": [
+        0.1483,
+        0.0857,
+        0.0728
+      ],
+      "vertex_count": 30353,
+      "face_count": 55694
+    },
+    {
+      "name": "leg_0",
+      "original_name": "tripo_part_3",
+      "category": "leg",
+      "center": [
+        -0.0516,
+        -0.109,
+        -0.3778
+      ],
+      "dimensions": [
+        0.0882,
+        0.0839,
+        0.1208
+      ],
+      "vertex_count": 24225,
+      "face_count": 43752
+    },
+    {
+      "name": "arm_0",
+      "original_name": "tripo_part_4",
+      "category": "arm",
+      "center": [
+        -0.0164,
+        -0.0489,
+        0.1425
+      ],
+      "dimensions": [
+        0.1787,
+        0.3344,
+        0.367
+      ],
+      "vertex_count": 324006,
+      "face_count": 622044
+    },
+    {
+      "name": "lower_body_1",
+      "original_name": "tripo_part_5",
+      "category": "lower_body",
+      "center": [
+        -0.0196,
+        0.0041,
+        -0.1534
+      ],
+      "dimensions": [
+        0.1804,
+        0.3294,
+        0.3681
+      ],
+      "vertex_count": 260367,
+      "face_count": 499811
+    },
+    {
+      "name": "head_0",
+      "original_name": "tripo_part_6",
+      "category": "head",
+      "center": [
+        -0.0221,
+        0.0002,
+        0.382
+      ],
+      "dimensions": [
+        0.1667,
+        0.1716,
+        0.2147
+      ],
+      "vertex_count": 160162,
+      "face_count": 300548
+    },
+    {
+      "name": "lower_body_2",
+      "original_name": "tripo_part_7",
+      "category": "lower_body",
+      "center": [
+        -0.0873,
+        0.0811,
+        -0.1086
+      ],
+      "dimensions": [
+        0.1209,
+        0.083,
+        0.2692
+      ],
+      "vertex_count": 30674,
+      "face_count": 55085
+    },
+    {
+      "name": "belt_1",
+      "original_name": "tripo_part_8",
+      "category": "belt",
+      "center": [
+        -0.0329,
+        0.1095,
+        -0.015
+      ],
+      "dimensions": [
+        0.0466,
+        0.0511,
+        0.0839
+      ],
+      "vertex_count": 5231,
+      "face_count": 8408
+    },
+    {
+      "name": "leg_1",
+      "original_name": "tripo_part_9",
+      "category": "leg",
+      "center": [
+        0.0385,
+        0.1441,
+        -0.4034
+      ],
+      "dimensions": [
+        0.1453,
+        0.1385,
+        0.1686
+      ],
+      "vertex_count": 55060,
+      "face_count": 103087
+    },
+    {
+      "name": "accessory_0",
+      "original_name": "tripo_part_10",
+      "category": "accessory",
+      "center": [
+        -0.0261,
+        0.1465,
+        0.1072
+      ],
+      "dimensions": [
+        0.1147,
+        0.1538,
+        0.3564
+      ],
+      "vertex_count": 98184,
+      "face_count": 185336
+    },
+    {
+      "name": "lower_body_3",
+      "original_name": "tripo_part_11",
+      "category": "lower_body",
+      "center": [
+        0.0817,
+        0.3064,
+        -0.1606
+      ],
+      "dimensions": [
+        0.1338,
+        0.2048,
+        0.2271
+      ],
+      "vertex_count": 17454,
+      "face_count": 31603
+    }
+  ]
+}

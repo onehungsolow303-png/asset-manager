@@ -1,0 +1,321 @@
+{
+  "model_name": "Human male fighter",
+  "source_file": "C:\\Pictures\\Assets\\NPCs\\Human male fighter.glb",
+  "total_parts": 18,
+  "categories": {
+    "arm": 5,
+    "belt": 1,
+    "hand": 5,
+    "head": 3,
+    "leg": 2,
+    "lower_body": 2
+  },
+  "parts": [
+    {
+      "name": "belt_0",
+      "original_name": "tripo_part_0",
+      "category": "belt",
+      "center": [
+        -0.0132,
+        -0.2481,
+        -0.0013
+      ],
+      "dimensions": [
+        0.0964,
+        0.0987,
+        0.0758
+      ],
+      "vertex_count": 9523,
+      "face_count": 16551
+    },
+    {
+      "name": "hand_0",
+      "original_name": "tripo_part_1",
+      "category": "hand",
+      "center": [
+        0.0751,
+        -0.1448,
+        0.0346
+      ],
+      "dimensions": [
+        0.2914,
+        0.1961,
+        0.3993
+      ],
+      "vertex_count": 85739,
+      "face_count": 160348
+    },
+    {
+      "name": "leg_0",
+      "original_name": "tripo_part_2",
+      "category": "leg",
+      "center": [
+        0.0007,
+        -0.156,
+        -0.4023
+      ],
+      "dimensions": [
+        0.1782,
+        0.1422,
+        0.1732
+      ],
+      "vertex_count": 44509,
+      "face_count": 82529
+    },
+    {
+      "name": "lower_body_0",
+      "original_name": "tripo_part_3",
+      "category": "lower_body",
+      "center": [
+        -0.0168,
+        -0.103,
+        -0.2239
+      ],
+      "dimensions": [
+        0.1449,
+        0.1721,
+        0.2367
+      ],
+      "vertex_count": 47258,
+      "face_count": 87223
+    },
+    {
+      "name": "hand_1",
+      "original_name": "tripo_part_4",
+      "category": "hand",
+      "center": [
+        0.0449,
+        -0.0992,
+        -0.0071
+      ],
+      "dimensions": [
+        0.099,
+        0.0873,
+        0.0985
+      ],
+      "vertex_count": 16066,
+      "face_count": 28041
+    },
+    {
+      "name": "head_0",
+      "original_name": "tripo_part_5",
+      "category": "head",
+      "center": [
+        -0.1376,
+        -0.056,
+        0.4035
+      ],
+      "dimensions": [
+        0.1669,
+        0.186,
+        0.1731
+      ],
+      "vertex_count": 35850,
+      "face_count": 60022
+    },
+    {
+      "name": "head_1",
+      "original_name": "tripo_part_6",
+      "category": "head",
+      "center": [
+        0.0184,
+        -0.0293,
+        0.2867
+      ],
+      "dimensions": [
+        0.0507,
+        0.0528,
+        0.0686
+      ],
+      "vertex_count": 3765,
+      "face_count": 5495
+    },
+    {
+      "name": "arm_0",
+      "original_name": "tripo_part_7",
+      "category": "arm",
+      "center": [
+        -0.054,
+        -0.0031,
+        0.2412
+      ],
+      "dimensions": [
+        0.2341,
+        0.3685,
+        0.2171
+      ],
+      "vertex_count": 123260,
+      "face_count": 230190
+    },
+    {
+      "name": "hand_2",
+      "original_name": "tripo_part_8",
+      "category": "hand",
+      "center": [
+        -0.0028,
+        0.0059,
+        -0.0282
+      ],
+      "dimensions": [
+        0.2037,
+        0.3481,
+        0.3804
+      ],
+      "vertex_count": 175211,
+      "face_count": 263284
+    },
+    {
+      "name": "hand_3",
+      "original_name": "tripo_part_9",
+      "category": "hand",
+      "center": [
+        -0.083,
+        0.0123,
+        -0.0717
+      ],
+      "dimensions": [
+        0.1982,
+        0.5617,
+        0.5285
+      ],
+      "vertex_count": 239579,
+      "face_count": 441501
+    },
+    {
+      "name": "arm_1",
+      "original_name": "tripo_part_10",
+      "category": "arm",
+      "center": [
+        0.0845,
+        0.009,
+        0.0535
+      ],
+      "dimensions": [
+        0.017,
+        0.0671,
+        0.0516
+      ],
+      "vertex_count": 4535,
+      "face_count": 7269
+    },
+    {
+      "name": "head_2",
+      "original_name": "tripo_part_11",
+      "category": "head",
+      "center": [
+        0.0102,
+        0.0023,
+        0.3684
+      ],
+      "dimensions": [
+        0.1595,
+        0.1517,
+        0.221
+      ],
+      "vertex_count": 64943,
+      "face_count": 119585
+    },
+    {
+      "name": "arm_2",
+      "original_name": "tripo_part_12",
+      "category": "arm",
+      "center": [
+        -0.0084,
+        -0.0006,
+        0.1477
+      ],
+      "dimensions": [
+        0.1787,
+        0.2338,
+        0.1833
+      ],
+      "vertex_count": 48887,
+      "face_count": 86067
+    },
+    {
+      "name": "arm_3",
+      "original_name": "tripo_part_13",
+      "category": "arm",
+      "center": [
+        0.0117,
+        0.1052,
+        0.2873
+      ],
+      "dimensions": [
+        0.1658,
+        0.1755,
+        0.1308
+      ],
+      "vertex_count": 20830,
+      "face_count": 36193
+    },
+    {
+      "name": "lower_body_1",
+      "original_name": "tripo_part_14",
+      "category": "lower_body",
+      "center": [
+        -0.0218,
+        0.104,
+        -0.2147
+      ],
+      "dimensions": [
+        0.1583,
+        0.1805,
+        0.2538
+      ],
+      "vertex_count": 50101,
+      "face_count": 92073
+    },
+    {
+      "name": "hand_4",
+      "original_name": "tripo_part_15",
+      "category": "hand",
+      "center": [
+        0.0425,
+        0.1114,
+        -0.025
+      ],
+      "dimensions": [
+        0.096,
+        0.1063,
+        0.108
+      ],
+      "vertex_count": 20912,
+      "face_count": 36594
+    },
+    {
+      "name": "leg_1",
+      "original_name": "tripo_part_16",
+      "category": "leg",
+      "center": [
+        -0.0129,
+        0.1646,
+        -0.4037
+      ],
+      "dimensions": [
+        0.1654,
+        0.159,
+        0.1704
+      ],
+      "vertex_count": 43373,
+      "face_count": 80086
+    },
+    {
+      "name": "arm_4",
+      "original_name": "tripo_part_17",
+      "category": "arm",
+      "center": [
+        0.0388,
+        0.2013,
+        0.198
+      ],
+      "dimensions": [
+        0.2242,
+        0.1924,
+        0.1951
+      ],
+      "vertex_count": 75955,
+      "face_count": 140890
+    }
+  ]
+}

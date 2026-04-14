@@ -1,0 +1,202 @@
+{
+  "model_name": "Drago male fighter",
+  "source_file": "C:\\Pictures\\Assets\\NPCs\\Drago male fighter.glb",
+  "total_parts": 11,
+  "categories": {
+    "accessory": 1,
+    "arm": 4,
+    "hair": 1,
+    "hand": 2,
+    "lower_body": 2,
+    "weapon": 1
+  },
+  "parts": [
+    {
+      "name": "weapon_0",
+      "original_name": "tripo_part_0",
+      "category": "weapon",
+      "center": [
+        -0.0273,
+        -0.3189,
+        -0.3859
+      ],
+      "dimensions": [
+        0.0277,
+        0.0172,
+        0.1318
+      ],
+      "vertex_count": 1322,
+      "face_count": 1731
+    },
+    {
+      "name": "hand_0",
+      "original_name": "tripo_part_1",
+      "category": "hand",
+      "center": [
+        0.0011,
+        -0.2307,
+        0.0038
+      ],
+      "dimensions": [
+        0.1934,
+        0.2691,
+        0.4174
+      ],
+      "vertex_count": 92393,
+      "face_count": 171507
+    },
+    {
+      "name": "lower_body_0",
+      "original_name": "tripo_part_2",
+      "category": "lower_body",
+      "center": [
+        -0.0138,
+        0.0019,
+        -0.1927
+      ],
+      "dimensions": [
+        0.2448,
+        0.5206,
+        0.593
+      ],
+      "vertex_count": 314745,
+      "face_count": 596904
+    },
+    {
+      "name": "arm_0",
+      "original_name": "tripo_part_3",
+      "category": "arm",
+      "center": [
+        0.0823,
+        -0.0098,
+        0.2031
+      ],
+      "dimensions": [
+        0.0541,
+        0.1051,
+        0.0566
+      ],
+      "vertex_count": 3630,
+      "face_count": 5841
+    },
+    {
+      "name": "arm_1",
+      "original_name": "tripo_part_4",
+      "category": "arm",
+      "center": [
+        0.1049,
+        0.0027,
+        0.3314
+      ],
+      "dimensions": [
+        0.2388,
+        0.2648,
+        0.3192
+      ],
+      "vertex_count": 117108,
+      "face_count": 177144
+    },
+    {
+      "name": "lower_body_1",
+      "original_name": "tripo_part_5",
+      "category": "lower_body",
+      "center": [
+        -0.1189,
+        0.0,
+        -0.1504
+      ],
+      "dimensions": [
+        0.212,
+        0.7757,
+        0.6228
+      ],
+      "vertex_count": 243363,
+      "face_count": 454320
+    },
+    {
+      "name": "arm_2",
+      "original_name": "tripo_part_6",
+      "category": "arm",
+      "center": [
+        -0.0053,
+        0.0017,
+        0.3109
+      ],
+      "dimensions": [
+        0.1458,
+        0.1889,
+        0.1604
+      ],
+      "vertex_count": 32215,
+      "face_count": 48751
+    },
+    {
+      "name": "arm_3",
+      "original_name": "tripo_part_7",
+      "category": "arm",
+      "center": [
+        0.0316,
+        -0.0018,
+        0.1185
+      ],
+      "dimensions": [
+        0.1654,
+        0.2507,
+        0.135
+      ],
+      "vertex_count": 32566,
+      "face_count": 58374
+    },
+    {
+      "name": "accessory_0",
+      "original_name": "tripo_part_8",
+      "category": "accessory",
+      "center": [
+        -0.0365,
+        0.0003,
+        0.0676
+      ],
+      "dimensions": [
+        0.3275,
+        0.4116,
+        0.4661
+      ],
+      "vertex_count": 110326,
+      "face_count": 204421
+    },
+    {
+      "name": "hair_0",
+      "original_name": "tripo_part_9",
+      "category": "hair",
+      "center": [
+        0.0317,
+        0.0882,
+        0.4378
+      ],
+      "dimensions": [
+        0.0959,
+        0.0455,
+        0.1072
+      ],
+      "vertex_count": 4864,
+      "face_count": 7644
+    },
+    {
+      "name": "hand_1",
+      "original_name": "tripo_part_10",
+      "category": "hand",
+      "center": [
+        0.0007,
+        0.2321,
+        0.0099
+      ],
+      "dimensions": [
+        0.1932,
+        0.2734,
+        0.4276
+      ],
+      "vertex_count": 93978,
+      "face_count": 174838
+    }
+  ]
+}
