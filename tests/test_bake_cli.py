@@ -5,6 +5,7 @@ synthetic recipes (success path, unknown kind, missing fields, malformed
 file). Each test redirects Storage to a tmp_path so it doesn't pollute
 C:/Dev/.shared/baked/.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -94,12 +95,7 @@ def test_malformed_yaml_returns_minus_one(tmp_path: Path):
 
 def test_sample_recipe_round_trip(tmp_path: Path):
     """The committed sample_recipe.yaml should bake without errors."""
-    sample = (
-        Path(__file__).resolve().parent.parent
-        / "asset_manager"
-        / "cli"
-        / "sample_recipe.yaml"
-    )
+    sample = Path(__file__).resolve().parent.parent / "asset_manager" / "cli" / "sample_recipe.yaml"
     assert sample.exists(), f"sample recipe missing at {sample}"
     success, failure = bake_recipe(sample, root=tmp_path / "baked")
     assert failure == 0

@@ -1,20 +1,21 @@
 """Tests for the source-decision routing protocol."""
+
 from __future__ import annotations
 
 import pytest
 
 from asset_manager.pipeline.source_decision import (
-    AssetRequest,
     PAID_TIERS,
+    TIER_COST_USD,
+    AssetRequest,
     RoutingResult,
     SourceDecisionRouter,
-    TIER_COST_USD,
     Tier,
     TierConfig,
 )
 
-
 # ─── AssetRequest hashing ─────────────────────────────────────────
+
 
 def test_hash_is_deterministic():
     req1 = AssetRequest(kind="creature_token", tags=["wolf"], biome="forest")
@@ -41,6 +42,7 @@ def test_hash_changes_with_different_prompt():
 
 
 # ─── Routing through tiers ────────────────────────────────────────
+
 
 def _hit(asset_id: str = "wolf") -> RoutingResult:
     return RoutingResult(found=True, asset_id=asset_id, path=f"/x/{asset_id}.png")
@@ -122,6 +124,7 @@ def test_router_skips_disabled_tiers():
 def test_router_handler_exception_does_not_kill_chain():
     """A tier handler that raises should be logged and skipped, not
     propagated. The router moves to the next tier."""
+
     def boom(req):
         raise RuntimeError("tier exploded")
 
@@ -142,6 +145,7 @@ def test_router_handler_exception_does_not_kill_chain():
 
 
 # ─── Budget ceiling ────────────────────────────────────────────────
+
 
 def test_paid_tiers_skipped_when_budget_exceeded():
     """Paid tiers (NANO_BANANA, TRIPO3D) must be skipped when projected
@@ -205,6 +209,7 @@ def test_budget_remaining_is_clamped_at_zero():
 
 
 # ─── Result tagging ────────────────────────────────────────────────
+
 
 def test_result_carries_serving_tier():
     router = SourceDecisionRouter(

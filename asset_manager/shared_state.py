@@ -14,17 +14,19 @@ import numpy as np
 @dataclass
 class Entity:
     """A placed object on the map (building, tree, rock, etc.)"""
-    entity_type: str          # "building", "tree", "rock", "chest", etc.
-    position: tuple[int, int] # (x, y)
+
+    entity_type: str  # "building", "tree", "rock", "chest", etc.
+    position: tuple[int, int]  # (x, y)
     size: tuple[int, int] = (1, 1)  # (w, h) in grid cells
-    variant: str = ""         # visual variant e.g. "oak_large", "stone_wall"
+    variant: str = ""  # visual variant e.g. "oak_large", "stone_wall"
     metadata: dict = field(default_factory=dict)  # name, description, etc.
 
 
 @dataclass
 class PathSegment:
     """A connected path (road, river, corridor)"""
-    path_type: str               # "road", "river", "corridor", "trail"
+
+    path_type: str  # "road", "river", "corridor", "trail"
     waypoints: list[tuple[int, int]] = field(default_factory=list)
     width: int = 2
     metadata: dict = field(default_factory=dict)
@@ -33,9 +35,10 @@ class PathSegment:
 @dataclass
 class Label:
     """A text label placed on the map"""
+
     text: str
     position: tuple[int, int]
-    category: str = "generic"    # "water_feature", "settlement", "landmark", etc.
+    category: str = "generic"  # "water_feature", "settlement", "landmark", etc.
     font_size: int = 12
     color: str = "#2c1810"
 
@@ -43,6 +46,7 @@ class Label:
 @dataclass
 class ZLevel:
     """A single vertical layer of the map."""
+
     z: int
     width: int = 0
     height: int = 0
@@ -75,6 +79,7 @@ class ZLevel:
 @dataclass
 class Transition:
     """A link between two z-levels (stairs, ladder, trapdoor)."""
+
     x: int
     y: int
     from_z: int
@@ -85,10 +90,11 @@ class Transition:
 @dataclass
 class SpawnPoint:
     """A creature spawn location for the playtest viewer."""
+
     x: int
     y: int
     z: int
-    token_type: str       # "player", "enemy", "npc"
+    token_type: str  # "player", "enemy", "npc"
     name: str
     stats: dict = field(default_factory=dict)
     ai_behavior: str = "static"  # "patrol", "guard", "chase", "static"
@@ -97,6 +103,7 @@ class SpawnPoint:
 @dataclass
 class MapConfig:
     """Configuration for the map being generated"""
+
     width: int = 512
     height: int = 512
     biome: str = "forest"
@@ -248,10 +255,12 @@ class SharedState:
     # ------------------------------------------------------------------
 
     def log_agent_completion(self, agent_name: str):
-        self.metadata["agents_completed"].append({
-            "agent": agent_name,
-            "timestamp": time.time(),
-        })
+        self.metadata["agents_completed"].append(
+            {
+                "agent": agent_name,
+                "timestamp": time.time(),
+            }
+        )
 
     def get_walkable_positions(self) -> np.ndarray:
         """Return a boolean mask of all positions that are walkable and not water/structures."""

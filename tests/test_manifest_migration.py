@@ -4,6 +4,7 @@ Verifies that legacy catalog entries (just {asset_id, kind, path}) are
 upgraded in-place to the new provenance schema (source, license, etc.)
 on Catalog load, and that already-migrated entries are no-ops.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,8 +15,8 @@ from asset_manager.library.manifest import (
     migrate_manifest,
 )
 
-
 # ─── make_manifest ─────────────────────────────────────────────────
+
 
 def test_make_manifest_minimal_args_includes_defaults():
     m = make_manifest(asset_id="wolf", kind="creature_token", path="/tmp/wolf.png")
@@ -51,13 +52,16 @@ def test_make_manifest_with_full_provenance():
 
 def test_make_manifest_extra_kwargs_pass_through():
     m = make_manifest(
-        asset_id="x", kind="y", path="/p",
+        asset_id="x",
+        kind="y",
+        path="/p",
         custom_field="custom_value",
     )
     assert m["custom_field"] == "custom_value"
 
 
 # ─── migrate_manifest ─────────────────────────────────────────────
+
 
 def test_legacy_manifest_gets_default_fields():
     legacy = {"asset_id": "wolf", "kind": "creature_token", "path": "/tmp/wolf.png"}
@@ -125,7 +129,7 @@ def test_migration_does_not_overwrite_existing_fields():
         "asset_id": "garth",
         "kind": "portrait",
         "path": "C:/Dev/.shared/baked/packs/synty/fantasy_kingdom/garth.png",
-        "source": "ai_2d",          # already set — keep this
+        "source": "ai_2d",  # already set — keep this
         "license": "Scenario_owned",
         "redistribution": True,
     }

@@ -18,6 +18,7 @@ To regenerate after editing the seed list:
   2. Delete the affected PNGs under .shared/baked/creature_token/
   3. Restart Asset Manager (seed will rebuild missing entries)
 """
+
 from __future__ import annotations
 
 import logging
@@ -39,27 +40,27 @@ logger = logging.getLogger(__name__)
 # at 32x32. Tags will be {name.lower()}.
 _SEED_CREATURES: list[tuple[str, str, tuple[int, int, int, int]]] = [
     # Forest
-    ("Wolf",            "forest",  (140, 140, 145, 255)),  # slate gray
-    ("Wolf Pup",        "forest",  (160, 160, 170, 255)),  # lighter gray
-    ("Dire Wolf",       "forest",  (90,  90,  100, 255)),  # darker, larger feel
-    ("Alpha Wolf",      "forest",  (60,  60,  80,  255)),  # near-black, intimidating
+    ("Wolf", "forest", (140, 140, 145, 255)),  # slate gray
+    ("Wolf Pup", "forest", (160, 160, 170, 255)),  # lighter gray
+    ("Dire Wolf", "forest", (90, 90, 100, 255)),  # darker, larger feel
+    ("Alpha Wolf", "forest", (60, 60, 80, 255)),  # near-black, intimidating
     # Plains
-    ("Bandit",          "plains",  (130, 90,  60,  255)),  # leather brown
-    ("Bandit Captain",  "plains",  (90,  50,  30,  255)),  # darker leather + steel
-    ("Cultist",         "plains",  (60,  20,  60,  255)),  # purple robe
+    ("Bandit", "plains", (130, 90, 60, 255)),  # leather brown
+    ("Bandit Captain", "plains", (90, 50, 30, 255)),  # darker leather + steel
+    ("Cultist", "plains", (60, 20, 60, 255)),  # purple robe
     # Ruins
-    ("Skeleton",        "ruins",   (230, 225, 205, 255)),  # bone
-    ("Skeleton Archer", "ruins",   (210, 200, 170, 255)),  # weathered bone
-    ("Mutant",          "ruins",   (90,  140, 70,  255)),  # bile green
-    ("Mutant Hulk",     "ruins",   (60,  100, 40,  255)),  # darker, mass
+    ("Skeleton", "ruins", (230, 225, 205, 255)),  # bone
+    ("Skeleton Archer", "ruins", (210, 200, 170, 255)),  # weathered bone
+    ("Mutant", "ruins", (90, 140, 70, 255)),  # bile green
+    ("Mutant Hulk", "ruins", (60, 100, 40, 255)),  # darker, mass
     # Dungeon (static encounter "dungeon_boss")
-    ("Hollow Guardian", "dungeon", (170, 130, 60,  255)),  # tarnished bronze
+    ("Hollow Guardian", "dungeon", (170, 130, 60, 255)),  # tarnished bronze
     # Castle (static encounter "castle_boss")
-    ("The Rot King",    "castle",  (120, 30,  40,  255)),  # rust red
-    ("Rot Knight",      "castle",  (110, 80,  40,  255)),  # dark rust
-    ("Plague Rat",      "castle",  (80,  50,  30,  255)),  # dark vermin
+    ("The Rot King", "castle", (120, 30, 40, 255)),  # rust red
+    ("Rot Knight", "castle", (110, 80, 40, 255)),  # dark rust
+    ("Plague Rat", "castle", (80, 50, 30, 255)),  # dark vermin
     # Generic fallback
-    ("Rat",             "default", (120, 90,  60,  255)),  # default vermin
+    ("Rat", "default", (120, 90, 60, 255)),  # default vermin
 ]
 
 _TOKEN_KIND = "creature_token"
@@ -152,9 +153,9 @@ def _ensure_manifest(
 # from generators.procedural_sprite.generate_item_icon.
 
 _SEED_ITEMS: list[tuple[str, tuple[int, int, int, int], str]] = [
-    ("Food",          (180, 120, 60,  255), "square"),   # warm bread brown
-    ("Water",         (60,  140, 220, 255), "circle"),   # deep blue droplet
-    ("Health Potion", (220, 50,  60,  255), "diamond"),  # crimson flask
+    ("Food", (180, 120, 60, 255), "square"),  # warm bread brown
+    ("Water", (60, 140, 220, 255), "circle"),  # deep blue droplet
+    ("Health Potion", (220, 50, 60, 255), "diamond"),  # crimson flask
 ]
 
 _ITEM_KIND = "item_icon"

@@ -1,4 +1,5 @@
 """Tests for the Pillow thumbnail renderer."""
+
 from __future__ import annotations
 
 import time
@@ -15,6 +16,7 @@ from asset_manager.library.html_index_thumbs import (
 
 def _write_png(path: Path, size: tuple[int, int] = (256, 256), mode: str = "RGB") -> Path:
     from PIL import Image
+
     color = (200, 100, 50, 255) if mode == "RGBA" else (200, 100, 50)
     Image.new(mode, size, color).save(path, format="PNG")
     return path
@@ -22,11 +24,13 @@ def _write_png(path: Path, size: tuple[int, int] = (256, 256), mode: str = "RGB"
 
 def _write_jpeg(path: Path, size: tuple[int, int] = (256, 256)) -> Path:
     from PIL import Image
+
     Image.new("RGB", size, (50, 100, 200)).save(path, format="JPEG", quality=90)
     return path
 
 
 # ─── is_thumbnailable ──────────────────────────────────────────────
+
 
 def test_is_thumbnailable_accepts_image_extensions():
     assert is_thumbnailable("test.png") is True
@@ -44,6 +48,7 @@ def test_is_thumbnailable_rejects_3d_and_other():
 
 
 # ─── render_thumbnail happy paths ─────────────────────────────────
+
 
 def test_render_jpeg_from_png_source(tmp_path):
     src = _write_png(tmp_path / "wolf.png", size=(256, 256), mode="RGB")
@@ -70,17 +75,19 @@ def test_render_jpeg_from_rgba_when_alpha_disabled(tmp_path):
 
 def test_render_thumbnail_preserves_aspect_ratio(tmp_path):
     from PIL import Image
+
     src = _write_png(tmp_path / "wide.png", size=(400, 100))  # 4:1 aspect
     out = render_thumbnail(src, "wide", tmp_path / "thumbs", box=(128, 128))
     assert out is not None
     with Image.open(out) as img:
         w, h = img.size
         assert w == 128  # width-bound
-        assert h == 32   # 128 / 4
+        assert h == 32  # 128 / 4
 
 
 def test_render_thumbnail_caps_at_box_dimensions(tmp_path):
     from PIL import Image
+
     src = _write_png(tmp_path / "huge.png", size=(2048, 2048))
     out = render_thumbnail(src, "huge", tmp_path / "thumbs", box=(64, 64))
     with Image.open(out) as img:
@@ -98,6 +105,7 @@ def test_render_thumbnail_creates_thumbs_dir(tmp_path):
 
 
 # ─── Idempotency ────────────────────────────────────────────────────
+
 
 def test_render_skips_when_thumb_newer_than_source(tmp_path):
     src = _write_png(tmp_path / "wolf.png")
@@ -133,6 +141,7 @@ def test_render_regenerates_when_source_is_newer(tmp_path):
 
 
 # ─── Failure modes ──────────────────────────────────────────────────
+
 
 def test_render_returns_none_for_missing_source(tmp_path):
     out = render_thumbnail(tmp_path / "ghost.png", "ghost", tmp_path / "thumbs")

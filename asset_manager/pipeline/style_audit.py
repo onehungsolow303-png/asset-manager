@@ -41,6 +41,7 @@ can run a fast PASS-or-FAIL audit on every generated asset without
 deep inspection, while a CLI tool can run the full deep audit when
 the user explicitly asks ("audit my whole catalog").
 """
+
 from __future__ import annotations
 
 import logging
@@ -106,6 +107,7 @@ class AuditPolicy:
     that want a deep audit can flip every check on; the router uses
     a leaner policy for fast pass-fail decisions.
     """
+
     check_file_exists: bool = True
     check_extension: bool = True
     check_image_loadable: bool = True
@@ -131,6 +133,7 @@ class AuditPolicy:
 class AuditReport:
     """Result of an audit. Caller checks `passed` first; on failure,
     `failures` carries human-readable reasons sorted by severity."""
+
     passed: bool
     asset_id: str
     failures: list[str] = field(default_factory=list)
@@ -187,8 +190,7 @@ def audit(
             actual_bytes = asset_path.stat().st_size
             if actual_bytes > max_bytes:
                 failures.append(
-                    f"file size {actual_bytes} exceeds max {max_bytes} "
-                    f"for kind={kind!r}"
+                    f"file size {actual_bytes} exceeds max {max_bytes} for kind={kind!r}"
                 )
             elif actual_bytes < 16:
                 # Less than 16 bytes is almost certainly corrupt
@@ -200,6 +202,7 @@ def audit(
     if is_image and (p.check_image_loadable or p.check_dimensions or p.check_alpha):
         try:
             from PIL import Image
+
             with Image.open(asset_path) as img:
                 width, height = img.size
                 mode = img.mode
@@ -208,20 +211,15 @@ def audit(
                     min_d = rules.get("min_dim", 0)
                     max_d = rules.get("max_dim", 0)
                     if min_d and (width < min_d or height < min_d):
-                        failures.append(
-                            f"dimensions {width}x{height} below min {min_d}"
-                        )
+                        failures.append(f"dimensions {width}x{height} below min {min_d}")
                     if max_d and (width > max_d or height > max_d):
-                        failures.append(
-                            f"dimensions {width}x{height} exceed max {max_d}"
-                        )
+                        failures.append(f"dimensions {width}x{height} exceed max {max_d}")
 
                 if p.check_alpha and rules.get("require_alpha"):
                     has_alpha = "A" in mode or mode in ("RGBA", "LA", "PA")
                     if not has_alpha:
                         failures.append(
-                            f"kind={kind!r} requires alpha channel but "
-                            f"image mode is {mode!r}"
+                            f"kind={kind!r} requires alpha channel but image mode is {mode!r}"
                         )
         except Exception as e:
             failures.append(f"image not loadable: {e}")

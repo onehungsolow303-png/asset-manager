@@ -12,10 +12,11 @@ Why these aren't in test_bridge.py:
   generate then catalog round-trip?", etc. They share the same
   TestClient fixture from conftest.py.
 """
+
 from __future__ import annotations
 
-
 # ─── Catalog seed visibility ───────────────────────────────────────
+
 
 def test_catalog_includes_seeded_creature_tokens(client):
     """At Asset Manager startup, seed_default_creature_tokens populates
@@ -44,6 +45,7 @@ def test_catalog_includes_seeded_item_icons(client):
 
 
 # ─── Select for seeded assets ──────────────────────────────────────
+
 
 def test_select_creature_token_by_tag_hits_seed(client):
     """Forever engine's BattleManager.RequestEnemySprites issues a
@@ -112,6 +114,7 @@ def test_select_unknown_kind_returns_miss(client):
 
 # ─── Procedural generate round-trip ────────────────────────────────
 
+
 def test_generate_creature_token_round_trips_to_catalog(client):
     """POST /generate with kind=creature_token must produce a real PNG
     on disk AND register the asset in the catalog so a follow-up
@@ -159,6 +162,7 @@ def test_generate_item_icon_round_trips_to_catalog(client):
 
 # ─── Catalog prune ─────────────────────────────────────────────────
 
+
 def test_catalog_prune_removes_missing_files(tmp_path):
     """Direct unit test of Catalog.prune_missing_files — bypasses the
     HTTP layer so we can construct a catalog with known-bad entries
@@ -174,7 +178,10 @@ def test_catalog_prune_removes_missing_files(tmp_path):
 
     cat_path = tmp_path / "catalog.json"
     catalog = Catalog(
-        path=cat_path, persist=True, auto_scan_baked=False, prune_on_load=False,
+        path=cat_path,
+        persist=True,
+        auto_scan_baked=False,
+        prune_on_load=False,
     )
     catalog.add("real_asset", {"kind": "test", "path": str(real_file)})
     catalog.add("ghost_asset", {"kind": "test", "path": str(missing_file)})
@@ -196,7 +203,10 @@ def test_catalog_prune_handles_entries_without_path(tmp_path):
 
     cat_path = tmp_path / "catalog.json"
     catalog = Catalog(
-        path=cat_path, persist=True, auto_scan_baked=False, prune_on_load=False,
+        path=cat_path,
+        persist=True,
+        auto_scan_baked=False,
+        prune_on_load=False,
     )
     catalog.add("pending", {"kind": "test"})  # no `path` key
     assert catalog.count() == 1

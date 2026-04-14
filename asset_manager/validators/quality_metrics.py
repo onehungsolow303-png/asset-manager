@@ -18,11 +18,11 @@ DEFAULT_THRESHOLDS = {
     # Current metrics (2026-03-29): dark pHash=26, PSNR=2.96, SSIM=0.097, aIoU=0.977, aMAE=4.71
     #                               light pHash=16, PSNR=3.43, SSIM=0.39, aIoU=0.997, aMAE=0.61
     # Tighten these as extraction quality improves.
-    "phash_max_distance": 30,     # Dark=26, Light=16 — detect > 15% regression
-    "psnr_min_db": 2.5,           # Dark=2.96, Light=3.43 — detect major degradation
-    "ssim_min": 0.05,             # Dark=0.097, Light=0.39 — detect structural collapse
-    "alpha_iou_min": 0.95,        # Dark=0.977, Light=0.997 — tight: alpha mask is critical
-    "alpha_mae_max": 8.0,         # Dark=4.71, Light=0.61 — detect alpha precision loss
+    "phash_max_distance": 30,  # Dark=26, Light=16 — detect > 15% regression
+    "psnr_min_db": 2.5,  # Dark=2.96, Light=3.43 — detect major degradation
+    "ssim_min": 0.05,  # Dark=0.097, Light=0.39 — detect structural collapse
+    "alpha_iou_min": 0.95,  # Dark=0.977, Light=0.997 — tight: alpha mask is critical
+    "alpha_mae_max": 8.0,  # Dark=4.71, Light=0.61 — detect alpha precision loss
 }
 
 
@@ -63,8 +63,9 @@ def alpha_mae(test_img: Image.Image, ref_img: Image.Image) -> float:
     return round(float(np.mean(np.abs(t_alpha - r_alpha))), 2)
 
 
-def region_opaque_pct(img: Image.Image, x_start: float, x_end: float,
-                      y_start: float, y_end: float) -> float:
+def region_opaque_pct(
+    img: Image.Image, x_start: float, x_end: float, y_start: float, y_end: float
+) -> float:
     if img.mode != "RGBA":
         img = img.convert("RGBA")
     arr = np.array(img)
@@ -89,6 +90,7 @@ def pixel_diff_count(img_a: Image.Image, img_b: Image.Image) -> int:
 
 def compute_ssim(test_img: Image.Image, ref_img: Image.Image) -> float:
     from skimage.metrics import structural_similarity
+
     if test_img.size != ref_img.size:
         test_img = test_img.resize(ref_img.size, Image.LANCZOS)
     # Normalize transparent pixels: zero RGB where alpha=0 in both images.
@@ -104,12 +106,12 @@ def compute_ssim(test_img: Image.Image, ref_img: Image.Image) -> float:
     win_size = min(7, min_dim if min_dim % 2 == 1 else min_dim - 1)
     if win_size < 3:
         win_size = 3
-    return round(float(structural_similarity(r_gray, t_gray, win_size=win_size,
-                                              data_range=255)), 4)
+    return round(float(structural_similarity(r_gray, t_gray, win_size=win_size, data_range=255)), 4)
 
 
 def compute_psnr(test_img: Image.Image, ref_img: Image.Image) -> float:
     from skimage.metrics import peak_signal_noise_ratio
+
     if test_img.size != ref_img.size:
         test_img = test_img.resize(ref_img.size, Image.LANCZOS)
     # Normalize transparent pixels before comparison (same fix as SSIM)
@@ -123,9 +125,9 @@ def compute_psnr(test_img: Image.Image, ref_img: Image.Image) -> float:
     return round(float(peak_signal_noise_ratio(r_arr, t_arr, data_range=255)), 2)
 
 
-def compute_phash_distance(test_img: Image.Image, ref_img: Image.Image,
-                           hash_size: int = 8) -> int:
+def compute_phash_distance(test_img: Image.Image, ref_img: Image.Image, hash_size: int = 8) -> int:
     import imagehash
+
     h1 = imagehash.phash(test_img.convert("RGB"), hash_size=hash_size)
     h2 = imagehash.phash(ref_img.convert("RGB"), hash_size=hash_size)
     return h1 - h2
@@ -133,6 +135,7 @@ def compute_phash_distance(test_img: Image.Image, ref_img: Image.Image,
 
 def generate_diff_heatmap(test_img: Image.Image, ref_img: Image.Image) -> Image.Image:
     import cv2
+
     if test_img.size != ref_img.size:
         test_img = test_img.resize(ref_img.size, Image.LANCZOS)
     t_arr = np.array(test_img.convert("RGBA")).astype(float)
@@ -144,8 +147,9 @@ def generate_diff_heatmap(test_img: Image.Image, ref_img: Image.Image) -> Image.
     return Image.fromarray(heatmap_rgb)
 
 
-def run_quality_gates(test_img: Image.Image, ref_img: Image.Image,
-                      thresholds: dict | None = None) -> dict:
+def run_quality_gates(
+    test_img: Image.Image, ref_img: Image.Image, thresholds: dict | None = None
+) -> dict:
     t = {**DEFAULT_THRESHOLDS, **(thresholds or {})}
     metrics = {}
     failures = []
@@ -154,36 +158,36 @@ def run_quality_gates(test_img: Image.Image, ref_img: Image.Image,
     metrics["phash_distance"] = phash_dist
     if phash_dist > t["phash_max_distance"]:
         failures.append(("phash_distance", phash_dist, f"<= {t['phash_max_distance']}"))
-        return {"passed": False, "failures": failures, "metrics": metrics,
-                "failed_at": "phash_distance"}
+        return {
+            "passed": False,
+            "failures": failures,
+            "metrics": metrics,
+            "failed_at": "phash_distance",
+        }
 
     psnr = compute_psnr(test_img, ref_img)
     metrics["psnr_db"] = psnr
     if psnr < t["psnr_min_db"]:
         failures.append(("psnr_db", psnr, f">= {t['psnr_min_db']}"))
-        return {"passed": False, "failures": failures, "metrics": metrics,
-                "failed_at": "psnr_db"}
+        return {"passed": False, "failures": failures, "metrics": metrics, "failed_at": "psnr_db"}
 
     ssim = compute_ssim(test_img, ref_img)
     metrics["ssim"] = ssim
     if ssim < t["ssim_min"]:
         failures.append(("ssim", ssim, f">= {t['ssim_min']}"))
-        return {"passed": False, "failures": failures, "metrics": metrics,
-                "failed_at": "ssim"}
+        return {"passed": False, "failures": failures, "metrics": metrics, "failed_at": "ssim"}
 
     iou = alpha_iou(test_img, ref_img)
     metrics["alpha_iou"] = iou
     if iou < t["alpha_iou_min"]:
         failures.append(("alpha_iou", iou, f">= {t['alpha_iou_min']}"))
-        return {"passed": False, "failures": failures, "metrics": metrics,
-                "failed_at": "alpha_iou"}
+        return {"passed": False, "failures": failures, "metrics": metrics, "failed_at": "alpha_iou"}
 
     mae = alpha_mae(test_img, ref_img)
     metrics["alpha_mae"] = mae
     if mae > t["alpha_mae_max"]:
         failures.append(("alpha_mae", mae, f"<= {t['alpha_mae_max']}"))
-        return {"passed": False, "failures": failures, "metrics": metrics,
-                "failed_at": "alpha_mae"}
+        return {"passed": False, "failures": failures, "metrics": metrics, "failed_at": "alpha_mae"}
 
     metrics["alpha_stats"] = alpha_stats(test_img)
     metrics["ref_alpha_stats"] = alpha_stats(ref_img)

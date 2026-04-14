@@ -35,6 +35,7 @@ Usage:
     python -m asset_manager.cli.extract_packs <directory> --force
     python -m asset_manager.cli.extract_packs <directory> --quiet
 """
+
 from __future__ import annotations
 
 import argparse
@@ -141,7 +142,7 @@ def extract_all_in_dir(
     zips = sorted(p for p in directory.iterdir() if p.is_file() and p.suffix.lower() == ".zip")
 
     if verbose:
-        total_size_gb = sum(z.stat().st_size for z in zips) / (1024 ** 3)
+        total_size_gb = sum(z.stat().st_size for z in zips) / (1024**3)
         print(f"Found {len(zips)} zip files, {total_size_gb:.1f} GB total")
         print()
 
@@ -157,7 +158,7 @@ def extract_all_in_dir(
             batch.successes += 1
             batch.total_bytes += result.bytes_extracted
             if verbose:
-                size_mb = result.bytes_extracted / (1024 ** 2)
+                size_mb = result.bytes_extracted / (1024**2)
                 print(
                     f"OK ({result.file_count} files, {size_mb:.1f} MB, "
                     f"{result.elapsed_seconds:.1f}s)"
@@ -173,7 +174,7 @@ def extract_all_in_dir(
 
     if verbose:
         print()
-        gb = batch.total_bytes / (1024 ** 3)
+        gb = batch.total_bytes / (1024**3)
         print(
             f"DONE: {batch.successes} extracted, {batch.skipped} skipped, "
             f"{batch.failures} failed. {gb:.2f} GB total."

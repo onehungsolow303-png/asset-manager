@@ -4,14 +4,15 @@ These tests run with very short hold/interval/timeout values so the
 suite stays fast. The actual CLI is intended for multi-minute waits
 on large copy operations.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 
 from asset_manager.cli.watch_move import total_size_bytes, watch
 
-
 # ─── total_size_bytes ──────────────────────────────────────────────
+
 
 def test_total_size_empty_directory(tmp_path):
     assert total_size_bytes(tmp_path) == 0
@@ -35,6 +36,7 @@ def test_total_size_handles_unusual_inputs(tmp_path):
 
 
 # ─── watch ──────────────────────────────────────────────────────────
+
 
 def test_watch_returns_false_for_missing_path(tmp_path):
     result = watch(
@@ -82,9 +84,7 @@ def test_watch_times_out_when_size_keeps_changing(tmp_path, monkeypatch):
         counter["calls"] += 1
         return counter["calls"] * 1000  # always growing
 
-    monkeypatch.setattr(
-        "asset_manager.cli.watch_move.total_size_bytes", fake_size
-    )
+    monkeypatch.setattr("asset_manager.cli.watch_move.total_size_bytes", fake_size)
 
     result = watch(
         tmp_path,
@@ -106,9 +106,7 @@ def test_watch_succeeds_after_growth_stops(tmp_path, monkeypatch):
             state["size"] += 1000
         return state["size"]
 
-    monkeypatch.setattr(
-        "asset_manager.cli.watch_move.total_size_bytes", fake_size
-    )
+    monkeypatch.setattr("asset_manager.cli.watch_move.total_size_bytes", fake_size)
 
     result = watch(
         tmp_path,

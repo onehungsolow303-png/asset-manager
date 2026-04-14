@@ -12,6 +12,7 @@ library, but it doesn't have wheels for Python 3.14 on Windows. We use
 values for the same inputs but both mirror Ken Perlin's reference algorithm
 closely enough that the visual output is indistinguishable.
 """
+
 from __future__ import annotations
 
 from perlin_noise import PerlinNoise

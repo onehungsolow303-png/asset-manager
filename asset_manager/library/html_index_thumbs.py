@@ -49,6 +49,7 @@ Failure modes:
       thumbnailer's job to police catalog hygiene; prune_missing_files
       handles that)
 """
+
 from __future__ import annotations
 
 import logging
@@ -118,12 +119,7 @@ def render_thumbnail(
     # or parent-directory references. Strip path separators, colons,
     # and any leading/trailing dots; collapse `..` sequences so the
     # final filename can never escape its parent directory.
-    safe_id = (
-        asset_id.replace("/", "_")
-        .replace("\\", "_")
-        .replace(":", "_")
-        .replace("..", "_")
-    )
+    safe_id = asset_id.replace("/", "_").replace("\\", "_").replace(":", "_").replace("..", "_")
     # Strip leading dots so the file isn't hidden on Unix
     safe_id = safe_id.lstrip(".")
     if not safe_id:
@@ -146,9 +142,7 @@ def render_thumbnail(
                 or (probe.info.get("transparency") is not None)
             )
     except Exception as e:
-        logger.warning(
-            "[html_index_thumbs] failed to probe %s: %s", source_path, e
-        )
+        logger.warning("[html_index_thumbs] failed to probe %s: %s", source_path, e)
         return None
 
     use_png = preserve_alpha and has_alpha
@@ -199,8 +193,7 @@ def render_thumbnail(
 
     except Exception as e:
         logger.warning(
-            "[html_index_thumbs] failed to render %s -> %s: %s",
-            source_path, thumb_path, e
+            "[html_index_thumbs] failed to render %s -> %s: %s", source_path, thumb_path, e
         )
         return None
 

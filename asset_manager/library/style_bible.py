@@ -57,6 +57,7 @@ fantasy art (per the conversation around the 33GB Roll20 library and
 the Tripo3D dwarf reference). They are NOT prescriptive — the user can
 edit the JSON file directly or call the setter methods at any time.
 """
+
 from __future__ import annotations
 
 import json
@@ -85,11 +86,11 @@ _DEFAULT_BIBLE: dict[str, Any] = {
     ),
     "color_palette": {
         # Weathered earthy browns (camp, dungeon walls, leather armor)
-        "primary":   ["#3a2818", "#5c3a1f", "#8b6332", "#a07c4a"],
+        "primary": ["#3a2818", "#5c3a1f", "#8b6332", "#a07c4a"],
         # Deep blues + greys (sky, stone, steel)
         "secondary": ["#1f3a5c", "#2d5180", "#4a7bb8", "#6b6b75"],
         # Warm gold + crimson highlights (gold trim, blood, fire)
-        "accent":    ["#c4a460", "#e8c878", "#f5d98a", "#a8302a"],
+        "accent": ["#c4a460", "#e8c878", "#f5d98a", "#a8302a"],
     },
     "line_weight": (
         "1-2px crisp outlines, outline color slightly darker than the "
@@ -107,8 +108,7 @@ _DEFAULT_BIBLE: dict[str, Any] = {
     "global_rules": [
         "no neon or electric colors",
         "no modern weapons, vehicles, or technology",
-        "weathered and grim tone — this is a post-Rot world, not a "
-        "bright cartoon",
+        "weathered and grim tone — this is a post-Rot world, not a bright cartoon",
         "all creature tokens must be readable as silhouettes at 32x32",
         "all portraits must be recognizable at 128x128",
         "no copyrighted character likenesses (no D&D official IPs)",
@@ -116,13 +116,13 @@ _DEFAULT_BIBLE: dict[str, Any] = {
     "category_overrides": {
         "creature_token": {
             "perspective": "strict top-down circular framing, character "
-                           "centered, no bleeding outside the disc",
+            "centered, no bleeding outside the disc",
             "size_default": "32x32 or 64x64",
             "background": "transparent",
         },
         "portrait": {
             "perspective": "three-quarter bust, upper torso visible, "
-                           "subject facing slightly off-camera",
+            "subject facing slightly off-camera",
             "size_default": "128x128 or 256x256",
             "background": "soft painterly fade or solid neutral",
         },
@@ -137,8 +137,7 @@ _DEFAULT_BIBLE: dict[str, Any] = {
             "background": "opaque, color-matched to neighboring tiles",
         },
         "dungeon_tile": {
-            "perspective": "top-down for floors, isometric or front-facing "
-                           "for walls",
+            "perspective": "top-down for floors, isometric or front-facing for walls",
             "size_default": "varies — match Forever engine grid",
             "background": "opaque",
         },

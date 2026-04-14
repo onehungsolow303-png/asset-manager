@@ -18,6 +18,7 @@ To enable in production:
 
 Spec: 2026-04-06-three-module-consolidation-design.md §6.2 (asset gateway)
 """
+
 from __future__ import annotations
 
 import base64
@@ -41,7 +42,9 @@ class StableDiffusionGateway(GenerationGateway):
         base_url: str | None = None,
         timeout: float | None = None,
     ) -> None:
-        self._base_url = (base_url or os.environ.get("SD_API_BASE_URL", "http://127.0.0.1:7860")).rstrip("/")
+        self._base_url = (
+            base_url or os.environ.get("SD_API_BASE_URL", "http://127.0.0.1:7860")
+        ).rstrip("/")
         self._timeout = float(timeout or os.environ.get("SD_API_TIMEOUT", "60.0"))
         self._default_steps = int(os.environ.get("SD_DEFAULT_STEPS", "20"))
         self._default_width = int(os.environ.get("SD_DEFAULT_WIDTH", "512"))
@@ -79,9 +82,7 @@ class StableDiffusionGateway(GenerationGateway):
             raise GatewayUnavailable(f"SD endpoint unreachable: {e}") from e
 
         if resp.status_code != 200:
-            raise GatewayUnavailable(
-                f"SD endpoint returned {resp.status_code}: {resp.text[:200]}"
-            )
+            raise GatewayUnavailable(f"SD endpoint returned {resp.status_code}: {resp.text[:200]}")
 
         body = resp.json()
         images = body.get("images") or []

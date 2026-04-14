@@ -1,4 +1,5 @@
 """Tests for the curate_lora_dataset CLI."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -26,6 +27,7 @@ def _make_catalog(tmp_path, entries: list[dict]) -> Catalog:
 def _png(tmp_path: Path, name: str) -> str:
     """Write a tiny PNG and return its path string."""
     from PIL import Image
+
     p = tmp_path / name
     p.parent.mkdir(parents=True, exist_ok=True)
     Image.new("RGB", (8, 8), (200, 100, 50)).save(p, format="PNG")
@@ -34,11 +36,15 @@ def _png(tmp_path: Path, name: str) -> str:
 
 # ─── filter_assets ─────────────────────────────────────────────────
 
+
 def test_filter_drops_non_image_paths(tmp_path):
-    cat = _make_catalog(tmp_path, [
-        make_manifest(asset_id="img", kind="portrait", path=_png(tmp_path, "a.png")),
-        make_manifest(asset_id="mesh", kind="character", path=str(tmp_path / "b.glb")),
-    ])
+    cat = _make_catalog(
+        tmp_path,
+        [
+            make_manifest(asset_id="img", kind="portrait", path=_png(tmp_path, "a.png")),
+            make_manifest(asset_id="mesh", kind="character", path=str(tmp_path / "b.glb")),
+        ],
+    )
     pool = filter_assets(cat)
     ids = {a["asset_id"] for a in pool}
     assert "img" in ids
@@ -46,30 +52,51 @@ def test_filter_drops_non_image_paths(tmp_path):
 
 
 def test_filter_by_kind(tmp_path):
-    cat = _make_catalog(tmp_path, [
-        make_manifest(asset_id="a", kind="portrait", path=_png(tmp_path, "a.png")),
-        make_manifest(asset_id="b", kind="creature_token", path=_png(tmp_path, "b.png")),
-    ])
+    cat = _make_catalog(
+        tmp_path,
+        [
+            make_manifest(asset_id="a", kind="portrait", path=_png(tmp_path, "a.png")),
+            make_manifest(asset_id="b", kind="creature_token", path=_png(tmp_path, "b.png")),
+        ],
+    )
     pool = filter_assets(cat, kind="portrait")
     assert {a["asset_id"] for a in pool} == {"a"}
 
 
 def test_filter_by_source(tmp_path):
-    cat = _make_catalog(tmp_path, [
-        make_manifest(asset_id="a", kind="portrait", path=_png(tmp_path, "a.png"), source="pack"),
-        make_manifest(asset_id="b", kind="portrait", path=_png(tmp_path, "b.png"), source="procedural"),
-    ])
+    cat = _make_catalog(
+        tmp_path,
+        [
+            make_manifest(
+                asset_id="a", kind="portrait", path=_png(tmp_path, "a.png"), source="pack"
+            ),
+            make_manifest(
+                asset_id="b", kind="portrait", path=_png(tmp_path, "b.png"), source="procedural"
+            ),
+        ],
+    )
     pool = filter_assets(cat, source="pack")
     assert {a["asset_id"] for a in pool} == {"a"}
 
 
 def test_filter_by_pack_pattern_case_insensitive(tmp_path):
-    cat = _make_catalog(tmp_path, [
-        make_manifest(asset_id="a", kind="portrait", path=_png(tmp_path, "a.png"),
-                       pack_name="FA Tokens Adventurers"),
-        make_manifest(asset_id="b", kind="portrait", path=_png(tmp_path, "b.png"),
-                       pack_name="Roll20 D&D Originals"),
-    ])
+    cat = _make_catalog(
+        tmp_path,
+        [
+            make_manifest(
+                asset_id="a",
+                kind="portrait",
+                path=_png(tmp_path, "a.png"),
+                pack_name="FA Tokens Adventurers",
+            ),
+            make_manifest(
+                asset_id="b",
+                kind="portrait",
+                path=_png(tmp_path, "b.png"),
+                pack_name="Roll20 D&D Originals",
+            ),
+        ],
+    )
     pool = filter_assets(cat, pack_patterns=["fa tokens"])
     assert {a["asset_id"] for a in pool} == {"a"}
 
@@ -85,10 +112,9 @@ def test_filter_drops_paths_without_path_field(tmp_path):
 
 # ─── round_robin_select ────────────────────────────────────────────
 
+
 def test_round_robin_picks_target_count():
-    assets = [
-        {"asset_id": f"a{i}", "pack_name": "PackA"} for i in range(10)
-    ] + [
+    assets = [{"asset_id": f"a{i}", "pack_name": "PackA"} for i in range(10)] + [
         {"asset_id": f"b{i}", "pack_name": "PackB"} for i in range(10)
     ]
     selected = round_robin_select(assets, target_count=8, max_per_pack=10)
@@ -98,9 +124,7 @@ def test_round_robin_picks_target_count():
 def test_round_robin_alternates_packs():
     """With 5 from PackA and 5 from PackB, the selection should
     interleave them rather than taking all 5 from one pack first."""
-    assets = [
-        {"asset_id": f"a{i}", "pack_name": "PackA"} for i in range(5)
-    ] + [
+    assets = [{"asset_id": f"a{i}", "pack_name": "PackA"} for i in range(5)] + [
         {"asset_id": f"b{i}", "pack_name": "PackB"} for i in range(5)
     ]
     selected = round_robin_select(assets, target_count=10, max_per_pack=10)
@@ -116,9 +140,7 @@ def test_round_robin_alternates_packs():
 def test_round_robin_caps_per_pack():
     """One pack with 100 assets, another with 5. Cap per pack=10
     means we get 10 from the big pack and all 5 from the small one."""
-    assets = [
-        {"asset_id": f"big{i}", "pack_name": "Big"} for i in range(100)
-    ] + [
+    assets = [{"asset_id": f"big{i}", "pack_name": "Big"} for i in range(100)] + [
         {"asset_id": f"small{i}", "pack_name": "Small"} for i in range(5)
     ]
     selected = round_robin_select(assets, target_count=200, max_per_pack=10)
@@ -140,9 +162,7 @@ def test_round_robin_zero_target():
 
 def test_round_robin_deterministic_within_pack():
     """Two runs with the same input must produce the same selection."""
-    assets = [
-        {"asset_id": f"x{i}", "pack_name": "P"} for i in range(20)
-    ]
+    assets = [{"asset_id": f"x{i}", "pack_name": "P"} for i in range(20)]
     a = round_robin_select(assets, 5, 10)
     b = round_robin_select(assets, 5, 10)
     assert [s["asset_id"] for s in a] == [s["asset_id"] for s in b]
@@ -159,6 +179,7 @@ def test_round_robin_groups_unnamed_packs():
 
 
 # ─── copy_to_dataset ───────────────────────────────────────────────
+
 
 def test_copy_to_dataset_copies_files(tmp_path):
     src1 = _png(tmp_path / "src", "wolf.png")
@@ -199,11 +220,16 @@ def test_copy_to_dataset_idempotent(tmp_path):
 
 # ─── write_manifest ────────────────────────────────────────────────
 
+
 def test_write_manifest_outputs_csv(tmp_path):
     selected = [
         {
-            "asset_id": "wolf", "kind": "creature_token", "source": "pack",
-            "pack_name": "Test", "license": "CC0", "path": "/x/wolf.png",
+            "asset_id": "wolf",
+            "kind": "creature_token",
+            "source": "pack",
+            "pack_name": "Test",
+            "license": "CC0",
+            "path": "/x/wolf.png",
             "tags": ["wolf", "forest"],
         },
     ]

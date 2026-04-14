@@ -10,6 +10,7 @@ catalog entries get the new provenance fields (source, license, cost_usd,
 swap_safe, etc.) inferred from their path. The migration is idempotent —
 already-migrated entries are no-ops.
 """
+
 from __future__ import annotations
 
 import json

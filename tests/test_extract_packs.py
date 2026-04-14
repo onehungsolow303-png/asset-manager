@@ -1,4 +1,5 @@
 """Tests for the extract_packs CLI."""
+
 from __future__ import annotations
 
 import zipfile
@@ -24,12 +25,16 @@ def _make_zip(path: Path, members: dict[str, bytes]) -> Path:
 
 # ─── extract_zip happy paths ────────────────────────────────────────
 
+
 def test_extract_zip_extracts_all_members(tmp_path):
-    src = _make_zip(tmp_path / "pack.zip", {
-        "a.png": b"fake png a",
-        "b.png": b"fake png b",
-        "sub/c.png": b"fake png c",
-    })
+    src = _make_zip(
+        tmp_path / "pack.zip",
+        {
+            "a.png": b"fake png a",
+            "b.png": b"fake png b",
+            "sub/c.png": b"fake png c",
+        },
+    )
     target = tmp_path / "pack"
     result = extract_zip(src, target)
 
@@ -41,15 +46,19 @@ def test_extract_zip_extracts_all_members(tmp_path):
 
 
 def test_extract_zip_records_bytes_extracted(tmp_path):
-    src = _make_zip(tmp_path / "pack.zip", {
-        "a.png": b"x" * 1000,
-        "b.png": b"y" * 500,
-    })
+    src = _make_zip(
+        tmp_path / "pack.zip",
+        {
+            "a.png": b"x" * 1000,
+            "b.png": b"y" * 500,
+        },
+    )
     result = extract_zip(src, tmp_path / "pack")
     assert result.bytes_extracted == 1500
 
 
 # ─── Idempotency ────────────────────────────────────────────────────
+
 
 def test_extract_zip_skips_when_target_already_populated(tmp_path):
     src = _make_zip(tmp_path / "pack.zip", {"a.png": b"x"})
@@ -82,6 +91,7 @@ def test_extract_zip_skips_when_target_exists_but_empty(tmp_path):
 
 # ─── Failure modes ──────────────────────────────────────────────────
 
+
 def test_extract_zip_fails_on_missing_zip(tmp_path):
     result = extract_zip(tmp_path / "ghost.zip", tmp_path / "out")
     assert result.success is False
@@ -113,6 +123,7 @@ def test_extract_zip_defends_against_zip_slip(tmp_path):
 
 
 # ─── extract_all_in_dir ────────────────────────────────────────────
+
 
 def test_extract_all_in_dir_processes_each_zip(tmp_path):
     _make_zip(tmp_path / "pack_a.zip", {"a.txt": b"hi"})

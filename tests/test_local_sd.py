@@ -1,4 +1,5 @@
 """Tests for the local SD + LoRA gateway stub."""
+
 from __future__ import annotations
 
 from pathlib import Path

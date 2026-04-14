@@ -48,6 +48,7 @@ Idempotency contract:
 
 Tests live in tests/test_pack_importer.py.
 """
+
 from __future__ import annotations
 
 import logging
@@ -95,6 +96,7 @@ class PackSpec:
                       so KayKit "wall_corner.glb" doesn't collide with
                       Synty "wall_corner.glb").
     """
+
     pack_name: str
     pack_id: str
     license_code: str
@@ -108,6 +110,7 @@ class PackSpec:
 @dataclass
 class ImportResult:
     """Counts and IDs of what an import_pack call did."""
+
     pack_id: str
     added: int = 0
     updated: int = 0
@@ -163,7 +166,10 @@ def import_pack(
 
     logger.info(
         "[pack_importer] %s: added=%d updated=%d skipped=%d",
-        spec.pack_id, result.added, result.updated, result.skipped,
+        spec.pack_id,
+        result.added,
+        result.updated,
+        result.skipped,
     )
     return result
 

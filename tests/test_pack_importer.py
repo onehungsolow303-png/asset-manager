@@ -13,6 +13,7 @@ Verifies:
   - swap_safe is False for pack assets (hand-curated, never auto-overwrite)
   - Missing local_path is handled gracefully (returns empty result, no crash)
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -50,12 +51,16 @@ def _make_pack(tmp_path: Path, layout: dict[str, bytes]) -> Path:
 
 # ─── Walk + register ───────────────────────────────────────────────
 
+
 def test_import_walks_pack_and_registers_each_asset(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "characters/wizard.glb": b"fake glb",
-        "characters/knight.glb": b"fake glb",
-        "props/torch.glb": b"fake glb",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "characters/wizard.glb": b"fake glb",
+            "characters/knight.glb": b"fake glb",
+            "props/torch.glb": b"fake glb",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
         pack_id="testpack",
@@ -75,13 +80,19 @@ def test_import_walks_pack_and_registers_each_asset(tmp_path):
 
 
 def test_import_infers_kind_from_parent_directory(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "characters/wizard.glb": b"fake",
-        "props/torch.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "characters/wizard.glb": b"fake",
+            "props/torch.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
     )
     import_pack(catalog, pack, spec)
 
@@ -90,10 +101,13 @@ def test_import_infers_kind_from_parent_directory(tmp_path):
 
 
 def test_kind_overrides_remap_parent_dir_names(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "Walls/north.glb": b"fake",
-        "Floors/wood.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "Walls/north.glb": b"fake",
+            "Floors/wood.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
         pack_id="testpack",
@@ -110,16 +124,23 @@ def test_kind_overrides_remap_parent_dir_names(tmp_path):
 
 # ─── Filtering ─────────────────────────────────────────────────────
 
+
 def test_import_skips_unrecognized_extensions(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "characters/wizard.glb": b"fake",
-        "characters/notes.txt": b"hello",        # not an asset
-        "characters/source.blend1": b"backup",   # not recognized
-        "characters/icon.png": b"fake png",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "characters/wizard.glb": b"fake",
+            "characters/notes.txt": b"hello",  # not an asset
+            "characters/source.blend1": b"backup",  # not recognized
+            "characters/icon.png": b"fake png",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
     )
     import_pack(catalog, pack, spec)
 
@@ -130,14 +151,20 @@ def test_import_skips_unrecognized_extensions(tmp_path):
 
 
 def test_import_skips_hidden_directories(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "characters/wizard.glb": b"fake",
-        ".git/objects/whatever.glb": b"hidden",
-        ".venv/lib/site-packages/junk.glb": b"hidden",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "characters/wizard.glb": b"fake",
+            ".git/objects/whatever.glb": b"hidden",
+            ".venv/lib/site-packages/junk.glb": b"hidden",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
     )
     import_pack(catalog, pack, spec)
 
@@ -148,13 +175,20 @@ def test_import_skips_hidden_directories(tmp_path):
 
 # ─── Idempotency ───────────────────────────────────────────────────
 
+
 def test_reimporting_same_pack_updates_in_place(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "characters/wizard.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "characters/wizard.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
     )
 
     first = import_pack(catalog, pack, spec)
@@ -172,7 +206,10 @@ def test_reimport_preserves_original_generated_at(tmp_path):
     pack = _make_pack(tmp_path, {"characters/wizard.glb": b"fake"})
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
     )
 
     import_pack(catalog, pack, spec)
@@ -185,10 +222,14 @@ def test_reimport_preserves_original_generated_at(tmp_path):
 
 # ─── Asset ID prefix ───────────────────────────────────────────────
 
+
 def test_asset_id_prefix_prevents_collisions(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "props/wall.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "props/wall.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
         pack_id="kaykit_dungeon",
@@ -205,13 +246,20 @@ def test_asset_id_prefix_prevents_collisions(tmp_path):
 
 # ─── Tag strategies ────────────────────────────────────────────────
 
+
 def test_filename_tag_strategy_splits_on_separators(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "props/stone_wall_corner_01.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "props/stone_wall_corner_01.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
         tag_strategy="filename",
     )
     import_pack(catalog, pack, spec)
@@ -222,12 +270,18 @@ def test_filename_tag_strategy_splits_on_separators(tmp_path):
 
 
 def test_parent_dir_tag_strategy_uses_directory_name(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "dungeon_walls/corner.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "dungeon_walls/corner.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
         tag_strategy="parent_dir",
     )
     import_pack(catalog, pack, spec)
@@ -237,12 +291,18 @@ def test_parent_dir_tag_strategy_uses_directory_name(tmp_path):
 
 
 def test_both_tag_strategy_combines_filename_and_parent_dir(tmp_path):
-    pack = _make_pack(tmp_path, {
-        "dungeon_walls/stone_corner.glb": b"fake",
-    })
+    pack = _make_pack(
+        tmp_path,
+        {
+            "dungeon_walls/stone_corner.glb": b"fake",
+        },
+    )
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="testpack", pack_name="Test", license_code="CC0", redistribution=True,
+        pack_id="testpack",
+        pack_name="Test",
+        license_code="CC0",
+        redistribution=True,
         tag_strategy="both",
     )
     import_pack(catalog, pack, spec)
@@ -252,6 +312,7 @@ def test_both_tag_strategy_combines_filename_and_parent_dir(tmp_path):
 
 
 # ─── Manifest provenance fields ────────────────────────────────────
+
 
 def test_imported_manifest_carries_full_provenance(tmp_path):
     pack = _make_pack(tmp_path, {"characters/wizard.glb": b"fake"})
@@ -289,10 +350,14 @@ def test_free_pack_marks_redistribution_true(tmp_path):
 
 # ─── Error handling ────────────────────────────────────────────────
 
+
 def test_missing_pack_root_returns_empty_result(tmp_path):
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="nope", pack_name="Nope", license_code="CC0", redistribution=True,
+        pack_id="nope",
+        pack_name="Nope",
+        license_code="CC0",
+        redistribution=True,
     )
     result = import_pack(catalog, tmp_path / "does_not_exist", spec)
 
@@ -307,7 +372,10 @@ def test_pack_root_that_is_a_file_returns_empty(tmp_path):
     not_a_dir.write_text("hi")
     catalog = FakeCatalog()
     spec = PackSpec(
-        pack_id="bad", pack_name="Bad", license_code="CC0", redistribution=True,
+        pack_id="bad",
+        pack_name="Bad",
+        license_code="CC0",
+        redistribution=True,
     )
     result = import_pack(catalog, not_a_dir, spec)
 

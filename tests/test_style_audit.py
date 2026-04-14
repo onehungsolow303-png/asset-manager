@@ -1,8 +1,10 @@
 """Tests for the style audit / quality gate."""
+
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from asset_manager.pipeline.style_audit import (
     AuditPolicy,
@@ -13,6 +15,7 @@ from asset_manager.pipeline.style_audit import (
 
 def _write_test_png(path: Path, size: int = 32, mode: str = "RGBA") -> Path:
     from PIL import Image
+
     color = (200, 100, 50, 255) if mode == "RGBA" else (200, 100, 50)
     img = Image.new(mode, (size, size), color)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -21,6 +24,7 @@ def _write_test_png(path: Path, size: int = 32, mode: str = "RGBA") -> Path:
 
 
 # ─── Pass cases ────────────────────────────────────────────────────
+
 
 def test_well_formed_creature_token_passes(tmp_path):
     p = _write_test_png(tmp_path / "wolf.png", size=32, mode="RGBA")
@@ -37,6 +41,7 @@ def test_well_formed_item_icon_passes(tmp_path):
 
 # ─── File existence ───────────────────────────────────────────────
 
+
 def test_missing_file_fails(tmp_path):
     report = audit("ghost", "creature_token", tmp_path / "ghost.png")
     assert report.passed is False
@@ -44,6 +49,7 @@ def test_missing_file_fails(tmp_path):
 
 
 # ─── Extension check ───────────────────────────────────────────────
+
 
 def test_wrong_extension_for_creature_token_fails(tmp_path):
     p = tmp_path / "wolf.glb"
@@ -56,12 +62,12 @@ def test_wrong_extension_for_creature_token_fails(tmp_path):
 def test_glb_passes_for_dungeon_tile_kind(tmp_path):
     p = tmp_path / "wall.glb"
     p.write_bytes(b"fake glb content with enough bytes")
-    report = audit("wall", "dungeon_tile", p,
-                    policy=AuditPolicy(check_image_loadable=False))
+    report = audit("wall", "dungeon_tile", p, policy=AuditPolicy(check_image_loadable=False))
     assert report.passed is True or "extension" not in str(report.failures)
 
 
 # ─── Dimensions ────────────────────────────────────────────────────
+
 
 def test_too_small_creature_token_fails(tmp_path):
     p = _write_test_png(tmp_path / "tiny.png", size=8)
@@ -79,6 +85,7 @@ def test_too_large_item_icon_fails(tmp_path):
 
 # ─── Alpha channel ─────────────────────────────────────────────────
 
+
 def test_creature_token_without_alpha_fails(tmp_path):
     p = _write_test_png(tmp_path / "opaque.png", size=32, mode="RGB")
     report = audit("opaque", "creature_token", p)
@@ -87,6 +94,7 @@ def test_creature_token_without_alpha_fails(tmp_path):
 
 
 # ─── Naming convention ────────────────────────────────────────────
+
 
 def test_empty_asset_id_fails(tmp_path):
     p = _write_test_png(tmp_path / "wolf.png")
@@ -111,6 +119,7 @@ def test_uppercase_asset_id_warns_but_passes(tmp_path):
 
 # ─── Manifest provenance ──────────────────────────────────────────
 
+
 def test_manifest_missing_source_warns(tmp_path):
     p = _write_test_png(tmp_path / "wolf.png")
     manifest = {"path": str(p)}  # missing source/license
@@ -128,6 +137,7 @@ def test_ai_source_without_prompt_warns(tmp_path):
 
 # ─── Catalog uniqueness ───────────────────────────────────────────
 
+
 def test_duplicate_asset_id_with_different_path_warns(tmp_path):
     class FakeCatalog:
         def get(self, _id):
@@ -139,6 +149,7 @@ def test_duplicate_asset_id_with_different_path_warns(tmp_path):
 
 
 # ─── Policy switches ──────────────────────────────────────────────
+
 
 def test_disabled_check_does_not_run(tmp_path):
     p = _write_test_png(tmp_path / "tiny.png", size=8)

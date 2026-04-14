@@ -9,6 +9,7 @@ The one test that DOES probe for a real Blender install
 (test_finds_blender_when_env_var_set) only verifies the executable
 detection mechanism, not the rendering itself.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,8 +22,8 @@ from asset_manager.generators.blender_renderer import (
     BlenderRendererUnavailable,
 )
 
-
 # ─── Executable detection ──────────────────────────────────────────
+
 
 def test_no_executable_when_nothing_found(monkeypatch, tmp_path):
     """With no env var, no PATH entry, and no Windows install paths,
@@ -59,6 +60,7 @@ def test_explicit_constructor_arg_wins(monkeypatch, tmp_path):
 
 
 # ─── Render error paths ────────────────────────────────────────────
+
 
 def test_render_raises_when_unavailable(monkeypatch, tmp_path):
     monkeypatch.delenv("BLENDER_EXECUTABLE", raising=False)
@@ -104,6 +106,7 @@ def test_render_rejects_unknown_preset(monkeypatch, tmp_path):
 
 
 # ─── Subprocess wrapping (mocked) ──────────────────────────────────
+
 
 def test_render_invokes_blender_subprocess(monkeypatch, tmp_path):
     """Verify the subprocess invocation has the right shape: blender
@@ -184,6 +187,7 @@ def test_render_raises_when_output_not_created(monkeypatch, tmp_path):
 
 def test_render_handles_subprocess_timeout(monkeypatch, tmp_path):
     import subprocess as sp
+
     fake_blender = tmp_path / "blender.exe"
     fake_blender.write_bytes(b"x")
     mesh = tmp_path / "model.glb"
@@ -200,6 +204,7 @@ def test_render_handles_subprocess_timeout(monkeypatch, tmp_path):
 
 
 # ─── Preset table ──────────────────────────────────────────────────
+
 
 def test_known_presets_present():
     """The four §9 presets from the spec must all be in RENDER_PRESETS."""

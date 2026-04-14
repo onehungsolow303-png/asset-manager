@@ -50,6 +50,7 @@ Symlinks vs copies:
     if the source moves. --symlink uses symlinks instead (faster, less
     disk, but breaks if the source path changes).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -59,10 +60,8 @@ import shutil
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
 
 from asset_manager.library.catalog import DEFAULT_CATALOG_PATH, Catalog
-
 
 DEFAULT_LORA_ROOT = Path("C:/Dev/.shared/lora_training")
 
@@ -207,21 +206,21 @@ def write_manifest(
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
         for a in selected:
-            w.writerow({
-                "asset_id": a.get("asset_id", ""),
-                "kind": a.get("kind", ""),
-                "source": a.get("source", ""),
-                "pack_name": a.get("pack_name") or "",
-                "license": a.get("license", ""),
-                "path": a.get("path", ""),
-                "tags": ",".join(str(t) for t in (a.get("tags") or [])),
-            })
+            w.writerow(
+                {
+                    "asset_id": a.get("asset_id", ""),
+                    "kind": a.get("kind", ""),
+                    "source": a.get("source", ""),
+                    "pack_name": a.get("pack_name") or "",
+                    "license": a.get("license", ""),
+                    "path": a.get("path", ""),
+                    "tags": ",".join(str(t) for t in (a.get("tags") or [])),
+                }
+            )
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Curate a LoRA training dataset from the catalog"
-    )
+    parser = argparse.ArgumentParser(description="Curate a LoRA training dataset from the catalog")
     parser.add_argument("--catalog", default=str(DEFAULT_CATALOG_PATH))
     parser.add_argument(
         "--count",

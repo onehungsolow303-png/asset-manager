@@ -14,6 +14,7 @@ This means it's a guard for local dev and for CI configurations that
 explicitly check out `.shared` as a sibling — not a hard gate that
 breaks isolated runs.
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -41,8 +42,7 @@ def test_vendored_schemas_match_shared_codegen():
     codegen = _find_shared_codegen()
     if codegen is None:
         pytest.skip(
-            "C:/Dev/.shared/codegen/python_gen.py not reachable; "
-            "skipping contract-drift check."
+            "C:/Dev/.shared/codegen/python_gen.py not reachable; skipping contract-drift check."
         )
 
     vendored = (
@@ -60,10 +60,7 @@ def test_vendored_schemas_match_shared_codegen():
         check=False,
     )
     if result.returncode != 0:
-        pytest.fail(
-            f"python_gen.py failed (returncode={result.returncode}): "
-            f"{result.stderr}"
-        )
+        pytest.fail(f"python_gen.py failed (returncode={result.returncode}): {result.stderr}")
 
     fresh = result.stdout
     vendored_text = vendored.read_text()

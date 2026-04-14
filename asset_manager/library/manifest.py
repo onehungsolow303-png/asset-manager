@@ -64,10 +64,10 @@ Backwards compatibility:
   defaults for everything else. Idempotent — calling on an already-new
   manifest is a no-op.
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from pathlib import PurePath
+from datetime import UTC, datetime
 from typing import Any
 
 # ─── Defaults ────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ _DEFAULT_REDISTRIBUTION = True
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def make_manifest(
@@ -186,10 +186,12 @@ def migrate_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
             inferred_source = "pack"
             inferred_pack = "quaternius"
             inferred_license = "Quaternius_free"
-        elif "/baked/" in path_str and ("/creature_token/" in path_str
-                                        or "/item_icon/" in path_str
-                                        or "/terrain/" in path_str
-                                        or "/tileset/" in path_str):
+        elif "/baked/" in path_str and (
+            "/creature_token/" in path_str
+            or "/item_icon/" in path_str
+            or "/terrain/" in path_str
+            or "/tileset/" in path_str
+        ):
             # These are the seed pipeline outputs — procedural Pillow art
             inferred_source = "procedural"
             inferred_license = "CC0"

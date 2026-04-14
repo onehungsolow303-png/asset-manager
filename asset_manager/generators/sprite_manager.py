@@ -25,6 +25,7 @@ from PIL import Image
 # Path resolution
 # ---------------------------------------------------------------------------
 
+
 def _resolve_assets_root() -> Path | None:
     """
     Return the absolute path to the Assets/ directory that lives at the
@@ -33,8 +34,8 @@ def _resolve_assets_root() -> Path | None:
     Returns None if the directory does not exist.
     """
     # sprite_manager.py lives at mapgen_agents/agents/  — project root is 2 dirs up
-    here = Path(os.path.abspath(__file__)).parent   # mapgen_agents/agents
-    project_root = here.parent.parent                # Map Generator/
+    here = Path(os.path.abspath(__file__)).parent  # mapgen_agents/agents
+    project_root = here.parent.parent  # Map Generator/
     assets_dir = project_root / "Assets"
     if assets_dir.is_dir():
         return assets_dir
@@ -44,6 +45,7 @@ def _resolve_assets_root() -> Path | None:
 # ---------------------------------------------------------------------------
 # SpriteManager
 # ---------------------------------------------------------------------------
+
 
 class SpriteManager:
     """
@@ -127,8 +129,7 @@ class SpriteManager:
 
             # Collect image files in this directory (non-recursive per-dir)
             images = sorted(
-                dirpath / f for f in filenames
-                if Path(f).suffix.lower() in self._IMAGE_EXTS
+                dirpath / f for f in filenames if Path(f).suffix.lower() in self._IMAGE_EXTS
             )
 
             if images:
@@ -143,9 +144,7 @@ class SpriteManager:
         self._building_paths = self._packs.get("buildings", [])
         self._npc_paths = self._packs.get("npcs", [])
 
-    def _load_sprite_sheet(
-        self, pack_name: str, directory: Path, meta_path: Path
-    ) -> None:
+    def _load_sprite_sheet(self, pack_name: str, directory: Path, meta_path: Path) -> None:
         """
         Parse a ``_sheet.json`` file and slice the accompanying sprite
         sheet image into individual tiles.
@@ -177,8 +176,7 @@ class SpriteManager:
 
         # Find the sheet image — pick the first image in the directory
         sheet_candidates = sorted(
-            p for p in directory.iterdir()
-            if p.suffix.lower() in self._IMAGE_EXTS
+            p for p in directory.iterdir() if p.suffix.lower() in self._IMAGE_EXTS
         )
         if not sheet_candidates:
             return
@@ -224,8 +222,9 @@ class SpriteManager:
         return img
 
     @staticmethod
-    def _pick_index(paths_or_count, variant: str | None,
-                    position: tuple[int, int] | None = None) -> int:
+    def _pick_index(
+        paths_or_count, variant: str | None, position: tuple[int, int] | None = None
+    ) -> int:
         """
         Choose a deterministic-but-varied index.
 
@@ -369,13 +368,25 @@ class SpriteManager:
 # ---------------------------------------------------------------------------
 
 # Entity types that map to building sprites
-_BUILDING_TYPES = {"building", "room", "house", "shop", "temple", "church",
-                   "tower", "fort", "castle", "inn", "tavern", "warehouse",
-                   "barracks", "manor"}
+_BUILDING_TYPES = {
+    "building",
+    "room",
+    "house",
+    "shop",
+    "temple",
+    "church",
+    "tower",
+    "fort",
+    "castle",
+    "inn",
+    "tavern",
+    "warehouse",
+    "barracks",
+    "manor",
+}
 
 # Entity types that map to NPC sprites
-_NPC_TYPES = {"npc", "guard", "villager", "merchant", "dwarf", "character",
-              "token", "creature"}
+_NPC_TYPES = {"npc", "guard", "villager", "merchant", "dwarf", "character", "token", "creature"}
 
 
 def composite_sprites(

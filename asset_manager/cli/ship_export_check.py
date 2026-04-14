@@ -34,12 +34,13 @@ The --quiet flag is intended for CI / pre-ship hooks: integrate with
 a build pipeline so the public commercial build refuses to bundle
 the catalog if any restricted assets are still registered.
 """
+
 from __future__ import annotations
 
 import argparse
 import csv
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 from asset_manager.library.catalog import DEFAULT_CATALOG_PATH, Catalog
@@ -47,10 +48,7 @@ from asset_manager.library.catalog import DEFAULT_CATALOG_PATH, Catalog
 
 def find_must_replace(catalog: Catalog) -> list[dict]:
     """Return every catalog entry where redistribution is False."""
-    return [
-        a for a in catalog.all()
-        if not a.get("redistribution", True)
-    ]
+    return [a for a in catalog.all() if not a.get("redistribution", True)]
 
 
 def summarize(must_replace: list[dict]) -> dict:
@@ -73,25 +71,35 @@ def write_csv_report(must_replace: list[dict], out_path: Path) -> None:
     """Write a CSV with one row per must-replace asset."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fields = [
-        "asset_id", "kind", "source", "pack_name", "license",
-        "cost_usd", "path", "tags", "biome", "generated_at",
+        "asset_id",
+        "kind",
+        "source",
+        "pack_name",
+        "license",
+        "cost_usd",
+        "path",
+        "tags",
+        "biome",
+        "generated_at",
     ]
     with open(out_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for a in must_replace:
-            writer.writerow({
-                "asset_id": a.get("asset_id", ""),
-                "kind": a.get("kind", ""),
-                "source": a.get("source", ""),
-                "pack_name": a.get("pack_name") or "",
-                "license": a.get("license", ""),
-                "cost_usd": a.get("cost_usd", 0.0),
-                "path": a.get("path", ""),
-                "tags": ",".join(str(t) for t in (a.get("tags") or [])),
-                "biome": a.get("biome", ""),
-                "generated_at": a.get("generated_at", ""),
-            })
+            writer.writerow(
+                {
+                    "asset_id": a.get("asset_id", ""),
+                    "kind": a.get("kind", ""),
+                    "source": a.get("source", ""),
+                    "pack_name": a.get("pack_name") or "",
+                    "license": a.get("license", ""),
+                    "cost_usd": a.get("cost_usd", 0.0),
+                    "path": a.get("path", ""),
+                    "tags": ",".join(str(t) for t in (a.get("tags") or [])),
+                    "biome": a.get("biome", ""),
+                    "generated_at": a.get("generated_at", ""),
+                }
+            )
 
 
 def print_human_report(summary: dict, must_replace: list[dict], limit: int = 10) -> None:
@@ -128,9 +136,9 @@ def print_human_report(summary: dict, must_replace: list[dict], limit: int = 10)
         print(f"First {min(limit, len(must_replace))} entries (asset_id, kind, license):")
         for a in must_replace[:limit]:
             print(
-                f"  {a.get('asset_id','?')[:40]:<40} "
-                f"{a.get('kind','?')[:15]:<15} "
-                f"{a.get('license','?')}"
+                f"  {a.get('asset_id', '?')[:40]:<40} "
+                f"{a.get('kind', '?')[:15]:<15} "
+                f"{a.get('license', '?')}"
             )
         if len(must_replace) > limit:
             print(f"  ... and {len(must_replace) - limit} more")
@@ -143,8 +151,7 @@ def print_human_report(summary: dict, must_replace: list[dict], limit: int = 10)
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Report catalog assets that must be replaced before "
-                    "shipping a commercial build"
+        description="Report catalog assets that must be replaced before shipping a commercial build"
     )
     parser.add_argument(
         "--catalog",

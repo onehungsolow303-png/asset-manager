@@ -28,6 +28,7 @@ Why it doesn't use filesystem watch APIs:
 The poll loop also prints a progress line so a human watching can
 see growth in real time.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -104,20 +105,14 @@ def watch(
                 )
             if stable_for >= hold_seconds:
                 if verbose:
-                    print(
-                        f"DONE: size stable at {size_mb:.1f} MB "
-                        f"after {int(elapsed)}s"
-                    )
+                    print(f"DONE: size stable at {size_mb:.1f} MB after {int(elapsed)}s")
                 return True
         else:
             stable_since = None
             if last_size >= 0:
                 delta_mb = (current_size - last_size) / (1024 * 1024)
                 if verbose:
-                    print(
-                        f"  [{int(elapsed):>5}s] {size_mb:>9.1f} MB  "
-                        f"(+{delta_mb:.1f} MB)"
-                    )
+                    print(f"  [{int(elapsed):>5}s] {size_mb:>9.1f} MB  (+{delta_mb:.1f} MB)")
             else:
                 if verbose:
                     print(f"  [{int(elapsed):>5}s] {size_mb:>9.1f} MB  (initial)")

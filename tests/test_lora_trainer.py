@@ -1,4 +1,5 @@
 """Tests for the LoRA trainer scaffolding."""
+
 from __future__ import annotations
 
 import json
@@ -16,12 +17,14 @@ from asset_manager.pipeline.lora_trainer import (
 
 def _make_image(path: Path) -> Path:
     from PIL import Image
+
     path.parent.mkdir(parents=True, exist_ok=True)
     Image.new("RGB", (64, 64), (200, 100, 50)).save(path, format="PNG")
     return path
 
 
 # ─── Construction ──────────────────────────────────────────────────
+
 
 def test_dataset_dir_uses_lora_name(tmp_path):
     trainer = LoRATrainer(training_root=tmp_path)
@@ -30,6 +33,7 @@ def test_dataset_dir_uses_lora_name(tmp_path):
 
 
 # ─── prepare_dataset ───────────────────────────────────────────────
+
 
 def test_prepare_dataset_copies_images(tmp_path):
     trainer = LoRATrainer(training_root=tmp_path / "training")
@@ -93,6 +97,7 @@ def test_prepare_dataset_rejects_invalid_lora_name(tmp_path):
 
 # ─── train (scaffolding state — not yet wired) ──────────────────────
 
+
 def test_train_fails_without_dataset(tmp_path):
     trainer = LoRATrainer(training_root=tmp_path / "training")
     config = LoRATrainingConfig(lora_name="missing")
@@ -127,6 +132,7 @@ def test_train_returns_not_implemented_for_valid_dataset(tmp_path):
 
 
 # ─── list_loras ────────────────────────────────────────────────────
+
 
 def test_list_loras_empty_when_no_training_root(tmp_path):
     trainer = LoRATrainer(training_root=tmp_path / "nonexistent")

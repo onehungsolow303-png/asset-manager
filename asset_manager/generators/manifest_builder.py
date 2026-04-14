@@ -9,6 +9,7 @@ deserialize it without any wrapper changes.
 C# reference: C:/Dev/_archive/forever-engine-pre-pivot/Assets/Scripts/AssetGeneration/AssetGeneration/AssetManifestBuilder.cs
 Spec: 2026-04-06-csharp-to-python-assetgen-port-design.md §5.3
 """
+
 from __future__ import annotations
 
 import json
@@ -41,9 +42,7 @@ class AssetManifest:
 def build_manifest(asset_root: Path) -> AssetManifest:
     """Scan asset_root recursively for PNG files and return a manifest.
     Mirrors C# AssetManifestBuilder.Build."""
-    manifest = AssetManifest(
-        created_at=datetime.now(UTC).isoformat(timespec="seconds")
-    )
+    manifest = AssetManifest(created_at=datetime.now(UTC).isoformat(timespec="seconds"))
     if not asset_root.exists():
         return manifest
 

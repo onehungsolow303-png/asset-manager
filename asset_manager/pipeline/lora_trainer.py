@@ -54,6 +54,7 @@ signature and dataset manifest. The actual SD/kohya_ss invocation is
 deferred until the user has a curated subset and explicitly authorizes
 the training run (it consumes 30+ minutes of GPU time).
 """
+
 from __future__ import annotations
 
 import json
@@ -61,7 +62,6 @@ import logging
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +78,7 @@ class LoRATrainingConfig:
     Defaults target the user's RTX 5090 + a small (~200-500 image)
     dataset. Tune up rank/steps for hero LoRAs, down for fast iteration.
     """
+
     lora_name: str
     base_model: str = "stabilityai/stable-diffusion-xl-base-1.0"
     rank: int = 16
@@ -85,16 +86,19 @@ class LoRATrainingConfig:
     batch_size: int = 1
     max_train_steps: int = 1500
     resolution: int = 1024
-    sample_prompts: list[str] = field(default_factory=lambda: [
-        "a fantasy creature token, top-down view, painterly, D&D style",
-        "a wise old wizard, three-quarter portrait, fantasy art, painterly",
-    ])
+    sample_prompts: list[str] = field(
+        default_factory=lambda: [
+            "a fantasy creature token, top-down view, painterly, D&D style",
+            "a wise old wizard, three-quarter portrait, fantasy art, painterly",
+        ]
+    )
     save_every_n_steps: int = 250
 
 
 @dataclass
 class DatasetManifest:
     """Records what's in a prepared training dataset, for reproducibility."""
+
     lora_name: str
     image_count: int
     image_paths: list[str]
@@ -105,6 +109,7 @@ class DatasetManifest:
 @dataclass
 class TrainingResult:
     """Outcome of a training invocation."""
+
     success: bool
     lora_name: str
     lora_path: str | None = None
@@ -152,10 +157,7 @@ class LoRATrainer:
         is also persisted to disk for reproducibility.
         """
         if not lora_name or not lora_name.replace("_", "").isalnum():
-            raise ValueError(
-                f"lora_name must be alphanumeric (with underscores): "
-                f"{lora_name!r}"
-            )
+            raise ValueError(f"lora_name must be alphanumeric (with underscores): {lora_name!r}")
 
         target = self.dataset_dir(lora_name)
         target.mkdir(parents=True, exist_ok=True)
@@ -206,7 +208,9 @@ class LoRATrainer:
 
         logger.info(
             "[lora_trainer] prepared dataset %s: %d images at %s",
-            lora_name, manifest.image_count, target,
+            lora_name,
+            manifest.image_count,
+            target,
         )
         return manifest
 
@@ -280,7 +284,6 @@ class LoRATrainer:
         """
         if not self._root.exists():
             return []
-        return sorted([
-            p.name for p in self._root.iterdir()
-            if p.is_dir() and (p / "checkpoints").exists()
-        ])
+        return sorted(
+            [p.name for p in self._root.iterdir() if p.is_dir() and (p / "checkpoints").exists()]
+        )

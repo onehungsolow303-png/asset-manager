@@ -1,4 +1,5 @@
 """Tests for the style bible reader/writer."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -5,6 +5,7 @@ construction. They do NOT make real API calls — that requires the
 user's API keys and would burn credits. The actual integration tests
 will run when keys are provided.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -13,8 +14,8 @@ from asset_manager.gateway.base import GatewayUnavailable
 from asset_manager.gateway.nano_banana import NanoBananaGateway
 from asset_manager.gateway.tripo3d import Tripo3DGateway
 
-
 # ─── Tripo3D gateway ────────────────────────────────────────────────
+
 
 def test_tripo3d_unavailable_without_api_key(monkeypatch):
     monkeypatch.delenv("TRIPO_API_KEY", raising=False)
@@ -47,8 +48,10 @@ def test_tripo3d_image_mode_rejects_missing_image(monkeypatch, tmp_path):
     gw = Tripo3DGateway()
     with pytest.raises(GatewayUnavailable, match="does not exist"):
         gw.generate(
-            "style hint", tmp_path / "out.glb",
-            mode="image", image_path=tmp_path / "missing.png",
+            "style hint",
+            tmp_path / "out.glb",
+            mode="image",
+            image_path=tmp_path / "missing.png",
         )
 
 
@@ -60,6 +63,7 @@ def test_tripo3d_unsupported_mode_raises(monkeypatch, tmp_path):
 
 
 # ─── Nano Banana gateway ────────────────────────────────────────────
+
 
 def test_nano_banana_unavailable_without_api_key(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
@@ -92,8 +96,10 @@ def test_nano_banana_image_mode_rejects_missing_image(monkeypatch, tmp_path):
     gw = NanoBananaGateway()
     with pytest.raises(GatewayUnavailable, match="does not exist"):
         gw.generate(
-            "edit prompt", tmp_path / "out.png",
-            mode="image", image_path=tmp_path / "missing.png",
+            "edit prompt",
+            tmp_path / "out.png",
+            mode="image",
+            image_path=tmp_path / "missing.png",
         )
 
 

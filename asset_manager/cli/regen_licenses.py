@@ -31,6 +31,7 @@ the table in memory, compares to the on-disk LICENSES.md, and exits
 with status 1 if they differ. This catches stale LICENSES.md before
 it lands in a commit.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -47,10 +48,7 @@ DEFAULT_LICENSES_MD = Path("C:/Dev/.shared/LICENSES.md")
 BEGIN_MARKER = "<!-- BEGIN AUTO-GENERATED PACKS TABLE -->"
 END_MARKER = "<!-- END AUTO-GENERATED PACKS TABLE -->"
 
-_TABLE_HEADER = (
-    "| Pack | Author | License | Redistribution | Status |\n"
-    "|---|---|---|---|---|\n"
-)
+_TABLE_HEADER = "| Pack | Author | License | Redistribution | Status |\n|---|---|---|---|---|\n"
 
 
 def build_packs_table(packs_yaml_path: Path) -> str:
@@ -123,8 +121,7 @@ def regenerate_licenses_md(
 
     if check_only:
         return True, (
-            "LICENSES.md is OUT OF DATE — run "
-            "`python -m asset_manager.cli.regen_licenses` to fix"
+            "LICENSES.md is OUT OF DATE — run `python -m asset_manager.cli.regen_licenses` to fix"
         )
 
     licenses_md_path.write_text(rebuilt, encoding="utf-8")

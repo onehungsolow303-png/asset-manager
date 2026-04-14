@@ -7,6 +7,7 @@ is RGBA PNG. Determinism is preserved via _perlin.seed(seed).
 C# reference: C:/Dev/_archive/forever-engine-pre-pivot/Assets/Scripts/AssetGeneration/AssetGeneration/TextureGenerator.cs
 Spec: 2026-04-06-csharp-to-python-assetgen-port-design.md §5.2
 """
+
 from __future__ import annotations
 
 from pathlib import Path

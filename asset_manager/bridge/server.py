@@ -1,4 +1,5 @@
 """Asset Manager HTTP bridge - FastAPI app on port 7801."""
+
 from __future__ import annotations
 
 import uuid
@@ -66,9 +67,8 @@ def _refresh_html_index() -> None:
         regenerate_index(_catalog, _INDEX_PATH)
     except Exception as e:  # boundary - log and continue
         import logging
-        logging.getLogger(__name__).warning(
-            "[server] HTML index regeneration failed: %s", e
-        )
+
+        logging.getLogger(__name__).warning("[server] HTML index regeneration failed: %s", e)
 
 
 # Generate the initial HTML index now that seeds have run, so the user
@@ -306,6 +306,7 @@ def import_pack_endpoint(payload: dict) -> dict:
 
 # ─── Style bible (read-only inspection) ──────────────────────────────
 
+
 @app.get("/style_bible")
 def get_style_bible() -> dict[str, Any]:
     """Return the full style bible JSON. Read-only inspection — no
@@ -327,6 +328,7 @@ def get_style_bible_category(kind: str) -> dict[str, Any]:
 
 
 # ─── Style audit (no asset generation, just inspection) ─────────────
+
 
 @app.post("/audit")
 def audit_endpoint(payload: dict) -> dict[str, Any]:
@@ -384,6 +386,7 @@ def audit_endpoint(payload: dict) -> dict[str, Any]:
 
 # ─── Router status (current budget + tier availability) ─────────────
 
+
 @app.get("/router_status")
 def router_status() -> dict[str, Any]:
     """Report which generation tiers are currently available + their
@@ -393,7 +396,6 @@ def router_status() -> dict[str, Any]:
     Does NOT trigger any generation or network calls. Just inspects
     env vars and reports the static availability state.
     """
-    import os as _os
     from asset_manager.gateway.nano_banana import NanoBananaGateway
     from asset_manager.gateway.tripo3d import Tripo3DGateway
     from asset_manager.generators.blender_renderer import BlenderRenderer
@@ -419,9 +421,7 @@ def router_status() -> dict[str, Any]:
                 "tier": Tier.LIBRARY.value,
                 "available": True,
                 "cost_per_call_usd": TIER_COST_USD[Tier.LIBRARY],
-                "notes": (
-                    f"{_catalog.count()} assets currently registered in catalog"
-                ),
+                "notes": (f"{_catalog.count()} assets currently registered in catalog"),
             },
             {
                 "name": "procedural",
@@ -446,27 +446,21 @@ def router_status() -> dict[str, Any]:
                 "tier": Tier.LOCAL_LORA_SD.value,
                 "available": local_sd.is_available(),
                 "cost_per_call_usd": TIER_COST_USD[Tier.LOCAL_LORA_SD],
-                "notes": (
-                    "scaffolding only — needs trained LoRA + webui wiring"
-                ),
+                "notes": ("scaffolding only — needs trained LoRA + webui wiring"),
             },
             {
                 "name": "nano_banana",
                 "tier": Tier.NANO_BANANA.value,
                 "available": nano.is_available(),
                 "cost_per_call_usd": TIER_COST_USD[Tier.NANO_BANANA],
-                "notes": (
-                    "Google Gemini 2.5 Flash Image — set GEMINI_API_KEY"
-                ),
+                "notes": ("Google Gemini 2.5 Flash Image — set GEMINI_API_KEY"),
             },
             {
                 "name": "tripo3d",
                 "tier": Tier.TRIPO3D.value,
                 "available": tripo.is_available(),
                 "cost_per_call_usd": TIER_COST_USD[Tier.TRIPO3D],
-                "notes": (
-                    "Tripo3D image-to-3D + text-to-3D — set TRIPO_API_KEY"
-                ),
+                "notes": ("Tripo3D image-to-3D + text-to-3D — set TRIPO_API_KEY"),
             },
         ],
     }

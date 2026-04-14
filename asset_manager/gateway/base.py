@@ -5,6 +5,7 @@ and reports availability via `is_available()`. The bridge dispatches to
 whichever gateway the user has configured + that reports available; if
 none are available, /generate returns the existing procedural fallback.
 """
+
 from __future__ import annotations
 
 import abc

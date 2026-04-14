@@ -48,6 +48,7 @@ These all land in a future batch when the user has a curated subset
 and a trained LoRA. For now, generate() returns a clear
 GatewayUnavailable so the router falls through to the next tier.
 """
+
 from __future__ import annotations
 
 import logging
@@ -93,11 +94,7 @@ class LocalSDGateway(GenerationGateway):
             or os.environ.get("AUTOMATIC1111_API_URL")
             or _DEFAULT_AUTOMATIC1111_URL
         )
-        self._comfyui_url = (
-            comfyui_url
-            or os.environ.get("COMFYUI_API_URL")
-            or _DEFAULT_COMFYUI_URL
-        )
+        self._comfyui_url = comfyui_url or os.environ.get("COMFYUI_API_URL") or _DEFAULT_COMFYUI_URL
 
     @property
     def lora_name(self) -> str | None:

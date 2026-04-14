@@ -21,6 +21,7 @@ Scoring strategy (single-image, no reference needed):
 The gateway calls AssetValidator().validate(path) and expects a
 ValidationResult with `passed`, `score`, `notes`.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

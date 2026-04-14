@@ -26,6 +26,7 @@ Usage:
     # List all registered 3D models:
     python -m asset_manager.cli.register_3d_model --list
 """
+
 from __future__ import annotations
 
 import argparse
@@ -34,7 +35,6 @@ from pathlib import Path
 
 from asset_manager.library.catalog import DEFAULT_CATALOG_PATH, Catalog
 from asset_manager.library.manifest import make_manifest
-
 
 _3D_EXTENSIONS = {".glb", ".gltf", ".fbx", ".obj"}
 
@@ -117,7 +117,7 @@ def list_3d_models(catalog: Catalog) -> int:
     print(f"Registered 3D models: {len(models)}")
     print()
     for m in sorted(models, key=lambda x: x.get("asset_id", "")):
-        print(f"  {m.get('asset_id','?'):30} {m.get('kind','?'):15} {m.get('path','')[:60]}")
+        print(f"  {m.get('asset_id', '?'):30} {m.get('kind', '?'):15} {m.get('path', '')[:60]}")
     return len(models)
 
 

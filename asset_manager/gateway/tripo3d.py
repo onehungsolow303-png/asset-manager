@@ -40,6 +40,7 @@ Cache strategy (used by source_decision.py):
     cached as a manifest entry with cost_usd populated, so future
     requests for the same semantic asset never re-bill.
 """
+
 from __future__ import annotations
 
 import logging
@@ -130,14 +131,10 @@ class Tripo3DGateway(GenerationGateway):
                 if mode == "image":
                     image_path = kwargs.get("image_path")
                     if not image_path:
-                        raise GatewayUnavailable(
-                            "mode=image requires kwargs['image_path']"
-                        )
+                        raise GatewayUnavailable("mode=image requires kwargs['image_path']")
                     image_path = Path(image_path)
                     if not image_path.exists():
-                        raise GatewayUnavailable(
-                            f"image_path does not exist: {image_path}"
-                        )
+                        raise GatewayUnavailable(f"image_path does not exist: {image_path}")
                     # Tripo's image-to-3D expects either a public URL or
                     # an uploaded file token. We upload first.
                     upload_token = self._upload_image(client, image_path)
@@ -169,14 +166,10 @@ class Tripo3DGateway(GenerationGateway):
                 )
                 if submit.status_code not in (200, 201):
                     raise GatewayUnavailable(
-                        f"submit returned {submit.status_code}: "
-                        f"{submit.text[:200]}"
+                        f"submit returned {submit.status_code}: {submit.text[:200]}"
                     )
                 body = submit.json()
-                task_id = (
-                    body.get("data", {}).get("task_id")
-                    or body.get("task_id")
-                )
+                task_id = body.get("data", {}).get("task_id") or body.get("task_id")
                 if not task_id:
                     raise GatewayUnavailable(f"submit missing task_id: {body}")
 
@@ -186,9 +179,7 @@ class Tripo3DGateway(GenerationGateway):
                 # ── Step 3: download the GLB ──
                 dl = client.get(model_url, timeout=self._timeout)
                 if dl.status_code != 200:
-                    raise GatewayUnavailable(
-                        f"GLB download returned {dl.status_code}"
-                    )
+                    raise GatewayUnavailable(f"GLB download returned {dl.status_code}")
                 out_path.parent.mkdir(parents=True, exist_ok=True)
                 out_path.write_bytes(dl.content)
                 return out_path
@@ -209,14 +200,9 @@ class Tripo3DGateway(GenerationGateway):
                 headers=upload_headers,
             )
         if resp.status_code != 200:
-            raise GatewayUnavailable(
-                f"upload returned {resp.status_code}: {resp.text[:200]}"
-            )
+            raise GatewayUnavailable(f"upload returned {resp.status_code}: {resp.text[:200]}")
         body = resp.json()
-        token = (
-            body.get("data", {}).get("file_token")
-            or body.get("file_token")
-        )
+        token = body.get("data", {}).get("file_token") or body.get("file_token")
         if not token:
             raise GatewayUnavailable(f"upload response missing file_token: {body}")
         return token
@@ -231,17 +217,13 @@ class Tripo3DGateway(GenerationGateway):
                 headers=self._headers(),
             )
             if poll.status_code != 200:
-                raise GatewayUnavailable(
-                    f"poll returned {poll.status_code}: {poll.text[:200]}"
-                )
+                raise GatewayUnavailable(f"poll returned {poll.status_code}: {poll.text[:200]}")
             body = poll.json().get("data", {}) or poll.json()
             status = body.get("status")
             if status == "success":
                 model = body.get("output", {}).get("model")
                 if not model:
-                    raise GatewayUnavailable(
-                        f"task success but no model URL: {body}"
-                    )
+                    raise GatewayUnavailable(f"task success but no model URL: {body}")
                 return model
             if status in ("failed", "cancelled", "banned"):
                 raise GatewayUnavailable(f"task ended in status: {status}")

@@ -9,6 +9,7 @@ raising GatewayUnavailable on unreachable endpoints.
 The reachable-and-working path can be tested manually by anyone with
 the credentials.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

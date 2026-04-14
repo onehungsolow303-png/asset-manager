@@ -1,4 +1,5 @@
 """Tests for the LICENSES.md regenerator CLI."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -15,6 +16,7 @@ from asset_manager.cli.regen_licenses import (
 
 def _write_packs_yaml(path: Path, packs: list[dict]) -> Path:
     import yaml
+
     path.write_text(yaml.safe_dump({"packs": packs}), encoding="utf-8")
     return path
 
@@ -33,25 +35,29 @@ def _write_licenses_md_with_markers(path: Path, body_above: str, body_below: str
 
 # ─── build_packs_table ─────────────────────────────────────────────
 
+
 def test_build_packs_table_renders_rows(tmp_path):
-    yaml_path = _write_packs_yaml(tmp_path / "packs.yaml", [
-        {
-            "pack_id": "pack_a",
-            "pack_name": "Pack A",
-            "author": "Alice",
-            "license_code": "CC0",
-            "redistribution": True,
-            "status": "imported",
-        },
-        {
-            "pack_id": "pack_b",
-            "pack_name": "Pack B",
-            "author": "Bob",
-            "license_code": "Synty_standard",
-            "redistribution": False,
-            "status": "planned",
-        },
-    ])
+    yaml_path = _write_packs_yaml(
+        tmp_path / "packs.yaml",
+        [
+            {
+                "pack_id": "pack_a",
+                "pack_name": "Pack A",
+                "author": "Alice",
+                "license_code": "CC0",
+                "redistribution": True,
+                "status": "imported",
+            },
+            {
+                "pack_id": "pack_b",
+                "pack_name": "Pack B",
+                "author": "Bob",
+                "license_code": "Synty_standard",
+                "redistribution": False,
+                "status": "planned",
+            },
+        ],
+    )
 
     table = build_packs_table(yaml_path)
     assert "| Pack A |" in table
@@ -73,10 +79,27 @@ def test_build_packs_table_raises_on_missing_yaml(tmp_path):
 
 
 def test_build_packs_table_sorts_by_pack_id(tmp_path):
-    yaml_path = _write_packs_yaml(tmp_path / "packs.yaml", [
-        {"pack_id": "zebra", "pack_name": "Z", "author": "z", "license_code": "x", "redistribution": True, "status": "x"},
-        {"pack_id": "apple", "pack_name": "A", "author": "a", "license_code": "x", "redistribution": True, "status": "x"},
-    ])
+    yaml_path = _write_packs_yaml(
+        tmp_path / "packs.yaml",
+        [
+            {
+                "pack_id": "zebra",
+                "pack_name": "Z",
+                "author": "z",
+                "license_code": "x",
+                "redistribution": True,
+                "status": "x",
+            },
+            {
+                "pack_id": "apple",
+                "pack_name": "A",
+                "author": "a",
+                "license_code": "x",
+                "redistribution": True,
+                "status": "x",
+            },
+        ],
+    )
     table = build_packs_table(yaml_path)
     apple_idx = table.index("| A |")
     zebra_idx = table.index("| Z |")
@@ -84,12 +107,19 @@ def test_build_packs_table_sorts_by_pack_id(tmp_path):
 
 
 def test_build_packs_table_escapes_pipes_in_pack_name(tmp_path):
-    yaml_path = _write_packs_yaml(tmp_path / "packs.yaml", [
-        {
-            "pack_id": "p", "pack_name": "Has | Pipe", "author": "a",
-            "license_code": "CC0", "redistribution": True, "status": "x",
-        },
-    ])
+    yaml_path = _write_packs_yaml(
+        tmp_path / "packs.yaml",
+        [
+            {
+                "pack_id": "p",
+                "pack_name": "Has | Pipe",
+                "author": "a",
+                "license_code": "CC0",
+                "redistribution": True,
+                "status": "x",
+            },
+        ],
+    )
     table = build_packs_table(yaml_path)
     # Escaped pipe should NOT break the table row
     assert "Has \\| Pipe" in table
@@ -97,13 +127,21 @@ def test_build_packs_table_escapes_pipes_in_pack_name(tmp_path):
 
 # ─── regenerate_licenses_md ────────────────────────────────────────
 
+
 def test_regenerate_replaces_markers_section(tmp_path):
-    yaml_path = _write_packs_yaml(tmp_path / "packs.yaml", [
-        {
-            "pack_id": "p1", "pack_name": "Test Pack", "author": "Test Author",
-            "license_code": "CC0", "redistribution": True, "status": "imported",
-        },
-    ])
+    yaml_path = _write_packs_yaml(
+        tmp_path / "packs.yaml",
+        [
+            {
+                "pack_id": "p1",
+                "pack_name": "Test Pack",
+                "author": "Test Author",
+                "license_code": "CC0",
+                "redistribution": True,
+                "status": "imported",
+            },
+        ],
+    )
     md_path = _write_licenses_md_with_markers(
         tmp_path / "LICENSES.md",
         "# Header\nSome prose above.",
@@ -121,14 +159,23 @@ def test_regenerate_replaces_markers_section(tmp_path):
 
 
 def test_regenerate_is_idempotent(tmp_path):
-    yaml_path = _write_packs_yaml(tmp_path / "packs.yaml", [
-        {
-            "pack_id": "p1", "pack_name": "Test Pack", "author": "Test",
-            "license_code": "CC0", "redistribution": True, "status": "x",
-        },
-    ])
+    yaml_path = _write_packs_yaml(
+        tmp_path / "packs.yaml",
+        [
+            {
+                "pack_id": "p1",
+                "pack_name": "Test Pack",
+                "author": "Test",
+                "license_code": "CC0",
+                "redistribution": True,
+                "status": "x",
+            },
+        ],
+    )
     md_path = _write_licenses_md_with_markers(
-        tmp_path / "LICENSES.md", "# H", "## D",
+        tmp_path / "LICENSES.md",
+        "# H",
+        "## D",
     )
 
     regenerate_licenses_md(yaml_path, md_path)
@@ -138,12 +185,23 @@ def test_regenerate_is_idempotent(tmp_path):
 
 
 def test_regenerate_check_only_does_not_write(tmp_path):
-    yaml_path = _write_packs_yaml(tmp_path / "packs.yaml", [
-        {"pack_id": "p1", "pack_name": "New Pack", "author": "x",
-         "license_code": "CC0", "redistribution": True, "status": "x"},
-    ])
+    yaml_path = _write_packs_yaml(
+        tmp_path / "packs.yaml",
+        [
+            {
+                "pack_id": "p1",
+                "pack_name": "New Pack",
+                "author": "x",
+                "license_code": "CC0",
+                "redistribution": True,
+                "status": "x",
+            },
+        ],
+    )
     md_path = _write_licenses_md_with_markers(
-        tmp_path / "LICENSES.md", "# H", "## D",
+        tmp_path / "LICENSES.md",
+        "# H",
+        "## D",
     )
     original = md_path.read_text(encoding="utf-8")
 

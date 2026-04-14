@@ -45,6 +45,7 @@ Usage:
         --exclude Core_Mapmaking \\
         --exclude .dungeondraft_pack
 """
+
 from __future__ import annotations
 
 import argparse
@@ -112,9 +113,7 @@ def should_skip(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Bulk-import sub-packs from a parent directory"
-    )
+    parser = argparse.ArgumentParser(description="Bulk-import sub-packs from a parent directory")
     parser.add_argument("parent", help="Parent directory containing sub-pack folders")
     parser.add_argument(
         "--catalog",
@@ -130,7 +129,7 @@ def main(argv: list[str] | None = None) -> int:
         "--asset-id-prefix-template",
         default="{slug}_",
         help="Template for asset_id_prefix per sub-pack. {slug} is replaced "
-             "with the lowercased+slugified folder name.",
+        "with the lowercased+slugified folder name.",
     )
     parser.add_argument(
         "--license",
@@ -217,9 +216,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for i, sub in enumerate(sub_packs, start=1):
         size_mb = directory_size_mb(sub)
-        skip, reason = should_skip(
-            sub, size_mb, args.max_size_mb, args.exclude, args.include
-        )
+        skip, reason = should_skip(sub, size_mb, args.max_size_mb, args.exclude, args.include)
 
         if skip:
             total_skipped_packs += 1

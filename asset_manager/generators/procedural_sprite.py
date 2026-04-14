@@ -7,6 +7,7 @@ filtering is implicit because we manipulate pixels directly. Output is RGBA PNG.
 C# reference: C:/Dev/_archive/forever-engine-pre-pivot/Assets/Scripts/AssetGeneration/AssetGeneration/ProceduralSpriteGenerator.cs
 Spec: 2026-04-06-csharp-to-python-assetgen-port-design.md §5.1
 """
+
 from __future__ import annotations
 
 import math

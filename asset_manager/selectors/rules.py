@@ -5,6 +5,7 @@ the SelectionRequest. The matcher is intentionally tolerant: missing
 fields on EITHER side don't disqualify a candidate, but mismatched
 explicit values do. Tags use set-overlap (any common tag matches).
 """
+
 from __future__ import annotations
 
 from typing import Any

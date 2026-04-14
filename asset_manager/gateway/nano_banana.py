@@ -34,6 +34,7 @@ The gateway is "available" iff GEMINI_API_KEY is set. Same cheap-probe
 pattern as the Tripo3D gateway: no network call in is_available() to
 keep /generate latency fast.
 """
+
 from __future__ import annotations
 
 import base64
@@ -63,12 +64,10 @@ class NanoBananaGateway(GenerationGateway):
         timeout: float | None = None,
     ) -> None:
         self._api_key = api_key or os.environ.get("GEMINI_API_KEY")
-        self._model_id = (
-            model_id or os.environ.get("GEMINI_MODEL_ID", DEFAULT_MODEL_ID)
+        self._model_id = model_id or os.environ.get("GEMINI_MODEL_ID", DEFAULT_MODEL_ID)
+        self._base_url = (base_url or os.environ.get("GEMINI_API_BASE", DEFAULT_BASE_URL)).rstrip(
+            "/"
         )
-        self._base_url = (
-            base_url or os.environ.get("GEMINI_API_BASE", DEFAULT_BASE_URL)
-        ).rstrip("/")
         self._timeout = float(timeout or os.environ.get("GEMINI_TIMEOUT", "60.0"))
 
     def is_available(self) -> bool:
@@ -111,37 +110,34 @@ class NanoBananaGateway(GenerationGateway):
         if mode == "image":
             image_path = kwargs.get("image_path")
             if not image_path:
-                raise GatewayUnavailable(
-                    "mode=image requires kwargs['image_path']"
-                )
+                raise GatewayUnavailable("mode=image requires kwargs['image_path']")
             image_path = Path(image_path)
             if not image_path.exists():
-                raise GatewayUnavailable(
-                    f"image_path does not exist: {image_path}"
-                )
+                raise GatewayUnavailable(f"image_path does not exist: {image_path}")
             mime = _guess_mime(image_path)
             encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
-            parts.append({
-                "inlineData": {
-                    "mimeType": mime,
-                    "data": encoded,
-                },
-            })
+            parts.append(
+                {
+                    "inlineData": {
+                        "mimeType": mime,
+                        "data": encoded,
+                    },
+                }
+            )
 
         body: dict[str, Any] = {
-            "contents": [{
-                "role": "user",
-                "parts": parts,
-            }],
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": parts,
+                }
+            ],
             "generationConfig": {
                 "responseModalities": ["IMAGE"],
             },
         }
 
-        url = (
-            f"{self._base_url}/models/{self._model_id}:generateContent"
-            f"?key={self._api_key}"
-        )
+        url = f"{self._base_url}/models/{self._model_id}:generateContent?key={self._api_key}"
 
         try:
             with httpx.Client(timeout=self._timeout) as client:
@@ -154,9 +150,7 @@ class NanoBananaGateway(GenerationGateway):
             raise GatewayUnavailable(f"gemini unreachable: {e}") from e
 
         if resp.status_code != 200:
-            raise GatewayUnavailable(
-                f"gemini returned {resp.status_code}: {resp.text[:200]}"
-            )
+            raise GatewayUnavailable(f"gemini returned {resp.status_code}: {resp.text[:200]}")
 
         # Walk the response for the first inline image part. Gemini's
         # response schema nests the image bytes deeply:
@@ -169,8 +163,7 @@ class NanoBananaGateway(GenerationGateway):
         image_bytes = _extract_inline_image(data)
         if image_bytes is None:
             raise GatewayUnavailable(
-                f"gemini response missing inline image data: "
-                f"{str(data)[:300]}"
+                f"gemini response missing inline image data: {str(data)[:300]}"
             )
 
         out_path.parent.mkdir(parents=True, exist_ok=True)

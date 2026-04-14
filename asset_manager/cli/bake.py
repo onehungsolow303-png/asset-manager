@@ -51,6 +51,7 @@ Exit codes:
     1  any failure (file printed which one)
     2  recipe file missing or malformed
 """
+
 from __future__ import annotations
 
 import argparse
@@ -109,10 +110,7 @@ def _bake_tileset(entry: dict[str, Any], storage: Storage) -> Path:
     tile_size = int(entry.get("tile_size", 16))
     tiles_per_row = int(entry.get("tiles_per_row", 4))
     raw = entry.get("tile_colors") or [[100, 0, 0, 255]]
-    colors = [
-        (int(c[0]), int(c[1]), int(c[2]), int(c[3]) if len(c) > 3 else 255)
-        for c in raw
-    ]
+    colors = [(int(c[0]), int(c[1]), int(c[2]), int(c[3]) if len(c) > 3 else 255) for c in raw]
     seed = int(entry.get("seed", 42))
     out = storage.path_for("tileset", entry["id"], ext="png")
     generate_tileset(tile_size, tiles_per_row, colors, seed=seed, out_path=out)
@@ -161,8 +159,7 @@ def bake_recipe(recipe_path: Path, root: Path | None = None) -> tuple[int, int]:
         handler = _HANDLERS.get(kind)
         if handler is None:
             print(
-                f"SKIP {asset_id}: unknown kind {kind!r} "
-                f"(supported: {sorted(_HANDLERS.keys())})",
+                f"SKIP {asset_id}: unknown kind {kind!r} (supported: {sorted(_HANDLERS.keys())})",
                 file=sys.stderr,
             )
             failure += 1

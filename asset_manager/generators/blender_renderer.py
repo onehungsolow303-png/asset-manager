@@ -53,6 +53,7 @@ Failure modes (all GatewayUnavailable):
     - Subprocess returns non-zero exit code
     - Output PNG not created
 """
+
 from __future__ import annotations
 
 import logging
@@ -61,9 +62,8 @@ import shutil
 import subprocess
 import tempfile
 import textwrap
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +87,7 @@ class BlenderRendererUnavailable(Exception):
 @dataclass
 class RenderPreset:
     """Camera + lighting + resolution + post-process for one preset."""
+
     name: str
     camera_type: str  # "ORTHO" | "PERSP"
     camera_rotation_deg: tuple[float, float, float]
@@ -192,8 +193,7 @@ class BlenderRenderer:
 
         if preset not in RENDER_PRESETS:
             raise BlenderRendererUnavailable(
-                f"unknown preset: {preset!r}. "
-                f"Known: {sorted(RENDER_PRESETS.keys())}"
+                f"unknown preset: {preset!r}. Known: {sorted(RENDER_PRESETS.keys())}"
             )
 
         out_path = Path(out_path)
@@ -218,9 +218,10 @@ class BlenderRenderer:
         try:
             cmd = [
                 str(self._blender),
-                "-b",          # background mode (no GUI)
-                "-noaudio",    # don't init audio (faster)
-                "-P", str(script_path),
+                "-b",  # background mode (no GUI)
+                "-noaudio",  # don't init audio (faster)
+                "-P",
+                str(script_path),
             ]
             logger.info("[blender_renderer] running: %s", " ".join(cmd))
             try:
@@ -235,14 +236,11 @@ class BlenderRenderer:
                     f"blender render timed out after {self._timeout}s"
                 ) from e
             except OSError as e:
-                raise BlenderRendererUnavailable(
-                    f"blender subprocess failed to start: {e}"
-                ) from e
+                raise BlenderRendererUnavailable(f"blender subprocess failed to start: {e}") from e
 
             if proc.returncode != 0:
                 raise BlenderRendererUnavailable(
-                    f"blender exited {proc.returncode}: "
-                    f"{(proc.stderr or proc.stdout)[-500:]}"
+                    f"blender exited {proc.returncode}: {(proc.stderr or proc.stdout)[-500:]}"
                 )
         finally:
             try:
@@ -312,17 +310,11 @@ class BlenderRenderer:
         ext = mesh_path.suffix.lower()
         # Map extension to the bpy importer call
         if ext in (".glb", ".gltf"):
-            import_call = (
-                f"bpy.ops.import_scene.gltf(filepath={repr(str(mesh_path))})"
-            )
+            import_call = f"bpy.ops.import_scene.gltf(filepath={repr(str(mesh_path))})"
         elif ext == ".fbx":
-            import_call = (
-                f"bpy.ops.import_scene.fbx(filepath={repr(str(mesh_path))})"
-            )
+            import_call = f"bpy.ops.import_scene.fbx(filepath={repr(str(mesh_path))})"
         elif ext == ".obj":
-            import_call = (
-                f"bpy.ops.wm.obj_import(filepath={repr(str(mesh_path))})"
-            )
+            import_call = f"bpy.ops.wm.obj_import(filepath={repr(str(mesh_path))})"
         else:
             # Should be unreachable — render() validates extensions first
             raise BlenderRendererUnavailable(f"no importer for {ext}")

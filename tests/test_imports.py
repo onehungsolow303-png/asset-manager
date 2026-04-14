@@ -9,6 +9,7 @@ deps (cv2, scipy). In a minimal venv those raise ModuleNotFoundError at import
 time — that's an environment problem, not a bare-import regression. We skip
 those specific modules via a known list and still catch every OTHER import bug.
 """
+
 import importlib
 import pkgutil
 
@@ -40,8 +41,7 @@ _RUNTIME_DEP_MODULES = {
 
 def _all_module_names():
     return [
-        m.name
-        for m in pkgutil.walk_packages(asset_manager.__path__, asset_manager.__name__ + ".")
+        m.name for m in pkgutil.walk_packages(asset_manager.__path__, asset_manager.__name__ + ".")
     ]
 
 
@@ -53,6 +53,11 @@ def test_module_imports(module_name):
         # Tolerate a missing runtime dep (cv2/scipy) for the known border_detect
         # modules. Any other missing module means a real bare-import bug.
         missing = getattr(e, "name", "")
-        if module_name in _RUNTIME_DEP_MODULES and missing in {"cv2", "scipy", "skimage", "imagehash"}:
+        if module_name in _RUNTIME_DEP_MODULES and missing in {
+            "cv2",
+            "scipy",
+            "skimage",
+            "imagehash",
+        }:
             pytest.skip(f"{module_name} requires {missing} (not installed in this venv)")
         raise

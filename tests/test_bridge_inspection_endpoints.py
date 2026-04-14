@@ -12,6 +12,7 @@ None of them mutate state. None of them call paid APIs. They expose
 the inspection surface so the user can verify the system from `curl`
 without booting the Python REPL.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -49,16 +50,21 @@ def test_get_style_bible_category_for_unknown_kind_returns_globals(client):
 
 # ─── /audit ──────────────────────────────────────────────────────────
 
+
 def test_audit_endpoint_passes_for_valid_png(client, tmp_path):
     from PIL import Image
+
     p = tmp_path / "test.png"
     Image.new("RGBA", (32, 32), (200, 100, 50, 255)).save(p)
 
-    r = client.post("/audit", json={
-        "asset_id": "test_wolf",
-        "kind": "creature_token",
-        "path": str(p),
-    })
+    r = client.post(
+        "/audit",
+        json={
+            "asset_id": "test_wolf",
+            "kind": "creature_token",
+            "path": str(p),
+        },
+    )
     assert r.status_code == 200
     body = r.json()
     assert body["passed"] is True
@@ -67,11 +73,14 @@ def test_audit_endpoint_passes_for_valid_png(client, tmp_path):
 
 
 def test_audit_endpoint_fails_on_missing_file(client, tmp_path):
-    r = client.post("/audit", json={
-        "asset_id": "ghost",
-        "kind": "creature_token",
-        "path": str(tmp_path / "ghost.png"),
-    })
+    r = client.post(
+        "/audit",
+        json={
+            "asset_id": "ghost",
+            "kind": "creature_token",
+            "path": str(tmp_path / "ghost.png"),
+        },
+    )
     assert r.status_code == 200
     body = r.json()
     assert body["passed"] is False
@@ -87,6 +96,7 @@ def test_audit_endpoint_validates_required_fields(client):
 
 
 # ─── /router_status ──────────────────────────────────────────────────
+
 
 def test_router_status_lists_all_tiers(client):
     r = client.get("/router_status")

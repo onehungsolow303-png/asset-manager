@@ -1,4 +1,5 @@
 """Tests for the ship_export_check CLI."""
+
 from __future__ import annotations
 
 import json
@@ -17,8 +18,10 @@ def _make_catalog(tmp_path, entries: list[dict]) -> Catalog:
     """Build a real Catalog instance with the given entries."""
     catalog_path = tmp_path / "catalog.json"
     catalog = Catalog(
-        path=catalog_path, persist=True,
-        auto_scan_baked=False, prune_on_load=False,
+        path=catalog_path,
+        persist=True,
+        auto_scan_baked=False,
+        prune_on_load=False,
     )
     for entry in entries:
         catalog.add(entry["asset_id"], entry)
@@ -27,15 +30,30 @@ def _make_catalog(tmp_path, entries: list[dict]) -> Catalog:
 
 # ─── find_must_replace ────────────────────────────────────────────
 
+
 def test_find_returns_only_redistribution_false(tmp_path):
-    catalog = _make_catalog(tmp_path, [
-        make_manifest(asset_id="ok", kind="creature_token", path="/x/ok.png",
-                       redistribution=True),
-        make_manifest(asset_id="bad1", kind="creature_token", path="/x/bad1.png",
-                       redistribution=False, license="Roll20_marketplace_personal"),
-        make_manifest(asset_id="bad2", kind="portrait", path="/x/bad2.png",
-                       redistribution=False, license="Synty_standard"),
-    ])
+    catalog = _make_catalog(
+        tmp_path,
+        [
+            make_manifest(
+                asset_id="ok", kind="creature_token", path="/x/ok.png", redistribution=True
+            ),
+            make_manifest(
+                asset_id="bad1",
+                kind="creature_token",
+                path="/x/bad1.png",
+                redistribution=False,
+                license="Roll20_marketplace_personal",
+            ),
+            make_manifest(
+                asset_id="bad2",
+                kind="portrait",
+                path="/x/bad2.png",
+                redistribution=False,
+                license="Synty_standard",
+            ),
+        ],
+    )
 
     must_replace = find_must_replace(catalog)
     asset_ids = {a["asset_id"] for a in must_replace}
@@ -47,31 +65,55 @@ def test_find_returns_only_redistribution_false(tmp_path):
 def test_find_treats_missing_redistribution_as_safe(tmp_path):
     """Catalog entries without an explicit redistribution field default
     to True (safe). They should NOT be flagged as must-replace."""
-    catalog = _make_catalog(tmp_path, [
-        {"asset_id": "legacy", "kind": "creature_token", "path": "/x/legacy.png"},
-    ])
+    catalog = _make_catalog(
+        tmp_path,
+        [
+            {"asset_id": "legacy", "kind": "creature_token", "path": "/x/legacy.png"},
+        ],
+    )
     must_replace = find_must_replace(catalog)
     assert must_replace == []
 
 
 def test_find_returns_empty_when_clean(tmp_path):
-    catalog = _make_catalog(tmp_path, [
-        make_manifest(asset_id="ok1", kind="creature_token", path="/x/ok1.png", redistribution=True),
-        make_manifest(asset_id="ok2", kind="portrait", path="/x/ok2.png", redistribution=True),
-    ])
+    catalog = _make_catalog(
+        tmp_path,
+        [
+            make_manifest(
+                asset_id="ok1", kind="creature_token", path="/x/ok1.png", redistribution=True
+            ),
+            make_manifest(asset_id="ok2", kind="portrait", path="/x/ok2.png", redistribution=True),
+        ],
+    )
     assert find_must_replace(catalog) == []
 
 
 # ─── summarize ────────────────────────────────────────────────────
 
+
 def test_summarize_groups_by_license_pack_kind_source():
     must_replace = [
-        {"asset_id": "a", "kind": "portrait", "source": "pack",
-         "license": "Roll20_marketplace_personal", "pack_name": "Roll20 Pack 1"},
-        {"asset_id": "b", "kind": "portrait", "source": "pack",
-         "license": "Roll20_marketplace_personal", "pack_name": "Roll20 Pack 1"},
-        {"asset_id": "c", "kind": "building", "source": "pack",
-         "license": "Synty_standard", "pack_name": "Synty Pack"},
+        {
+            "asset_id": "a",
+            "kind": "portrait",
+            "source": "pack",
+            "license": "Roll20_marketplace_personal",
+            "pack_name": "Roll20 Pack 1",
+        },
+        {
+            "asset_id": "b",
+            "kind": "portrait",
+            "source": "pack",
+            "license": "Roll20_marketplace_personal",
+            "pack_name": "Roll20 Pack 1",
+        },
+        {
+            "asset_id": "c",
+            "kind": "building",
+            "source": "pack",
+            "license": "Synty_standard",
+            "pack_name": "Synty Pack",
+        },
     ]
     s = summarize(must_replace)
     assert s["total"] == 3
@@ -101,13 +143,19 @@ def test_summarize_handles_missing_pack_name():
 
 # ─── CSV output ────────────────────────────────────────────────────
 
+
 def test_write_csv_report_creates_file_with_expected_columns(tmp_path):
     must_replace = [
         {
-            "asset_id": "wolf", "kind": "creature_token", "source": "pack",
-            "pack_name": "Roll20 Pack", "license": "Roll20_marketplace_personal",
-            "cost_usd": 0.0, "path": "/x/wolf.png",
-            "tags": ["wolf", "forest"], "biome": "forest",
+            "asset_id": "wolf",
+            "kind": "creature_token",
+            "source": "pack",
+            "pack_name": "Roll20 Pack",
+            "license": "Roll20_marketplace_personal",
+            "cost_usd": 0.0,
+            "path": "/x/wolf.png",
+            "tags": ["wolf", "forest"],
+            "biome": "forest",
             "generated_at": "2026-04-08T20:00:00+00:00",
         },
     ]

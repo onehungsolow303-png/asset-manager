@@ -20,6 +20,7 @@ To enable in production:
 
 Spec: 2026-04-06-three-module-consolidation-design.md §6.2 (asset gateway)
 """
+
 from __future__ import annotations
 
 import logging
@@ -49,7 +50,9 @@ class ScenarioGateway(GenerationGateway):
     ) -> None:
         self._api_key = api_key or os.environ.get("SCENARIO_API_KEY")
         self._model_id = model_id or os.environ.get("SCENARIO_MODEL_ID")
-        self._base_url = (base_url or os.environ.get("SCENARIO_API_BASE_URL", DEFAULT_BASE_URL)).rstrip("/")
+        self._base_url = (
+            base_url or os.environ.get("SCENARIO_API_BASE_URL", DEFAULT_BASE_URL)
+        ).rstrip("/")
         self._timeout = float(timeout or os.environ.get("SCENARIO_TIMEOUT", "120.0"))
 
     def _headers(self) -> dict[str, str]:
@@ -78,9 +81,7 @@ class ScenarioGateway(GenerationGateway):
         if not self._api_key:
             raise GatewayUnavailable("SCENARIO_API_KEY not set")
         if not self._model_id and not kwargs.get("model_id"):
-            raise GatewayUnavailable(
-                "SCENARIO_MODEL_ID not set (and no model_id in kwargs)"
-            )
+            raise GatewayUnavailable("SCENARIO_MODEL_ID not set (and no model_id in kwargs)")
 
         model_id = str(kwargs.get("model_id", self._model_id))
         width = int(kwargs.get("width", 512))
@@ -136,9 +137,7 @@ class ScenarioGateway(GenerationGateway):
                             headers=self._headers(),
                         )
                         if dl.status_code != 200:
-                            raise GatewayUnavailable(
-                                f"asset download returned {dl.status_code}"
-                            )
+                            raise GatewayUnavailable(f"asset download returned {dl.status_code}")
                         out_path.parent.mkdir(parents=True, exist_ok=True)
                         out_path.write_bytes(dl.content)
                         return out_path

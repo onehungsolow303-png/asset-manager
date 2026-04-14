@@ -39,9 +39,9 @@ Pagination strategy:
   lines of JS) and the browser responsive even at 50,000+ catalog
   entries.
 """
+
 from __future__ import annotations
 
-import html
 import json
 import logging
 from pathlib import Path
@@ -118,25 +118,28 @@ def regenerate_index(
             ext = Path(path).suffix.lower().lstrip(".") if path else ""
             thumb_state = f"ext_{ext}" if ext else "no_path"
 
-        asset_records.append({
-            "id": asset_id,
-            "kind": asset.get("kind") or "?",
-            "source": asset.get("source") or "unknown",
-            "license": asset.get("license") or "unknown",
-            "pack_name": asset.get("pack_name") or "",
-            "cost_usd": float(asset.get("cost_usd") or 0.0),
-            "swap_safe": bool(asset.get("swap_safe", True)),
-            "redistribution": bool(asset.get("redistribution", True)),
-            "biome": asset.get("biome") or "",
-            "tags": [str(t) for t in (asset.get("tags") or [])],
-            "thumb": thumb_rel,
-            "thumb_state": thumb_state,
-        })
+        asset_records.append(
+            {
+                "id": asset_id,
+                "kind": asset.get("kind") or "?",
+                "source": asset.get("source") or "unknown",
+                "license": asset.get("license") or "unknown",
+                "pack_name": asset.get("pack_name") or "",
+                "cost_usd": float(asset.get("cost_usd") or 0.0),
+                "swap_safe": bool(asset.get("swap_safe", True)),
+                "redistribution": bool(asset.get("redistribution", True)),
+                "biome": asset.get("biome") or "",
+                "tags": [str(t) for t in (asset.get("tags") or [])],
+                "thumb": thumb_rel,
+                "thumb_state": thumb_state,
+            }
+        )
 
     if rendered or skipped:
         logger.info(
             "[html_index] thumbnails rendered=%d skipped=%d",
-            rendered, skipped,
+            rendered,
+            skipped,
         )
 
     # Embed the entire catalog as JSON. JS pagination renders cards
@@ -147,9 +150,9 @@ def regenerate_index(
     # malicious asset_id like "</script><script>alert(1)</script>"
     # from breaking out of the surrounding <script> tag and injecting
     # arbitrary JS into the page.
-    catalog_json = json.dumps(
-        asset_records, ensure_ascii=False, separators=(",", ":")
-    ).replace("</", "<\\/")
+    catalog_json = json.dumps(asset_records, ensure_ascii=False, separators=(",", ":")).replace(
+        "</", "<\\/"
+    )
 
     page = _PAGE_TEMPLATE.format(
         count=len(asset_records),

@@ -60,21 +60,23 @@ user's approval to actually start charging API credits. For now,
 the router exists, is unit-tested, and can be invoked from CLI tools
 or future endpoints once budgets and keys are confirmed.
 """
+
 from __future__ import annotations
 
 import hashlib
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
-from pathlib import Path
-from typing import Any, Callable
+from enum import StrEnum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class Tier(str, Enum):
+class Tier(StrEnum):
     """Routing tiers, ordered cheapest → most expensive."""
+
     CACHE = "cache"
     LIBRARY = "library"
     PROCEDURAL = "procedural"
@@ -91,8 +93,8 @@ TIER_COST_USD: dict[Tier, float] = {
     Tier.LIBRARY: 0.0,
     Tier.PROCEDURAL: 0.0,
     Tier.LOCAL_LORA_SD: 0.0,  # local GPU = effectively free
-    Tier.NANO_BANANA: 0.04,    # Gemini 2.5 Flash Image, per edit
-    Tier.TRIPO3D: 0.30,        # rough average; image-to-3D is ~1 credit
+    Tier.NANO_BANANA: 0.04,  # Gemini 2.5 Flash Image, per edit
+    Tier.TRIPO3D: 0.30,  # rough average; image-to-3D is ~1 credit
 }
 
 PAID_TIERS = {Tier.NANO_BANANA, Tier.TRIPO3D}
@@ -107,6 +109,7 @@ class AssetRequest:
     transient field. Two requests for the same semantic asset must
     produce the same hash so the cache lookup hits.
     """
+
     kind: str
     tags: list[str] = field(default_factory=list)
     biome: str | None = None
@@ -131,6 +134,7 @@ class AssetRequest:
 @dataclass
 class RoutingResult:
     """What the router returns for a given request."""
+
     found: bool
     tier: Tier | None = None
     asset_id: str | None = None
@@ -144,6 +148,7 @@ class RoutingResult:
 class TierConfig:
     """Per-tier configuration. The router queries each tier in order
     and skips ones marked enabled=False or ones whose handler is None."""
+
     tier: Tier
     enabled: bool = True
     handler: Callable[[AssetRequest], RoutingResult | None] | None = None
@@ -216,9 +221,7 @@ class SourceDecisionRouter:
             try:
                 result = cfg.handler(request)
             except Exception as e:  # boundary - don't let one tier kill the chain
-                logger.warning(
-                    "[router] tier %s handler raised: %s", cfg.tier.value, e
-                )
+                logger.warning("[router] tier %s handler raised: %s", cfg.tier.value, e)
                 notes_collected.append(f"{cfg.tier.value}: error: {e}")
                 continue
 
@@ -235,12 +238,14 @@ class SourceDecisionRouter:
             cost = TIER_COST_USD.get(cfg.tier, 0.0)
             result.cost_usd = cost
             self._spent_usd += cost
-            result.notes = notes_collected + [
-                f"{cfg.tier.value}: HIT ${cost:.4f}"
-            ]
+            result.notes = notes_collected + [f"{cfg.tier.value}: HIT ${cost:.4f}"]
             logger.info(
                 "[router] %s -> %s (asset_id=%s, cost=$%.4f, total=$%.4f)",
-                request.kind, cfg.tier.value, result.asset_id, cost, self._spent_usd,
+                request.kind,
+                cfg.tier.value,
+                result.asset_id,
+                cost,
+                self._spent_usd,
             )
             return result
 

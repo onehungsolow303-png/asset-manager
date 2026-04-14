@@ -37,20 +37,28 @@ Output columns:
 The script is read-only and idempotent. Running it twice on the same
 folder produces the same output. No catalog state is modified.
 """
+
 from __future__ import annotations
 
 import argparse
 import csv
 import os
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 # File extensions we consider as recognizable assets
 _RECOGNIZED_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".webp", ".gif",      # 2D
-    ".glb", ".gltf", ".fbx", ".obj", ".blend",     # 3D
-    ".psd",                                         # Photoshop source
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".gif",  # 2D
+    ".glb",
+    ".gltf",
+    ".fbx",
+    ".obj",
+    ".blend",  # 3D
+    ".psd",  # Photoshop source
 }
 
 # Windows file attributes (per win32 docs / GetFileAttributes)
@@ -73,6 +81,7 @@ def is_placeholder(path: Path) -> bool:
         return False
     try:
         import ctypes
+
         attrs = ctypes.windll.kernel32.GetFileAttributesW(str(path))
         if attrs == -1 or attrs == 0xFFFFFFFF:
             return False
@@ -131,8 +140,9 @@ def inventory_subpack(sub_root: Path) -> dict:
 def inventory_pack_root(pack_root: Path) -> list[dict]:
     """Walk one level deep under pack_root, inventory each subdirectory."""
     if not pack_root.exists() or not pack_root.is_dir():
-        print(f"ERROR: pack root does not exist or is not a directory: {pack_root}",
-              file=sys.stderr)
+        print(
+            f"ERROR: pack root does not exist or is not a directory: {pack_root}", file=sys.stderr
+        )
         return []
 
     rows: list[dict] = []
@@ -144,9 +154,7 @@ def inventory_pack_root(pack_root: Path) -> list[dict]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Inventory a pack root without importing it"
-    )
+    parser = argparse.ArgumentParser(description="Inventory a pack root without importing it")
     parser.add_argument(
         "pack_root",
         help="Top-level directory containing sub-pack directories",
@@ -174,8 +182,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"wrote {len(rows)} rows to {out_path}")
     else:
         # Pretty print to stdout
-        widths = {k: max(len(str(r.get(k, ""))) for r in rows + [{k: k}])
-                  for k in rows[0].keys()}
+        widths = {k: max(len(str(r.get(k, ""))) for r in rows + [{k: k}]) for k in rows[0].keys()}
         # Header
         print(" | ".join(k.ljust(widths[k]) for k in rows[0].keys()))
         print("-+-".join("-" * widths[k] for k in rows[0].keys()))
@@ -188,9 +195,11 @@ def main(argv: list[str] | None = None) -> int:
         total_materialized = sum(r["materialized"] for r in rows)
         total_placeholder = sum(r["placeholder"] for r in rows)
         print()
-        print(f"TOTAL: {len(rows)} sub-packs, {total_assets} assets, "
-              f"{total_size:.1f} MB materialized, "
-              f"{total_materialized} files local, {total_placeholder} placeholder")
+        print(
+            f"TOTAL: {len(rows)} sub-packs, {total_assets} assets, "
+            f"{total_size:.1f} MB materialized, "
+            f"{total_materialized} files local, {total_placeholder} placeholder"
+        )
 
     return 0
 
