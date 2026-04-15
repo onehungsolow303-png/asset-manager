@@ -28,7 +28,7 @@
     },
     "Dwarf male cleric.glb": {
       "hash": "358dad4dda7ba3a506d29b443fe223d9",
-      "processed_at": "2026-04-10T15:43:23.366283+00:00",
+      "processed_at": "2026-04-14T14:03:19.769016+00:00",
       "parts": 30,
       "categories": {
         "arm": 11,
@@ -40,7 +40,7 @@
     },
     "Dwarf male fighter 2.glb": {
       "hash": "d1df03f885a4c36e781bad2002969203",
-      "processed_at": "2026-04-10T15:43:32.621172+00:00",
+      "processed_at": "2026-04-14T14:03:22.942677+00:00",
       "parts": 25,
       "categories": {
         "accessory": 2,
@@ -54,7 +54,7 @@
     },
     "Dwarf male fighter 3.glb": {
       "hash": "7d35a65dc72c1d76e3c1e65797b43677",
-      "processed_at": "2026-04-10T15:43:39.001391+00:00",
+      "processed_at": "2026-04-14T14:03:25.917924+00:00",
       "parts": 18,
       "categories": {
         "accessory": 2,
@@ -68,7 +68,7 @@
     },
     "Dwarf male fighter.glb": {
       "hash": "22459f628e5ff403b4979a2d8bd47f12",
-      "processed_at": "2026-04-10T15:43:44.987777+00:00",
+      "processed_at": "2026-04-14T14:03:28.973913+00:00",
       "parts": 26,
       "categories": {
         "accessory": 1,
@@ -81,7 +81,7 @@
     },
     "Elf female ranger.glb": {
       "hash": "9f0ba8fcfe414d114a1ff57264fd14a3",
-      "processed_at": "2026-04-10T15:43:50.241534+00:00",
+      "processed_at": "2026-04-14T14:03:32.039595+00:00",
       "parts": 16,
       "categories": {
         "arm": 6,
@@ -95,7 +95,7 @@
     },
     "Elf male fighter.glb": {
       "hash": "8ad6988ad408bf87830c16744cf00a43",
-      "processed_at": "2026-04-10T15:43:56.102784+00:00",
+      "processed_at": "2026-04-14T14:03:35.234263+00:00",
       "parts": 19,
       "categories": {
         "arm": 6,
@@ -107,7 +107,7 @@
     },
     "Elf male wizard 2.glb": {
       "hash": "cd1fba1e0a0730d01f2f852713276434",
-      "processed_at": "2026-04-10T15:44:01.734690+00:00",
+      "processed_at": "2026-04-14T14:03:41.520884+00:00",
       "parts": 15,
       "categories": {
         "accessory": 2,
@@ -119,7 +119,7 @@
     },
     "Elf male wizard.glb": {
       "hash": "1ae8c5ff21ce8318a2eb4965e21a6184",
-      "processed_at": "2026-04-10T15:44:05.634515+00:00",
+      "processed_at": "2026-04-14T14:03:44.655381+00:00",
       "parts": 20,
       "categories": {
         "accessory": 1,
@@ -134,7 +134,7 @@
     },
     "Githyanki female fighter.glb": {
       "hash": "042c4cd13d3f05a4860be3ef9674022c",
-      "processed_at": "2026-04-10T15:44:08.810579+00:00",
+      "processed_at": "2026-04-14T14:03:47.676293+00:00",
       "parts": 19,
       "categories": {
         "accessory": 2,
@@ -147,7 +147,7 @@
     },
     "Githyanl female sorcerer.glb": {
       "hash": "6e8ada7c72f2c47d19181e8b67705d7d",
-      "processed_at": "2026-04-10T15:44:11.967130+00:00",
+      "processed_at": "2026-04-14T14:03:50.774693+00:00",
       "parts": 24,
       "categories": {
         "arm": 9,
@@ -190,7 +190,7 @@
     },
     "Bare with Elf male rider.glb": {
       "hash": "b9706a24f581fd7eff33cfeb53ad8209",
-      "processed_at": "2026-04-14T13:48:16.235543+00:00",
+      "processed_at": "2026-04-14T14:03:10.405971+00:00",
       "parts": 13,
       "categories": {
         "accessory": 1,
@@ -203,7 +203,7 @@
     },
     "Dragon born male fighter.glb": {
       "hash": "992d9cea31af9c8acc5861651db92453",
-      "processed_at": "2026-04-14T13:48:19.299319+00:00",
+      "processed_at": "2026-04-14T14:03:13.509837+00:00",
       "parts": 11,
       "categories": {
         "accessory": 1,
@@ -216,7 +216,7 @@
     },
     "Dragon born male sorcerer.glb": {
       "hash": "5fd574136811c0210a6fb6a285223a91",
-      "processed_at": "2026-04-14T13:48:22.352760+00:00",
+      "processed_at": "2026-04-14T14:03:16.619528+00:00",
       "parts": 20,
       "categories": {
         "accessory": 1,
@@ -229,7 +229,7 @@
     },
     "Elf male on a young Dragon.glb": {
       "hash": "bd0820b085a2d33146a6bcd30053ae15",
-      "processed_at": "2026-04-14T13:48:25.529595+00:00",
+      "processed_at": "2026-04-14T14:03:38.396276+00:00",
       "parts": 17,
       "categories": {
         "accessory": 2,
@@ -241,7 +241,7 @@
     },
     "griffin with elf male fighter rider.glb": {
       "hash": "75affbf990ad7b665841b946af8b6889",
-      "processed_at": "2026-04-14T13:48:28.585164+00:00",
+      "processed_at": "2026-04-14T14:03:53.878200+00:00",
       "parts": 25,
       "categories": {
         "accessory": 2,
@@ -256,7 +256,7 @@
     },
     "Human female fighter.glb": {
       "hash": "b6c82928e5e81f0114e3196ce6c41a1f",
-      "processed_at": "2026-04-14T13:48:31.714904+00:00",
+      "processed_at": "2026-04-14T14:03:57.108896+00:00",
       "parts": 12,
       "categories": {
         "accessory": 1,
@@ -270,7 +270,7 @@
     },
     "Human male and Dog.glb": {
       "hash": "b926bdf3372825eb1ec227aa78efec5f",
-      "processed_at": "2026-04-14T13:48:34.840522+00:00",
+      "processed_at": "2026-04-14T14:04:00.291056+00:00",
       "parts": 16,
       "categories": {
         "accessory": 2,
@@ -284,7 +284,7 @@
     },
     "Human male fighter 2.glb": {
       "hash": "6236548a1f2eb6cea3ee7b0b5e5cc81d",
-      "processed_at": "2026-04-14T13:48:38.015116+00:00",
+      "processed_at": "2026-04-14T14:04:03.616673+00:00",
       "parts": 10,
       "categories": {
         "arm": 6,
@@ -295,7 +295,7 @@
     },
     "Human male fighter 3.glb": {
       "hash": "7924f9449a17e3d9c18f6f117b0dc14e",
-      "processed_at": "2026-04-14T13:48:41.077449+00:00",
+      "processed_at": "2026-04-14T14:04:06.762766+00:00",
       "parts": 13,
       "categories": {
         "accessory": 2,
@@ -309,7 +309,7 @@
     },
     "Human male fighter.glb": {
       "hash": "ea263ce4f0d7a569d7bea62e1aa8f435",
-      "processed_at": "2026-04-14T13:48:44.149320+00:00",
+      "processed_at": "2026-04-14T14:04:09.865298+00:00",
       "parts": 18,
       "categories": {
         "arm": 5,
@@ -322,7 +322,7 @@
     },
     "Panther with Elf female archer rider.glb": {
       "hash": "ab54b948c8ddaef9b2760e5d2997bb83",
-      "processed_at": "2026-04-14T13:48:47.158422+00:00",
+      "processed_at": "2026-04-14T14:06:11.376116+00:00",
       "parts": 27,
       "categories": {
         "accessory": 1,
@@ -336,7 +336,7 @@
     },
     "Pegasus.glb": {
       "hash": "26ba2509243ad31f3d27a6287274608b",
-      "processed_at": "2026-04-14T13:48:50.317714+00:00",
+      "processed_at": "2026-04-14T14:06:14.639297+00:00",
       "parts": 10,
       "categories": {
         "accessory": 1,
@@ -348,7 +348,7 @@
     },
     "Monsters\\Giant Rat.glb": {
       "hash": "3c5098cc7aed97820220309ce0338212",
-      "processed_at": "2026-04-14T13:50:28.681601+00:00",
+      "processed_at": "2026-04-14T14:04:13.005477+00:00",
       "parts": 12,
       "categories": {
         "accessory": 2,
@@ -361,7 +361,7 @@
     },
     "Monsters\\goblin female fighter.glb": {
       "hash": "7ad060fa4fb717e7ebb24f4f716b6817",
-      "processed_at": "2026-04-14T13:50:31.721937+00:00",
+      "processed_at": "2026-04-14T14:04:16.002335+00:00",
       "parts": 21,
       "categories": {
         "arm": 9,
@@ -373,7 +373,7 @@
     },
     "Monsters\\Goblin female Shamen on a Giant Frog.glb": {
       "hash": "3b59d209677c3689b9a14c5165c85051",
-      "processed_at": "2026-04-14T13:50:34.753800+00:00",
+      "processed_at": "2026-04-14T14:04:19.147829+00:00",
       "parts": 18,
       "categories": {
         "arm": 6,
@@ -384,7 +384,7 @@
     },
     "Monsters\\Goblin King.glb": {
       "hash": "babc514eb5f2c020623bc24e662b0e78",
-      "processed_at": "2026-04-14T13:50:37.735042+00:00",
+      "processed_at": "2026-04-14T14:04:22.149765+00:00",
       "parts": 22,
       "categories": {
         "accessory": 1,
@@ -397,7 +397,7 @@
     },
     "Monsters\\Goblin male archer.glb": {
       "hash": "678ed87f982d243b9901ca95d0804e0f",
-      "processed_at": "2026-04-14T13:50:40.689497+00:00",
+      "processed_at": "2026-04-14T14:04:25.142136+00:00",
       "parts": 22,
       "categories": {
         "accessory": 1,
@@ -411,7 +411,7 @@
     },
     "Monsters\\goblin male fighter on Giant bat.glb": {
       "hash": "2fe5e0923b6c275ce180ed9e0fb9803c",
-      "processed_at": "2026-04-14T13:50:43.775728+00:00",
+      "processed_at": "2026-04-14T14:04:28.278135+00:00",
       "parts": 17,
       "categories": {
         "accessory": 1,
@@ -424,7 +424,7 @@
     },
     "Monsters\\Goblin male fighter on Giant Rat.glb": {
       "hash": "d4cae91100328733af2165cd78c9f6ed",
-      "processed_at": "2026-04-14T13:50:46.785216+00:00",
+      "processed_at": "2026-04-14T14:04:31.374159+00:00",
       "parts": 30,
       "categories": {
         "accessory": 3,
@@ -438,7 +438,7 @@
     },
     "Monsters\\Goblin male fighter on Velociraptor.glb": {
       "hash": "c3e9e39591332df9e0c5d550292315d8",
-      "processed_at": "2026-04-14T13:50:49.852274+00:00",
+      "processed_at": "2026-04-14T14:04:34.394739+00:00",
       "parts": 21,
       "categories": {
         "arm": 2,
@@ -450,7 +450,7 @@
     },
     "Monsters\\Goblin male fighter on warthog.glb": {
       "hash": "4f3666d566d8e688fdb0d71c9ef73936",
-      "processed_at": "2026-04-14T13:50:53.005986+00:00",
+      "processed_at": "2026-04-14T14:04:37.625464+00:00",
       "parts": 27,
       "categories": {
         "arm": 8,
@@ -463,7 +463,7 @@
     },
     "Monsters\\goblin male rogue .glb": {
       "hash": "2dc7ac7c87d06680c89ea5d6641310e6",
-      "processed_at": "2026-04-14T13:53:31.866085+00:00",
+      "processed_at": "2026-04-14T14:04:40.658741+00:00",
       "parts": 18,
       "categories": {
         "arm": 7,
@@ -475,7 +475,7 @@
     },
     "Monsters\\Goblin male Shamon.glb": {
       "hash": "599e8e1d1452613b77eeb8ad9714fa9c",
-      "processed_at": "2026-04-14T13:53:34.972717+00:00",
+      "processed_at": "2026-04-14T14:04:43.717890+00:00",
       "parts": 24,
       "categories": {
         "arm": 8,
@@ -489,7 +489,7 @@
     },
     "Monsters\\Halfling male bandit.glb": {
       "hash": "8488a5a60fb784ab42c4b635e5cbeb0d",
-      "processed_at": "2026-04-14T13:53:38.093015+00:00",
+      "processed_at": "2026-04-14T14:04:46.933009+00:00",
       "parts": 17,
       "categories": {
         "arm": 4,
@@ -500,7 +500,7 @@
     },
     "Monsters\\human feamle assassin.glb": {
       "hash": "38a772efe9ca9674270150f3485e1cbe",
-      "processed_at": "2026-04-14T13:53:41.206530+00:00",
+      "processed_at": "2026-04-14T14:04:50.092025+00:00",
       "parts": 14,
       "categories": {
         "accessory": 3,
@@ -516,7 +516,7 @@
     },
     "Monsters\\Human Female Bandit.glb": {
       "hash": "80e942f067f36f7f1d7579a7e9de358f",
-      "processed_at": "2026-04-14T13:53:44.355393+00:00",
+      "processed_at": "2026-04-14T14:04:53.187928+00:00",
       "parts": 14,
       "categories": {
         "accessory": 1,
@@ -530,7 +530,7 @@
     },
     "Monsters\\Human male Alchenist.glb": {
       "hash": "a333d598d79a768f24a88b547b8c310e",
-      "processed_at": "2026-04-14T13:53:47.412605+00:00",
+      "processed_at": "2026-04-14T14:04:56.295976+00:00",
       "parts": 14,
       "categories": {
         "accessory": 1,
@@ -545,7 +545,7 @@
     },
     "Monsters\\Human Male Bandit fighter 4.glb": {
       "hash": "f50575a24ee1a704fadae14a1f8ee8b1",
-      "processed_at": "2026-04-14T13:53:50.658398+00:00",
+      "processed_at": "2026-04-14T14:04:59.413698+00:00",
       "parts": 12,
       "categories": {
         "accessory": 2,
@@ -559,7 +559,7 @@
     },
     "Monsters\\Human male bandit fighter 5.glb": {
       "hash": "636f1648bfe94a92cef51a068617548f",
-      "processed_at": "2026-04-14T13:53:53.800701+00:00",
+      "processed_at": "2026-04-14T14:05:02.581750+00:00",
       "parts": 14,
       "categories": {
         "arm": 2,
@@ -572,7 +572,7 @@
     },
     "Monsters\\Human male bandit fighter.glb": {
       "hash": "e4cfac037a8417480f6147cf604dbae2",
-      "processed_at": "2026-04-14T13:53:56.980486+00:00",
+      "processed_at": "2026-04-14T14:05:05.789921+00:00",
       "parts": 11,
       "categories": {
         "accessory": 2,
@@ -585,7 +585,7 @@
     },
     "Monsters\\Knoll male fighter.glb": {
       "hash": "c1aae3423f2d5ca01f5530a3ddd18cc0",
-      "processed_at": "2026-04-14T13:53:59.927083+00:00",
+      "processed_at": "2026-04-14T14:05:08.836285+00:00",
       "parts": 18,
       "categories": {
         "accessory": 1,
@@ -599,7 +599,7 @@
     },
     "Monsters\\Kobold male fighter.glb": {
       "hash": "e1718b726ab95fce06aee7185efe8fd2",
-      "processed_at": "2026-04-14T13:54:02.982240+00:00",
+      "processed_at": "2026-04-14T14:05:11.814618+00:00",
       "parts": 32,
       "categories": {
         "arm": 16,
@@ -613,7 +613,7 @@
     },
     "Monsters\\Lizard folk archer.glb": {
       "hash": "3d3c2cffef71a13fd0d22d24e52965c6",
-      "processed_at": "2026-04-14T13:54:06.093664+00:00",
+      "processed_at": "2026-04-14T14:05:14.975610+00:00",
       "parts": 15,
       "categories": {
         "arm": 6,
@@ -626,7 +626,7 @@
     },
     "Monsters\\Lizard folk fighter 2.glb": {
       "hash": "26569ec9b2e34587a1aa963440134879",
-      "processed_at": "2026-04-14T13:54:09.222457+00:00",
+      "processed_at": "2026-04-14T14:05:18.183822+00:00",
       "parts": 14,
       "categories": {
         "arm": 8,
@@ -637,7 +637,7 @@
     },
     "Monsters\\Lizard folk fighter.glb": {
       "hash": "3f8b6c9445fd1f5be40ad2ecb0206e83",
-      "processed_at": "2026-04-14T13:54:12.299251+00:00",
+      "processed_at": "2026-04-14T14:05:21.303002+00:00",
       "parts": 23,
       "categories": {
         "arm": 10,
@@ -650,7 +650,7 @@
     },
     "Monsters\\Lizard Folk Shaman.glb": {
       "hash": "b8a61e37fa36626d1c07a67aab88ce2b",
-      "processed_at": "2026-04-14T13:54:15.423112+00:00",
+      "processed_at": "2026-04-14T14:05:24.373470+00:00",
       "parts": 24,
       "categories": {
         "accessory": 1,
@@ -665,7 +665,7 @@
     },
     "Monsters\\Mephitis.glb": {
       "hash": "3d5e37e330d93692990e1487bfb0d5c5",
-      "processed_at": "2026-04-14T13:54:18.545983+00:00",
+      "processed_at": "2026-04-14T14:05:27.505912+00:00",
       "parts": 10,
       "categories": {
         "accessory": 2,
@@ -678,7 +678,7 @@
     },
     "Monsters\\Mummy.glb": {
       "hash": "6fe2ec3c41f94f650dcf4a6dd9605376",
-      "processed_at": "2026-04-14T13:54:21.595007+00:00",
+      "processed_at": "2026-04-14T14:05:30.663889+00:00",
       "parts": 21,
       "categories": {
         "arm": 8,
@@ -692,7 +692,7 @@
     },
     "Monsters\\Orc female fighter.glb": {
       "hash": "9ed981e313a3d7e97a66b363ac9ced09",
-      "processed_at": "2026-04-14T13:54:24.705737+00:00",
+      "processed_at": "2026-04-14T14:05:33.777061+00:00",
       "parts": 26,
       "categories": {
         "arm": 3,
@@ -704,7 +704,7 @@
     },
     "Monsters\\Orc male fighterr.glb": {
       "hash": "3cc81799398d03803fd017def2d85b15",
-      "processed_at": "2026-04-14T13:54:27.896602+00:00",
+      "processed_at": "2026-04-14T14:05:37.008602+00:00",
       "parts": 30,
       "categories": {
         "arm": 12,
@@ -718,7 +718,7 @@
     },
     "Monsters\\skeleton archer .glb": {
       "hash": "fa76b73eb1bf477fc19ad01a8e0f346e",
-      "processed_at": "2026-04-14T13:54:31.083475+00:00",
+      "processed_at": "2026-04-14T14:05:40.197715+00:00",
       "parts": 23,
       "categories": {
         "arm": 9,
@@ -732,7 +732,7 @@
     },
     "Monsters\\skeleton Fighter.glb": {
       "hash": "f93570c2fe9ae6ef4bd3bb3b2a598569",
-      "processed_at": "2026-04-14T13:54:34.083717+00:00",
+      "processed_at": "2026-04-14T14:05:43.310992+00:00",
       "parts": 18,
       "categories": {
         "accessory": 3,
@@ -746,7 +746,7 @@
     },
     "Monsters\\Skeleton horse and skeleton fighter.glb": {
       "hash": "346322960468807d828698fe461ba694",
-      "processed_at": "2026-04-14T13:54:37.234922+00:00",
+      "processed_at": "2026-04-14T14:05:46.392572+00:00",
       "parts": 22,
       "categories": {
         "accessory": 1,
@@ -760,7 +760,7 @@
     },
     "Monsters\\Stirges.glb": {
       "hash": "a465405daf8a52e356f68123d5268f2e",
-      "processed_at": "2026-04-14T13:54:40.249891+00:00",
+      "processed_at": "2026-04-14T14:05:49.509321+00:00",
       "parts": 16,
       "categories": {
         "arm": 6,
@@ -771,7 +771,7 @@
     },
     "Monsters\\Velociraptor.glb": {
       "hash": "84512ada7b3ea48eabae3690c08a2537",
-      "processed_at": "2026-04-14T13:54:43.357930+00:00",
+      "processed_at": "2026-04-14T14:05:52.682692+00:00",
       "parts": 8,
       "categories": {
         "accessory": 1,
@@ -783,7 +783,7 @@
     },
     "Monsters\\Winged Goblin male fighter.glb": {
       "hash": "ff88faf1e8171f48c26cb46febfd7f61",
-      "processed_at": "2026-04-14T13:54:46.347190+00:00",
+      "processed_at": "2026-04-14T14:05:55.762881+00:00",
       "parts": 22,
       "categories": {
         "arm": 7,
@@ -795,7 +795,7 @@
     },
     "Monsters\\Young Velociraptor with goblin male fighter rider.glb": {
       "hash": "3c5ccbcd0e62887a6afe47b7ed9a0d30",
-      "processed_at": "2026-04-14T13:54:49.440432+00:00",
+      "processed_at": "2026-04-14T14:05:58.803689+00:00",
       "parts": 20,
       "categories": {
         "arm": 5,
@@ -807,7 +807,7 @@
     },
     "Monsters\\Zombie female fighter.glb": {
       "hash": "b0190015fe5e2e3220edf8c09cb56935",
-      "processed_at": "2026-04-14T13:54:52.592687+00:00",
+      "processed_at": "2026-04-14T14:06:01.976074+00:00",
       "parts": 10,
       "categories": {
         "accessory": 2,
@@ -820,7 +820,7 @@
     },
     "Monsters\\Zombie male fighter.glb": {
       "hash": "09a911374e081afa3780e801fb787a61",
-      "processed_at": "2026-04-14T13:54:55.620863+00:00",
+      "processed_at": "2026-04-14T14:06:05.090045+00:00",
       "parts": 11,
       "categories": {
         "arm": 4,
@@ -831,7 +831,7 @@
     },
     "Monsters\\zombie male warrior .glb": {
       "hash": "e3230eaba1bad5a5c02b054d4185f26d",
-      "processed_at": "2026-04-14T13:54:58.642813+00:00",
+      "processed_at": "2026-04-14T14:06:08.280290+00:00",
       "parts": 21,
       "categories": {
         "accessory": 4,
@@ -844,5 +844,5 @@
       }
     }
   },
-  "last_run": "2026-04-14T13:54:58.642823+00:00"
+  "last_run": "2026-04-14T14:06:14.639309+00:00"
 }
