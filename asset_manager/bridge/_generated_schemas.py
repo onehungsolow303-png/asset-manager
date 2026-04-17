@@ -14,8 +14,6 @@ from pydantic import BaseModel, ConfigDict
 
 # from action.schema.json
 class ActionRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     schema_version: Literal['1.0.0'] = '1.0.0'
     session_id: str
     actor_id: str
@@ -25,11 +23,11 @@ class ActionRequest(BaseModel):
     target_stats: dict | None = None
     scene_context: dict[str, Any] | None = None
     recent_history: list[str] | None = None
+    request_type: str | None = None
+    party: list[dict[str, Any]] | None = None
 
 # from decision.schema.json
 class DecisionPayload(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     schema_version: Literal['1.0.0'] = '1.0.0'
     session_id: str
     success: bool
@@ -39,6 +37,7 @@ class DecisionPayload(BaseModel):
     fx_requests: list[dict[str, Any]] | None = None
     repetition_penalty: int | None = None
     deterministic_fallback: bool | None = False
+    encounter_template: dict | None = None
 
 # from selection.schema.json
 class AssetSelectionRequest(BaseModel):
