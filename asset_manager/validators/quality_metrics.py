@@ -43,7 +43,7 @@ def alpha_stats(img: Image.Image) -> dict:
 
 def alpha_iou(test_img: Image.Image, ref_img: Image.Image, threshold: int = 10) -> float:
     if test_img.size != ref_img.size:
-        test_img = test_img.resize(ref_img.size, Image.LANCZOS)
+        test_img = test_img.resize(ref_img.size, Image.Resampling.LANCZOS)
     t_alpha = np.array(test_img.convert("RGBA"))[:, :, 3]
     r_alpha = np.array(ref_img.convert("RGBA"))[:, :, 3]
     t_trans = t_alpha < threshold
@@ -57,7 +57,7 @@ def alpha_iou(test_img: Image.Image, ref_img: Image.Image, threshold: int = 10) 
 
 def alpha_mae(test_img: Image.Image, ref_img: Image.Image) -> float:
     if test_img.size != ref_img.size:
-        test_img = test_img.resize(ref_img.size, Image.LANCZOS)
+        test_img = test_img.resize(ref_img.size, Image.Resampling.LANCZOS)
     t_alpha = np.array(test_img.convert("RGBA"))[:, :, 3].astype(float)
     r_alpha = np.array(ref_img.convert("RGBA"))[:, :, 3].astype(float)
     return round(float(np.mean(np.abs(t_alpha - r_alpha))), 2)
@@ -82,7 +82,7 @@ def pixel_diff_count(img_a: Image.Image, img_b: Image.Image) -> int:
     a = np.array(img_a.convert("RGBA"))
     b = np.array(img_b.convert("RGBA"))
     if a.shape != b.shape:
-        img_b_r = img_b.resize((img_a.width, img_a.height), Image.LANCZOS)
+        img_b_r = img_b.resize((img_a.width, img_a.height), Image.Resampling.LANCZOS)
         b = np.array(img_b_r.convert("RGBA"))
     diff = np.any(a != b, axis=2)
     return int(np.sum(diff))
@@ -92,7 +92,7 @@ def compute_ssim(test_img: Image.Image, ref_img: Image.Image) -> float:
     from skimage.metrics import structural_similarity
 
     if test_img.size != ref_img.size:
-        test_img = test_img.resize(ref_img.size, Image.LANCZOS)
+        test_img = test_img.resize(ref_img.size, Image.Resampling.LANCZOS)
     # Normalize transparent pixels: zero RGB where alpha=0 in both images.
     # Without this, hidden RGB values (white matte in reference, black in test)
     # dominate the score despite being visually identical (both fully transparent).
@@ -113,7 +113,7 @@ def compute_psnr(test_img: Image.Image, ref_img: Image.Image) -> float:
     from skimage.metrics import peak_signal_noise_ratio
 
     if test_img.size != ref_img.size:
-        test_img = test_img.resize(ref_img.size, Image.LANCZOS)
+        test_img = test_img.resize(ref_img.size, Image.Resampling.LANCZOS)
     # Normalize transparent pixels before comparison (same fix as SSIM)
     t_arr = np.array(test_img.convert("RGBA"))
     r_arr = np.array(ref_img.convert("RGBA"))
@@ -137,7 +137,7 @@ def generate_diff_heatmap(test_img: Image.Image, ref_img: Image.Image) -> Image.
     import cv2
 
     if test_img.size != ref_img.size:
-        test_img = test_img.resize(ref_img.size, Image.LANCZOS)
+        test_img = test_img.resize(ref_img.size, Image.Resampling.LANCZOS)
     t_arr = np.array(test_img.convert("RGBA")).astype(float)
     r_arr = np.array(ref_img.convert("RGBA")).astype(float)
     diff = np.max(np.abs(t_arr - r_arr), axis=2).astype(np.uint8)

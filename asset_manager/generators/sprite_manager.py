@@ -217,7 +217,7 @@ class SpriteManager:
 
         img = Image.open(path)
         img = img.convert("RGBA")
-        img = img.resize(size, Image.LANCZOS)
+        img = img.resize(size, Image.Resampling.LANCZOS)
         self._cache[key] = img
         return img
 
@@ -309,7 +309,7 @@ class SpriteManager:
             # It is a sheet tile — resize a copy to the requested size
             tile = sheet_tiles[idx - len(file_sprites)].copy()
             if tile.size != size:
-                tile = tile.resize(size, Image.LANCZOS)
+                tile = tile.resize(size, Image.Resampling.LANCZOS)
             return tile
 
     # ------------------------------------------------------------------

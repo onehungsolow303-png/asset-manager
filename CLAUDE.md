@@ -54,7 +54,7 @@ Python/FastAPI asset library, selector, and generator pipeline for the Forever e
 ```bash
 cd "C:/Dev/Asset Manager"
 .venv/Scripts/python.exe -m pytest tests/ -q
-# 325 tests, ~15 seconds
+# 333 tests, ~15 seconds
 ```
 
 ## Key Files
