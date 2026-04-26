@@ -38,6 +38,7 @@ class DecisionPayload(BaseModel):
     repetition_penalty: int | None = None
     deterministic_fallback: bool | None = False
     encounter_template: dict | None = None
+    atmospherics: dict | None = None
 
 # from selection.schema.json
 class AssetSelectionRequest(BaseModel):
