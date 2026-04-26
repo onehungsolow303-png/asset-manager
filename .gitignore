@@ -12,3 +12,6 @@ input/temp/
 
 # Superpowers brainstorm session state
 .superpowers/
+
+# NPC pipeline output artifacts (added 2026-04-26)
+asset_manager/cli/npc_pipeline/_processed/
